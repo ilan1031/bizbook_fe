@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    /* Add any necessary styles here */
+    .header {
+      background-color: #408dfb;
+      color: white;
+      padding: 12px;
+      text-align: center;
+    }
+    .quote-amount {
+      background-color: #fffef5;
+      border: 1px solid #f0f0e0;
+      padding: 15px;
+      text-align: center;
+      margin-bottom: 20px;
+    }
+    .details-box {
+      background-color: #fffef5;
+      border: 1px solid #f0f0e0;
+      padding: 15px;
+    }
+    .button {
+      background-color: #2ecc71;
+      color: white;
+      text-decoration: none;
+      padding: 10px 20px;
+      border-radius: 5px;
+      display: inline-block;
+    }
+  </style>
+</head>
+<body>
+  <!-- Header -->
+  <div class="header">
+    <h2><span id="order-type">QUOTE</span> #<span id="order-number">QT-OOO-000002</span></h2>
+  </div>
+
+  <!-- Body -->
+  <div style="padding: 20px;">
+    <p>Dear <span id="recipient-name">Mrs. Anil</span>,</p>
+    <p><span id="message-body">Thank you for contacting us. Your quote can be viewed, printed, and downloaded as PDF from the link below.</span></p>
+
+    <!-- Quote Amount Box -->
+    <div class="quote-amount">
+      <p><strong><span id="order-type-amount">QUOTE AMOUNT</span></strong></p>
+      <p style="font-size: 24px; color: red;" id="total-amount">₹1,000.00</p>
+    </div>
+
+    <!-- Details Box -->
+    <div class="details-box">
+      <table style="width: 100%; font-size: 14px;">
+        <tr>
+          <td style="width: 40%; text-align: right; padding-right: 10px; font-weight: bold;"><span id="order-type-label">Quote No</span></td>
+          <td><span id="order-number-details">QT-OOO-000002</span></td>
+        </tr>
+        <tr>
+          <td style="width: 40%; text-align: right; padding-right: 10px; font-weight: bold;">Order Date</td>
+          <td><span id="order-date">24/03/2025</span></td>
+        </tr>
+        <tr id="due-date-row" style="display: none;">
+          <td style="width: 40%; text-align: right; padding-right: 10px; font-weight: bold;">Due Date</td>
+          <td><span id="due-date">N/A</span></td>
+        </tr>
+      </table>
+      <div style="text-align: center; margin-top: 20px;">
+        <a href="#" class="button" id="action-button">VIEW QUOTE</a>
+      </div>
+    </div>
+
+    <!-- Footer -->
+    <p>Regards,</p>
+    <p><span id="sender-name">Divya Singh</span></p>
+    <p><span id="company-name">Divya Singh, SK</span></p>
+  </div>
+</body>
+</html>
