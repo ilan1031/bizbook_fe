@@ -486,7 +486,8 @@ const SkeletonBillSection = () => (
   </Paper>
 );
 
-const BillManagementApp = () => {
+const BillManagementApp = ({ journalId }) => {
+  console.log("🔍 BillManagementApp received journalId:", journalId);
   const [isPdfGenerating, setIsPdfGenerating] = useState(false);
   const { showMessage } = useSnackbar();
   const [modalConfig, setModalConfig] = useState({
@@ -506,13 +507,13 @@ const BillManagementApp = () => {
   const [loading, setLoading] = useState(true);
   const pathname = usePathname();
   const router = useRouter();
-const [isZoho, setIsZoho] = useState(false);
+  const [isZoho, setIsZoho] = useState(false);
 
-const toggleMode = () => {
-  setIsZoho((prev) => !prev);
-  localStorage.setItem("billId", billDetail.bill_number);
-  router.push("/tally/preview?isStatus=Bill");
-};
+  const toggleMode = () => {
+    setIsZoho((prev) => !prev);
+    localStorage.setItem("billId", billDetail.bill_number);
+    router.push("/tally/preview?isStatus=Bill");
+  };
   // PDF generation function
   const generatePDF = () => {
     setIsPdfGenerating(true);
@@ -603,8 +604,8 @@ const toggleMode = () => {
     }, 500);
   };
 
-   const handleClone = () => {
-     const bill_ID = pathname.split("/")[3];
+  const handleClone = () => {
+    const bill_ID = pathname.split("/")[3];
     alert(bill_ID);
     router.push(`/purchase/bills/create?clone_id=${bill_ID}`);
   };
@@ -869,8 +870,6 @@ const toggleMode = () => {
     }
   };
 
-
-  
   const togglePDFView = () => {
     setShowPDFView(!showPDFView);
   };
@@ -1355,7 +1354,7 @@ const toggleMode = () => {
                     Balance Due
                   </Typography>
                 </Grid>
-                <Grid item xs={6} textAlign="right" sx={{pr:1.5}}>
+                <Grid item xs={6} textAlign="right" sx={{ pr: 1.5 }}>
                   <Typography variant="body2" sx={{ mt: 1, fontSize: "13px" }}>
                     {"₹" + formatCurrency(billDetail.subtotal)}
                   </Typography>
@@ -1814,6 +1813,41 @@ const toggleMode = () => {
     </Box>
   );
 
+  const [items, setItems] = useState([]);
+
+  const getJournals = async (journal_id) => {
+    if (!journal_id) return;
+    setLoading(true);
+    try {
+      let orgId = localStorage.getItem("organization_id");
+      const params = {
+        url: `/api/v1/get-individual-journal?journal_id=${journal_id}&org_id=${orgId}`,
+        method: "GET",
+        customBaseUrl: config.PO_Base_url,
+      };
+
+      await new Promise((resolve) => setTimeout(resolve, 800));
+      const response = await apiService(params);
+
+      if (response?.data?.data?.line_items) {
+        setItems(response.data.data.line_items);
+      }
+      console.log(response, "responseresponse------");
+    } catch (error) {
+      console.error("Error fetching journal:", error);
+      showMessage("Failed to load journal", "error");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    if (journalId) {
+      getJournals(journalId);
+      console.log(journalId, "orgIdorgId");
+    }
+  }, [journalId]);
+
   const BillSection = () => (
     <Paper
       elevation={0}
@@ -1899,88 +1933,65 @@ const toggleMode = () => {
             </TableRow>
           </TableHead>
           <TableBody>
-            <TableRow>
-              <TableCell
-                sx={{
-                  borderBottom: "none",
-                  fontSize: "14px",
-                  fontWeight: "400",
-                  color: "black !important",
-                }}
-              >
-                Accounts Payable
-              </TableCell>
-              <TableCell
-                align="right"
-                sx={{ borderBottom: "none", color: "black !important" }}
-              >
-                0.00
-              </TableCell>
-              <TableCell
-                align="right"
-                sx={{ borderBottom: "none", color: "black !important" }}
-              >
-                4,410.00
-              </TableCell>
-            </TableRow>
-            <TableRow>
-              <TableCell
-                sx={{
-                  borderBottom: "none",
-                  fontSize: "14px !important",
-                  fontWeight: "400 !important",
-                  color: "black !important",
-                }}
-              >
-                Investments
-              </TableCell>
-              <TableCell
-                align="right"
-                sx={{
-                  borderBottom: "none",
-                  fontSize: "14px !important",
-                  fontWeight: "400 !important",
-                  color: "black !important",
-                }}
-              >
-                4,500.00
-              </TableCell>
-              <TableCell
-                align="right"
-                sx={{
-                  borderBottom: "none",
-                  fontSize: "14px !important",
-                  fontWeight: "400 !important",
-                  color: "black !important",
-                }}
-              >
-                0.00
-              </TableCell>
-            </TableRow>
+            {items.map((item, index) => (
+              <TableRow key={index}>
+                <TableCell
+                  sx={{
+                    borderBottom: "none",
+                    fontSize: "14px",
+                    fontWeight: "400",
+                    color: "black !important",
+                  }}
+                >
+                  {item.coa_account_name}
+                </TableCell>
+                <TableCell
+                  align="right"
+                  sx={{ borderBottom: "none", color: "black !important" }}
+                >
+                  {item.creditOrDebit === "Debit"
+                    ? item.amount_formatted
+                    : "0.00"}
+                </TableCell>
+                <TableCell
+                  align="right"
+                  sx={{ borderBottom: "none", color: "black !important" }}
+                >
+                  {item.creditOrDebit === "Credit"
+                    ? item.amount_formatted
+                    : "0.00"}
+                </TableCell>
+              </TableRow>
+            ))}
 
+            {/* Total Row */}
             <TableRow sx={{ borderTop: "1px solid #ddd" }}>
-              <TableCell sx={{ borderBottom: "none" }}></TableCell>
+              <TableCell></TableCell>
               <TableCell
                 align="right"
                 sx={{
-                  borderBottom: "none",
-                  fontSize: "15px !important",
-                  fontWeight: "600 !important",
+                  fontSize: "15px",
+                  fontWeight: "600",
                   color: "black !important",
                 }}
               >
-                4,500.00
+                {items
+                  .filter((item) => item.creditOrDebit === "Debit")
+                  .reduce((sum, item) => sum + Number(item.amount || 0), 0)
+                  .toFixed(2)}
               </TableCell>
               <TableCell
                 align="right"
                 sx={{
-                  borderBottom: "none",
-                  fontSize: "15px !important",
-                  fontWeight: "600 !important",
+                  fontSize: "15px",
+                  fontWeight: "600",
                   color: "black !important",
                 }}
               >
-                4,500.00
+                {items
+                  .filter((item) => item.creditOrDebit === "Credit")
+                  .reduce((sum, item) => sum + Number(item.amount || 0), 0)
+                  .toFixed(2)}
               </TableCell>
             </TableRow>
           </TableBody>
@@ -2298,22 +2309,22 @@ const toggleMode = () => {
         </Box>
 
         <Box sx={{ display: "flex", alignItems: "center", gap: 2 }}>
-           <div
-                                style={{ display: "flex", alignItems: "center", cursor: "pointer" }}
-                                onClick={toggleMode}
-                              >
-                                {isZoho ? (
-                                  <ToggleOff sx={{ color: "#888", fontSize: 32 }} />
-                                ) : (
-                                  <ToggleOn sx={{ color: "#336699", fontSize: 32 }} />
-                                )}
-                                <Typography
-                                  variant="body1"
-                                  sx={{ ml: 1, color: "#333", fontWeight: "bold" }}
-                                >
-                                  Zoho
-                                </Typography>
-                              </div>
+          <div
+            style={{ display: "flex", alignItems: "center", cursor: "pointer" }}
+            onClick={toggleMode}
+          >
+            {isZoho ? (
+              <ToggleOff sx={{ color: "#888", fontSize: 32 }} />
+            ) : (
+              <ToggleOn sx={{ color: "#336699", fontSize: 32 }} />
+            )}
+            <Typography
+              variant="body1"
+              sx={{ ml: 1, color: "#333", fontWeight: "bold" }}
+            >
+              Zoho
+            </Typography>
+          </div>
           <Box
             sx={{
               display: "flex",
@@ -2522,7 +2533,7 @@ const toggleMode = () => {
                 Expected Payment Date
               </MenuItem>
               <MenuItem
-                 onClick={handleClone}
+                onClick={handleClone}
                 sx={{
                   fontSize: "13px",
                   "&:hover": {
