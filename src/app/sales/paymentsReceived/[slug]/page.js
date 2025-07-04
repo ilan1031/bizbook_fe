@@ -45,17 +45,9 @@ const dummyDefaultFilters = [
     empty_msg: "There are no items for this filter",
     column_orientation_type: "wrap",
   },
+  
   {
     id: "2",
-    isFavorite: false,
-    label: "Retainer Payments",
-    value: "retainer",
-    key: "retainer payments",
-    empty_msg: "There are no draft items for this filter",
-    column_orientation_type: "wrap",
-  },
-  {
-    id: "3",
     isFavorite: false,
     label: "Invoice Payments",
     value: "invoice",
@@ -64,7 +56,7 @@ const dummyDefaultFilters = [
     column_orientation_type: "wrap",
   },
   {
-    id: "4",
+    id: "3",
     isFavorite: false,
     label: "Customer Advance",
     value: "advance",
