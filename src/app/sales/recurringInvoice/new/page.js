@@ -485,7 +485,12 @@ const InvoiceCreationPage = () => {
   };
 
   const handleUpdateEdit = (updatedData) => {
-    onUpdateGST && onUpdateGST(updatedData);
+    // Update customerData with new GST Treatment and GSTIN if provided
+    setCustomerData((prev) => ({
+      ...prev,
+      ...(updatedData.gst_treatment && { gst_treatment: updatedData.gst_treatment }),
+      ...(updatedData.gst_no && { gst_no: updatedData.gst_no }),
+    }));
     handleCloseEdit();
   };
 
@@ -504,7 +509,11 @@ const InvoiceCreationPage = () => {
   };
 
   const handleUpdateGSTIN = (updatedData) => {
-    onUpdateGSTIN && onUpdateGSTIN(updatedData);
+    // Update customerData with new GSTIN
+    setCustomerData((prev) => ({
+      ...prev,
+      ...(updatedData.gst_no && { gst_no: updatedData.gst_no }),
+    }));
     handleCloseGSTIN();
   };
   // Format date helper function
@@ -1891,17 +1900,7 @@ const InvoiceCreationPage = () => {
                     }}
                   >
                     {customerData?.gst_no || "Not provided"}
-                    <IconButton
-                      size="small"
-                      sx={{
-                        p: 0.5,
-                        height: "fit-content",
-                        color: "#757575",
-                      }}
-                      onClick={handleGSTINClick}
-                    >
-                      <EditIcon sx={{ fontSize: "16px" }} />
-                    </IconButton>
+                   
                   </Typography>
                 </Typography>
               </Box>
