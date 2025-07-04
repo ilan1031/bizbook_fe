@@ -315,7 +315,7 @@ const RecurringInvoice = () => {
         method: "GET",
         url: `/api/v1/RecurringInvoices/getall`,
         params: {
-          filter_by: filterValue,
+          filter: filterValue,
           page: page.current,
           per_page: limit.current,
           sort_column: sort_column,
