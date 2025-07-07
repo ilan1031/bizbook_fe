@@ -774,85 +774,116 @@ const SideBarSkeleton = () => {
   );
 };
 
-const expenseStatusOptions = [
+// EmptyStateNotification component for when there's no data
+const EmptyStateNotification = ({ selectedStatus }) => {
+  return (
+    <Box
+      sx={{
+        display: "flex",
+        flexDirection: "column",
+        alignItems: "center",
+        justifyContent: "center",
+        padding: "40px 20px",
+        textAlign: "center",
+        height: "100%",
+        minHeight: "300px",
+      }}
+    >
+     
+      <Typography
+        variant="h6"
+        sx={{
+          color: "#666",
+          fontSize: "16px",
+          fontWeight: "500",
+          marginBottom: "8px",
+        }}
+      >
+        No {selectedStatus?.title || "Expenses"} Found
+      </Typography>
+      <Typography
+        variant="body2"
+        sx={{
+          color: "#999",
+          fontSize: "14px",
+          maxWidth: "250px",
+          lineHeight: "1.4",
+        }}
+      >
+      </Typography>
+    </Box>
+  );
+};
+
+const paymentMadeOptions = [
   {
     id: "1",
     default_customview_id: "2375679000000057003",
     is_favorite: true,
-    title: "All",
-    value: "Status.Inactive",
+    title: "All Expenses",
+    value: "Status.All",
     key: "All",
     empty_msg: "There are no Expense",
     column_orientation_type: "wrap",
   },
   {
     id: "2",
-    default_customview_id: "2375679000000057004",
-    is_favorite: true,
-    title: "Unbilled",
-    value: "Status.Inactive",
-    key: "Unbilled",
-    empty_msg: "There are no Unbilled",
+    default_customview_id: "2375679000000057005",
+    is_favorite: false,
+    title: "Non-Billable Expenses",
+    value: "Status.Nonbillable",
+    key: "Nonbillable ",
+    empty_msg: "There are no Non-Billable",
     column_orientation_type: "wrap",
   },
   {
     id: "3",
-    default_customview_id: "2375679000000057005",
+    default_customview_id: "2375679000000057004",
     is_favorite: false,
-    title: "Invoiced",
-    value: "Status.Inactive",
-    key: "Invoiced ",
-    empty_msg: "There are no Invoiced",
+    title: "Unbilled Expenses",
+    value: "Status.Unbilled",
+    key: "Unbilled",
+    empty_msg: "There are no Unbilled",
     column_orientation_type: "wrap",
   },
   {
     id: "4",
     default_customview_id: "2375679000000057005",
     is_favorite: false,
-    title: "Reimbursed",
-    value: "Status.Inactive",
+    title: "Invoiced Expenses",
+    value: "Status.Invoiced",
     key: "Invoiced ",
-    empty_msg: "There are no Reimbursed",
+    empty_msg: "There are no Invoiced",
     column_orientation_type: "wrap",
   },
   {
     id: "5",
     default_customview_id: "2375679000000057005",
     is_favorite: false,
-    title: "Billable",
-    value: "Status.Inactive",
-    key: "Billable ",
-    empty_msg: "There are no Billable",
+    title: "Reimbursed Expenses",
+    value: "Status.Reimbursed",
+    key: "Reimbursed ",
+    empty_msg: "There are no Reimbursed",
     column_orientation_type: "wrap",
   },
   {
     id: "6",
     default_customview_id: "2375679000000057005",
     is_favorite: false,
-    title: "Non-Billable",
-    value: "Status.Inactive",
-    key: "Non-Billable ",
-    empty_msg: "There are no Non-Billable",
+    title: "With Receipts Expenses",
+    value: "Status.Withreceipts",
+    key: "Withreceipts ",
+    empty_msg: "There are no Reimbursed",
     column_orientation_type: "wrap",
   },
   {
     id: "7",
     default_customview_id: "2375679000000057005",
     is_favorite: false,
-    title: "With Receipts",
-    value: "Status.Inactive",
-    key: "With Receipts ",
-    empty_msg: "There are no With Receipts",
-    column_orientation_type: "wrap",
-  },
-  {
-    id: "8",
-    default_customview_id: "2375679000000057005",
-    is_favorite: false,
-    title: "Without Receipts",
-    value: "Status.Inactive",
-    key: "Without Receipts ",
-    empty_msg: "There are no Without Receipts",
+    title: "Without Receipts Expenses",
+    value: "Status.Withoutreceipts",
+    key: "Withoutreceipts ",
+    empty_msg: "There are no Reimbursed",
     column_orientation_type: "wrap",
   },
 ];
@@ -934,7 +965,7 @@ const menuItems = [
 ];
 
 const Page = () => {
-  const [statusOptions, setStatusOptions] = useState(expenseStatusOptions);
+  const [statusOptions, setStatusOptions] = useState(paymentMadeOptions);
   const [selectedStatus, setSelectedStatus] = useState(statusOptions[0]);
   const [expenseList, setExpenseList] = useState([]);
   const [theFilteredArray, setTheFilteredArray] = useState([]);

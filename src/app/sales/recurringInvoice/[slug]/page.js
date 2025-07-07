@@ -18,6 +18,7 @@ import {
 } from "@mui/material";
 import KeyboardArrowDownIcon from "@mui/icons-material/KeyboardArrowDown";
 import MoreVertIcon from "@mui/icons-material/MoreVert";
+import ListAltIcon from "@mui/icons-material/ListAlt";
 import {
   AddOutlined,
   ArrowDownward,
@@ -86,6 +87,7 @@ const dummyDefaultFilters = [
   },
 ];
 
+
 const menuItems = [
   {
     text: "Sort by",
@@ -102,26 +104,20 @@ const menuItems = [
     ],
   },
   {
-    text: "Import Invoices",
+    text: "Import  Recurring Invoices",
     icon: <Download className="menu-icon" />,
     hasArrow: false,
     primary: false,
     border: false,
   },
   {
-    text: "Export Invoices",
+    text: "Export ",
     icon: <Upload className="menu-icon" />,
     hasArrow: false,
     primary: false,
     border: false,
   },
-  {
-    text: "Export as E-way Bill",
-    icon: <Upload className="menu-icon" />,
-    hasArrow: false,
-    primary: false,
-    border: true,
-  },
+
   {
     text: "Export Current View",
     icon: <Upload className="menu-icon" />,
@@ -129,13 +125,7 @@ const menuItems = [
     primary: false,
     border: true,
   },
-  {
-    text: "Import Debit Notes",
-    icon: <Download className="menu-icon" />,
-    hasArrow: false,
-    primary: false,
-    border: true,
-  },
+
   {
     text: "Preferences",
     icon: <Settings className="menu-icon" />,
@@ -145,7 +135,7 @@ const menuItems = [
   },
   {
     text: "Manage Custom Fields",
-    icon: <ListAlt className="menu-icon" />,
+    icon: <ListAltIcon className="menu-icon" />,
     hasArrow: false,
     primary: false,
     border: false,
@@ -211,12 +201,21 @@ const RecurringInvoice = () => {
   const [sortOrder, setSortOrder] = useState("A");
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [selectedInvoiceId, setSelectedInvoiceId] = useState(null);
+  const [exportModalOpen, setExportModalOpen] = useState(false);
 
+  const handleExportModalOpen = () => {
+    setExportModalOpen(true);
+  };
+
+  const handleExportModalClose = () => {
+    setExportModalOpen(false);
+  };
   const handleMenuItemClick = (item) => {
-    if (item === "Export Recurring Invoices") {
-      setOpen(true);
+    console.log("Selected menu item:", item);
+    if (item === "Export ") {
+      handleExportModalOpen();
     } else if (item === "Refresh List") {
-      fetchInvoiceList(filterBy, sortColumn, sortOrder);
+      refreshList();
     }
     setMenuAnchorEl(null);
   };
@@ -915,9 +914,9 @@ const RecurringInvoice = () => {
                 ))}
               </Menu>
               <ExportModal
-                open={open}
+                open={exportModalOpen}
                 moduleName="Recurring Invoices"
-                onClose={handleClose}
+                  onClose={handleExportModalClose}
               />
             </Box>
           </Toolbar>

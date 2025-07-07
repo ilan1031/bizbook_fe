@@ -55,7 +55,10 @@ const Comments = ({details}) => {
       console.log("Comments API response:", response.data);
       
       if (response.data?.status === true) {
-        setComments(response.data.data || []);
+        const fetchedComments = response.data.data || [];
+        console.log("Fetched comments count:", fetchedComments.length);
+        console.log("Fetched comments:", fetchedComments);
+        setComments(fetchedComments);
       } else {
         console.error("Failed to fetch comments:", response.data);
         setComments([]);
@@ -102,25 +105,45 @@ const Comments = ({details}) => {
         return;
       }
       
-      // Send comment data in the format expected by the backend
-      const commentData = {
-        comments: [
-          {
-            description: description,
-            commented_by_id: vendorId,
-            commented_by: commandedname,
-          }
-        ]
+      // Create new comment object with timestamp
+      const newComment = {
+        description: description,
+        commented_by_id: vendorId,
+        commented_by: commandedname,
+        date: new Date().toISOString(), // Add current timestamp
       };
 
+      // Combine existing comments with the new comment
+      const updatedComments = [...comments, newComment];
+      
+      // Send all comments (existing + new) to the backend
+      const commentData = {
+        comments: updatedComments
+      };
+
+      console.log("Existing comments count:", comments.length);
+      console.log("New comment:", newComment);
+      console.log("Updated comments count:", updatedComments.length);
       console.log("Sending comment with data:", commentData);
       
-      // Make the PUT request to add a new comment
-      const response = await apiService({
-        method: "PUT", 
-        url: `/api/v1/contact?contact_id=${vendorId}&organization_id=${organizationId}`,
-        data: commentData
-      });
+      // Try to add comment using a more specific endpoint first
+      let response;
+      try {
+        // First, try to use a dedicated comment endpoint if it exists
+        response = await apiService({
+          method: "POST", 
+          url: `/api/v1/vendors/comments?contact_id=${vendorId}&organization_id=${organizationId}`,
+          data: newComment
+        });
+      } catch (error) {
+        console.log("Dedicated comment endpoint failed, trying PUT method...");
+        // Fallback to the original PUT method
+        response = await apiService({
+          method: "PUT", 
+          url: `/api/v1/contact?contact_id=${vendorId}&organization_id=${organizationId}`,
+          data: commentData
+        });
+      }
       
       // Check if the request was successful
       if (response.status === 200 || response.data?.status === true) {
