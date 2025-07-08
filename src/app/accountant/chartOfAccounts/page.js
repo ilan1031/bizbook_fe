@@ -985,7 +985,7 @@ const AccountsList = () => {
               <>
                 <CustomizedTable
                   columns={columns}
-                  staticData={filteredAccountDataDetails || []} // Add fallback to empty array
+                  staticData={filteredAccountDataDetails} // Add fallback to empty array
                   hasMore={hasMore} // pagination key
                   totalCount={totalCount} // pagination key
                   selected={selected}
@@ -999,7 +999,7 @@ const AccountsList = () => {
                   onRowClick={handleRowClick}
                   setSelectedMenuItem={setSelectedMenuItem}
                   handleOpenSearchDialog={handleOpenSearchDialog}
-                  value="chart_of_acount"
+                  value="chart_of_account"
                   callBackAPI={handleFetchTable}
                   selectedType={selectedType}
                   someSelected={someSelected}
