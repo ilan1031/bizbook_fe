@@ -1,3 +1,4 @@
+
 "use client";
 import { useEffect, useRef, useState } from "react";
 import {
@@ -117,8 +118,6 @@ const menuItems = [
   {
     text: "Export Bills",
     icon: <Upload className="menu-icon" />,
-    // route: "/import-files",
-    // query: { type: "bills" },
     hasArrow: false,
     primary: false,
     border: true,
@@ -126,8 +125,6 @@ const menuItems = [
   {
     text: "Export Current View",
     icon: <Upload className="menu-icon" />,
-    // route: "/Export-files",
-    // query: { type: "bills" },
     hasArrow: false,
     primary: false,
     border: true,
@@ -135,7 +132,6 @@ const menuItems = [
   {
     text: "Import Credit Notes",
     icon: <Download className="menu-icon" />,
-    // route: "/import-files",
     hasArrow: false,
     primary: false,
     border: true,
@@ -143,7 +139,6 @@ const menuItems = [
   {
     text: "Preferences",
     icon: <Settings className="menu-icon" />,
-    // route: "/import-files",
     hasArrow: false,
     primary: false,
     border: true,
@@ -151,7 +146,6 @@ const menuItems = [
   {
     text: "Refresh List",
     icon: <RefreshCcw className="menu-icon" />,
-    // route: "/import-files",
     hasArrow: false,
     primary: false,
     border: false,
@@ -159,10 +153,6 @@ const menuItems = [
 ];
 
 const Customer = () => {
-  useEffect(() => {
-    getBills(filterBy, sortColumn, sortOrder);
-  }, []);
-
   const [statusOptions, setStatusOptions] = useState(billsStatusOptions);
   const [selectedStatus, setSelectedStatus] = useState(statusOptions[0]);
   const [anchorEl, setAnchorEl] = useState(null);
@@ -171,6 +161,7 @@ const Customer = () => {
   const [openSearchDialog, setOpenSearchDialog] = useState(false);
   const [billsList, setBillsList] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [journalId, setJournalId] = useState(""); // This will be set when a bill is selected
   const [openNewView, setOpenNewView] = useState(false);
   const [theFilteredArray, setTheFilteredArray] = useState([]);
   const pathname = usePathname();
@@ -203,7 +194,7 @@ const Customer = () => {
     try {
       const response = await apiService(params);
       if (response.statusCode === 200) {
-        console.log("(response.data.data", response.data.data);
+        console.log("📋 Bills list response:", response.data.data);
         setBillsList(response.data.data);
         setTheFilteredArray(response.data.data);
       }
@@ -213,6 +204,52 @@ const Customer = () => {
       setLoading(false);
     }
   };
+
+  const getBillData = async (billId) => {
+    if (!billId) {
+      console.log("❌ No billId provided to getBillData");
+      return;
+    }
+    try {
+      const orgId = localStorage.getItem("organization_id");
+      const response = await apiService({
+        method: "GET",
+        customBaseUrl: config.PO_Base_url,
+        url: `/api/v1/bills/get-individual-bill?org_id=${orgId}&bill_id=${billId}`,
+      });
+
+      if (response.statusCode === 200) {
+        console.log("✅ Individual bill response:", response.data.data);
+        console.log("🆔 Journal ID from bill:", response.data.data.journal_id);
+
+        // Set the journal_id from the individual bill data
+        setJournalId(response.data.data.journal_id || "");
+      } else {
+        console.log(
+          "❌ Failed to fetch bill data, status:",
+          response.statusCode
+        );
+        setJournalId("");
+      }
+    } catch (error) {
+      console.error("💥 Error fetching individual bill:", error);
+      setJournalId(""); // Clear journal_id on error
+    }
+  };
+
+  useEffect(() => {
+    // Load bills list
+    getBills(filterBy, sortColumn, sortOrder);
+    // Check if we're on a specific bill page and load its journal_id
+    const billIdFromUrl = pathname.split("/")[3];
+    if (billIdFromUrl && billIdFromUrl !== "create") {
+      console.log("🌐 Loading bill from URL:", billIdFromUrl);
+      getBillData(billIdFromUrl);
+    } else {
+      console.log("📝 Not on a specific bill page, clearing journalId");
+      setJournalId(""); // Clear journal_id when not on a specific bill
+    }
+  }, [pathname]); // Re-run when URL changes
 
   const handleDropdownClick = (event) => {
     setAnchorEl(event.currentTarget);
@@ -248,7 +285,7 @@ const Customer = () => {
         case "Draft Bills":
           filtered = billsList.filter((bill) => bill.status_type === "DRAFT");
           break;
-        case "Void Bills": // For Void Bills
+        case "Void Bills":
           filtered = billsList.filter((bill) => bill.status_type === "VOID");
           break;
         default:
@@ -263,14 +300,21 @@ const Customer = () => {
     return;
   };
 
+  // ✅ UPDATED: Modified handleSelectRow to get journal_id when bill is selected
   const handleSelectRow = (key) => {
+    console.log("🎯 Bill selected:", key.bill_number);
+
     const activeID = pathname.split("/")[3];
     const newArray = theFilteredArray.map((item) => ({
       ...item,
       isActive: item.bill_number === activeID ? true : item.isActive,
     }));
-    // return;
+
+    // Navigate to the bill page
     router.push(`/purchase/bills/${key.bill_number}`);
+
+    // Get the individual bill data to fetch journal_id
+    getBillData(key.bill_number);
   };
 
   const handleCloseSearchDialog = () => setOpenSearchDialog(false);
@@ -278,6 +322,17 @@ const Customer = () => {
   const handleNewCustomView = () => {
     setOpenNewView(true);
     setAnchorEl(null);
+  };
+
+  // Handle menu item clicks
+  const handleMenuItemClick = (item) => {
+    if (item.route) {
+      router.push(
+        item.route +
+          (item.query ? `?${new URLSearchParams(item.query).toString()}` : "")
+      );
+    }
+    setMenuAnchorEl(null);
   };
 
   // Group options by favorite status
@@ -339,11 +394,10 @@ const Customer = () => {
                 elevation: 3,
                 sx: {
                   width: 250,
-                  // height: "360px",
                   marginLeft: "-10px",
                   maxHeight: 500,
-                  overflowY: "auto", // Scrollable content
-                  boxShadow: "0px 4px 10px rgba(0, 0, 0, 0.1)", // Smooth shadow
+                  overflowY: "auto",
+                  boxShadow: "0px 4px 10px rgba(0, 0, 0, 0.1)",
                   borderRadius: "8px",
                   mt: 1,
                   "&::-webkit-scrollbar": {
@@ -364,7 +418,7 @@ const Customer = () => {
             >
               <Box
                 sx={{
-                  maxHeight: "310px", // Limit scroll height
+                  maxHeight: "310px",
                   overflowY: "auto",
                   "&::-webkit-scrollbar": {
                     width: "6px",
@@ -478,7 +532,7 @@ const Customer = () => {
                           px: 2,
                           py: 1,
                           "&:hover": {
-                            backgroundColor: "primary.main", // Hover effect color
+                            backgroundColor: "primary.main",
                             "& .MuiTypography-root": {
                               color: "menu.text.normal",
                             },
@@ -525,7 +579,6 @@ const Customer = () => {
                 )}
               </Box>
 
-              {/* New Custom View Fixed at Bottom */}
               <Divider />
               <MenuItem
                 onClick={handleNewCustomView}
@@ -536,7 +589,7 @@ const Customer = () => {
                   py: 1,
                   position: "sticky",
                   bottom: 0,
-                  backgroundColor: "white", // Ensure it stays on top
+                  backgroundColor: "white",
                   zIndex: 1,
                   "&:hover": {
                     backgroundColor: "#E6F1FF",
@@ -578,14 +631,14 @@ const Customer = () => {
                 sx={{
                   width: "30px",
                   height: "30px",
-                  minWidth: "20px", // ensures the button doesn't expand due to internal padding
-                  padding: 0, // removes internal padding
+                  minWidth: "20px",
+                  padding: 0,
                   marginRight: "10px",
                   borderRadius: "5px",
                 }}
                 onClick={() => router.push("/purchase/bills/create")}
               >
-                <AddOutlined sx={{ fontSize: "16px" }} />{" "}
+                <AddOutlined sx={{ fontSize: "16px" }} />
               </Button>
 
               <IconButton
@@ -676,7 +729,6 @@ const Customer = () => {
                       </Box>
                       {item.hasArrow && <ChevronRight className="menu-icon" />}
                     </Box>
-                    {/* Submenu */}
                     {item.submenu && (
                       <Menu
                         anchorEl={submenuAnchorEl}
@@ -719,7 +771,7 @@ const Customer = () => {
                               setSubmenuAnchorEl(null);
                               setMenuAnchorEl(null);
                               setSortColumn(subItem.key);
-                              getBills(filterBy, subItem.key, subItem.order); // default order
+                              getBills(filterBy, subItem.key, subItem.order);
                             }}
                             selected={sortColumn === subItem.key}
                             sx={{
@@ -756,7 +808,7 @@ const Customer = () => {
                                 e.stopPropagation();
                                 const newOrder =
                                   subItem.order === "D" ? "A" : "D";
-                                subItem.order = newOrder; // mutate local config or handle externally
+                                subItem.order = newOrder;
                                 setSortOrder(newOrder);
                                 setSortColumn(subItem.key);
                                 setSubmenuAnchorEl(null);
@@ -806,8 +858,10 @@ const Customer = () => {
             </Box>
           )}
         </Box>
+
         <Box sx={{ flexGrow: 1, height: "100%", overflow: "auto" }}>
-          <BillViewComponent />
+          {/* ✅ PASSING journalId to BillViewComponent */}
+          <BillViewComponent journalId={journalId} />
         </Box>
       </Box>
 
