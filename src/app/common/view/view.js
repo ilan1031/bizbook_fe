@@ -265,7 +265,7 @@ export default function View({ details, moduleKey, callViewAPI, uniqueId }) {
       if (moduleKey === "Customer") {
         window.location.href = `/sales/customer/${data.contact_id}`;
       } else {
-        window.location.href = `/sales/vendor/${data.contact_id}`;
+        window.location.href = `/purchase/vendor/${data.contact_id}`;
       }
     } catch (err) {
       console.error("Failed to fetch tax exemptions:", err);
