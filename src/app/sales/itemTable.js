@@ -1637,7 +1637,7 @@ export default function InvoiceItemTable({formik}) {
     fetchItemList();
 
   }, []);
-
+ console.log(formik.values.discount_percent,"discount_percent");
 
   const handleClose = () => {
     fetchItemList();
