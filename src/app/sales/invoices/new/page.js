@@ -352,7 +352,12 @@ const InvoiceCreationPage = () => {
   };
 
   const handleUpdateEdit = (updatedData) => {
-    onUpdateGST && onUpdateGST(updatedData);
+    // Update customerData with new GST Treatment and GSTIN if provided
+    setCustomerData((prev) => ({
+      ...prev,
+      ...(updatedData.gst_treatment && { gst_treatment: updatedData.gst_treatment }),
+      ...(updatedData.gst_no && { gst_no: updatedData.gst_no }),
+    }));
     handleCloseEdit();
   };
 
@@ -371,7 +376,11 @@ const InvoiceCreationPage = () => {
   };
 
   const handleUpdateGSTIN = (updatedData) => {
-    onUpdateGSTIN && onUpdateGSTIN(updatedData);
+    // Update customerData with new GSTIN
+    setCustomerData((prev) => ({
+      ...prev,
+      ...(updatedData.gst_no && { gst_no: updatedData.gst_no }),
+    }));
     handleCloseGSTIN();
   };
   // Format date helper function
@@ -2141,40 +2150,7 @@ const InvoiceCreationPage = () => {
             </Grid>
           </Grid>
         )}
-        {/* GSTIN Section */}
-        {customerData !== null && customerData?.gst_treatment !== "" && (
-          <Grid container>
-            <Grid item xs={1.8}></Grid>
-            <Grid item xs={8}>
-              <Box sx={{ fontSize: "13px" }}>
-                <Typography variant="body3" color="#4c526c">
-                  GSTIN:{" "}
-                  <Typography
-                    component="span"
-                    sx={{
-                      color: "#000",
-                      cursor: "pointer",
-                      fontSize: "13px",
-                    }}
-                  >
-                    {customerData?.gst_no || "Not provided"}
-                    <IconButton
-                      size="small"
-                      sx={{
-                        p: 0.5,
-                        height: "fit-content",
-                        color: "#757575",
-                      }}
-                      onClick={handleGSTINClick}
-                    >
-                      <EditIcon sx={{ fontSize: "16px" }} />
-                    </IconButton>
-                  </Typography>
-                </Typography>
-              </Box>
-            </Grid>
-          </Grid>
-        )}
+     
 
         {/* Tax Preferences Popover */}
         <TaxPreferencesPopover

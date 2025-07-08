@@ -387,9 +387,15 @@ const Transactions = ({ customerId, moduleKey }) => {
                   </TableHead>
                   <TableBody>
                     {invoiceList.length > 0 &&
-                      invoiceList?.map((invoice) => (
-                        <>
-                          {" "}
+                      invoiceList.map((invoice, idx) => (
+                        <React.Fragment key={invoice.invoice_id}>
+                          {idx === 0 && (
+                            <TableRow>
+                              <TableCell colSpan={6} sx={{ border: 0, padding: 0, background: 'transparent' }}>
+                                <Box sx={{ height: 12, background: 'transparent' }} />
+                              </TableCell>
+                            </TableRow>
+                          )}
                           <TableRow>
                             <TableCell
                               align="left"
@@ -452,7 +458,14 @@ const Transactions = ({ customerId, moduleKey }) => {
                               {invoice?.status_formatted}
                             </TableCell>
                           </TableRow>
-                        </>
+                          {idx < invoiceList.length - 1 && (
+                            <TableRow>
+                              <TableCell colSpan={6} sx={{ border: 0, padding: 0, background: 'transparent' }}>
+                                <Box sx={{ height: 12, background: 'transparent' }} />
+                              </TableCell>
+                            </TableRow>
+                          )}
+                        </React.Fragment>
                       ))}
                     {!loading && invoiceList.length === 0 && (
                       <TableRow>
@@ -617,8 +630,15 @@ const Transactions = ({ customerId, moduleKey }) => {
                   </TableHead>
                   <TableBody>
                     {quotesList.length > 0 &&
-                      quotesList?.map((quote) => (
-                        <>
+                      quotesList.map((quote, idx) => (
+                        <React.Fragment key={quote.quote_id}>
+                          {idx === 0 && (
+                            <TableRow>
+                              <TableCell colSpan={5} sx={{ border: 0, padding: 0, background: 'transparent' }}>
+                                <Box sx={{ height: 12, background: 'transparent' }} />
+                              </TableCell>
+                            </TableRow>
+                          )}
                           <TableRow>
                             <TableCell
                               align="left"
@@ -674,7 +694,14 @@ const Transactions = ({ customerId, moduleKey }) => {
                               {quote?.status_formatted}
                             </TableCell>
                           </TableRow>
-                        </>
+                          {idx < quotesList.length - 1 && (
+                            <TableRow>
+                              <TableCell colSpan={5} sx={{ border: 0, padding: 0, background: 'transparent' }}>
+                                <Box sx={{ height: 12, background: 'transparent' }} />
+                              </TableCell>
+                            </TableRow>
+                          )}
+                        </React.Fragment>
                       ))}
                     {!loadingQuotes && quotesList.length === 0 && (
                       <TableRow>
@@ -841,8 +868,15 @@ const Transactions = ({ customerId, moduleKey }) => {
                   </TableHead>
                   <TableBody>
                     {salesOrderList.length > 0 &&
-                      salesOrderList.map((salesorder) => (
-                        <>
+                      salesOrderList.map((salesorder, idx) => (
+                        <React.Fragment key={salesorder.salesorder_id}>
+                          {idx === 0 && (
+                            <TableRow>
+                              <TableCell colSpan={6} sx={{ border: 0, padding: 0, background: 'transparent' }}>
+                                <Box sx={{ height: 12, background: 'transparent' }} />
+                              </TableCell>
+                            </TableRow>
+                          )}
                           <TableRow>
                             <TableCell
                               align="left"
@@ -906,7 +940,14 @@ const Transactions = ({ customerId, moduleKey }) => {
                               {salesorder?.status_formatted}
                             </TableCell>
                           </TableRow>
-                        </>
+                          {idx < salesOrderList.length - 1 && (
+                            <TableRow>
+                              <TableCell colSpan={6} sx={{ border: 0, padding: 0, background: 'transparent' }}>
+                                <Box sx={{ height: 12, background: 'transparent' }} />
+                              </TableCell>
+                            </TableRow>
+                          )}
+                        </React.Fragment>
                       ))}
                     {!loadingSalesOrder && salesOrderList.length === 0 && (
                       <TableRow>
@@ -1073,8 +1114,15 @@ const Transactions = ({ customerId, moduleKey }) => {
                   </TableHead>
                   <TableBody>
                     {deliveryChallanList.length > 0 &&
-                      deliveryChallanList.map((deliveryChallan) => (
-                        <>
+                      deliveryChallanList.map((deliveryChallan, idx) => (
+                        <React.Fragment key={deliveryChallan.deliverychallan_id}>
+                          {idx === 0 && (
+                            <TableRow>
+                              <TableCell colSpan={5} sx={{ border: 0, padding: 0, background: 'transparent' }}>
+                                <Box sx={{ height: 12, background: 'transparent' }} />
+                              </TableCell>
+                            </TableRow>
+                          )}
                           <TableRow>
                             <TableCell
                               align="left"
@@ -1132,7 +1180,14 @@ const Transactions = ({ customerId, moduleKey }) => {
                               {deliveryChallan?.status_formatted}
                             </TableCell>
                           </TableRow>
-                        </>
+                          {idx < deliveryChallanList.length - 1 && (
+                            <TableRow>
+                              <TableCell colSpan={5} sx={{ border: 0, padding: 0, background: 'transparent' }}>
+                                <Box sx={{ height: 12, background: 'transparent' }} />
+                              </TableCell>
+                            </TableRow>
+                          )}
+                        </React.Fragment>
                       ))}
                     {!loadingDeliveryChallan &&
                       deliveryChallanList.length === 0 && (
