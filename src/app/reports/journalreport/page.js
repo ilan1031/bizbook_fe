@@ -67,7 +67,6 @@ const JournalReport = () => {
 
     console.log("The Organization Data in the frontend", response.data.data);
     setOrganizationData(response.data.data);
-
   };
 
   useEffect(() => {
@@ -121,9 +120,11 @@ const JournalReport = () => {
 
       case "This Quarter": {
         const quarter = Math.floor(dayjs().month() / 3); // 0-based quarter
-  from = dayjs().startOf("year").add(quarter * 3, "month"); // Start of the quarter
-  to = dayjs(from).endOf("quarter"); // End of the quarter
-  break;
+        from = dayjs()
+          .startOf("year")
+          .add(quarter * 3, "month"); // Start of the quarter
+        to = dayjs(from).endOf("quarter"); // End of the quarter
+        break;
       }
 
       case "Previous Quarter": {
@@ -148,7 +149,7 @@ const JournalReport = () => {
       default:
         from = to = "";
     }
-    
+
     setFromDate(from.format("DD-MM-YYYY"));
     setToDate(to.format("DD-MM-YYYY"));
   };

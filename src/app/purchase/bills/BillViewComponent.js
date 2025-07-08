@@ -786,7 +786,7 @@ const BillManagementApp = ({ journalId }) => {
 
       const response = await apiService({
         method: "DELETE",
-        url: `api/v1/bills/delete-individual-bill?org_id=${org_id}&bill_id=${bill_ID}`,
+        url: `api/v1/bills/delete-individual-bill?org_id=${org_id}&bill_id=${bill_ID}&journal_id=${journalId}`,
         customBaseUrl: config.PO_Base_url,
       });
 
