@@ -34,6 +34,9 @@ import {
   Autocomplete,
   Checkbox,
   CircularProgress,
+  Dialog,
+  DialogContent,
+  DialogActions,
 } from "@mui/material";
 import CloseIcon from "@mui/icons-material/Close";
 import ToggleOnIcon from "@mui/icons-material/ToggleOn";
@@ -1103,12 +1106,19 @@ const InvoiceCreationPage = () => {
         console.log("=== API RESPONSE ===");
         console.log("Response:", response);
 
-        if (response?.data?.status) {
-          console.log("Update successful");
-          showMessage("Recurring invoice updated successfully", "success");
-          router.push(`/sales/recurringInvoice/${recurring_invoice_id}`);
+        if (
+          response?.statusCode === 200 ||
+          response?.data?.message?.toLowerCase().includes("success")
+        ) {
+          console.log("13. Update successful");
+          // Update generated invoices and their payment records
+          const updateResult = await updateGeneratedInvoicesAndPayments(requestData);
+          showMessage("Recurring invoice and related records updated successfully!", "success");
+          setTimeout(() => {
+            router.push(`/sales/recurringInvoice/${recurring_invoice_id}`);
+          }, 1000);
         } else {
-          console.log("Update failed:", response?.data);
+          console.log("13. Update failed:", response?.data);
           showMessage(
             response?.data?.message || "Failed to update recurring invoice",
             "error"
@@ -1326,6 +1336,9 @@ const InvoiceCreationPage = () => {
         total_amount_formatted: formik.values.total_amount_formatted,
         calculated_total: parseFloat(formik.values.total_amount) || 0,
         calculated_total_formatted: formik.values.total_amount_formatted,
+        terms: formik.values.terms,
+        repeat_value: formik.values.repeat_value,
+        
       };
 
       console.log("10. Request data prepared:", requestData);
@@ -1365,8 +1378,9 @@ const InvoiceCreationPage = () => {
         response?.data?.message?.toLowerCase().includes("success")
       ) {
         console.log("13. Update successful");
-        showMessage("Recurring invoice updated successfully", "success");
-        // Add a small delay before redirecting to ensure the message is shown
+        // Update generated invoices and their payment records
+        const updateResult = await updateGeneratedInvoicesAndPayments(requestData);
+        showMessage("Recurring invoice and related records updated successfully!", "success");
         setTimeout(() => {
           router.push(`/sales/recurringInvoice/${recurring_invoice_id}`);
         }, 1000);
@@ -1515,15 +1529,19 @@ const InvoiceCreationPage = () => {
       console.log("=== API RESPONSE ===");
       console.log("Response:", response);
 
-      if (response?.data?.status) {
-        console.log("Update successful");
-        showMessage(
-          "Recurring invoice updated and activated successfully",
-          "success"
-        );
-        router.push(`/sales/recurringInvoice/${recurring_invoice_id}`);
+      if (
+        response?.statusCode === 200 ||
+        response?.data?.message?.toLowerCase().includes("success")
+      ) {
+        console.log("13. Update successful");
+        // Update generated invoices and their payment records
+        const updateResult = await updateGeneratedInvoicesAndPayments(requestData);
+        showMessage("Recurring invoice and related records updated successfully!", "success");
+        setTimeout(() => {
+          router.push(`/sales/recurringInvoice/${recurring_invoice_id}`);
+        }, 1000);
       } else {
-        console.log("Update failed:", response?.data);
+        console.log("13. Update failed:", response?.data);
         showMessage(
           response?.data?.message || "Failed to update recurring invoice",
           "error"
@@ -1745,6 +1763,227 @@ const InvoiceCreationPage = () => {
     { label: "3 Years", value: 3, key: "year" },
     { label: "Custom", value: 0, key: "custom" },
   ];
+
+  // Function to fetch and update generated invoices and their payment records
+  const updateGeneratedInvoicesAndPayments = async (recurringInvoiceData) => {
+    try {
+      // Removed: setPaymentUpdateStatus(prev => ({ ...prev, isUpdating: true }));
+      
+      const organization_id = localStorage.getItem("organization_id");
+      
+      console.log("🔍 Searching for generated invoices for recurring invoice:", recurring_invoice_id);
+      
+      // First, fetch all generated invoices for this recurring invoice
+      console.log("🔍 Making API call to fetch generated invoices...");
+      console.log("🔍 API URL:", `${config.SO_Base_url}/api/v1/invoices`);
+      console.log("🔍 Params:", {
+        organization_id: organization_id,
+        recurring_invoice_id: recurring_invoice_id,
+        page: 1,
+        limit: 1000,
+      });
+      
+      const invoicesResponse = await apiService({
+        method: "GET",
+        url: `/api/v1/invoices`,
+        params: {
+          organization_id: organization_id,
+          recurring_invoice_id: recurring_invoice_id,
+          page: 1,
+          limit: 1000, // Get all invoices
+        },
+        customBaseUrl: config.SO_Base_url,
+      });
+
+      console.log("📋 Invoices API Response:", invoicesResponse);
+      console.log("📋 Response data:", invoicesResponse.data);
+      console.log("📋 Response status:", invoicesResponse.status);
+      console.log("📋 Response statusCode:", invoicesResponse.statusCode);
+
+      if (!invoicesResponse.data) {
+        console.log("❌ No response data received");
+        return { success: false, error: "No response data", total: 0, updated: 0, failed: 0 };
+      }
+
+      if (!invoicesResponse.data.invoices) {
+        console.log("❌ No invoices array in response");
+        console.log("📋 Available keys in response:", Object.keys(invoicesResponse.data));
+        return { success: true, total: 0, updated: 0, failed: 0 };
+      }
+
+      const generatedInvoices = invoicesResponse.data.invoices;
+      console.log("✅ Found generated invoices:", generatedInvoices.length);
+
+      let updatedInvoices = 0;
+      let failedInvoices = 0;
+      let totalPayments = 0;
+      let updatedPayments = 0;
+      let failedPayments = 0;
+
+      // Update each generated invoice
+      for (const invoice of generatedInvoices) {
+        try {
+          console.log(`🔄 Updating invoice: ${invoice.invoice_number}`);
+          
+          // Prepare updated invoice data
+          const invoiceUpdateData = {
+            customer_id: recurringInvoiceData.customer_id,
+            customer_name: recurringInvoiceData.customer_name,
+            billing_address: recurringInvoiceData.billing_address,
+            shipping_address: recurringInvoiceData.shipping_address,
+            line_items: recurringInvoiceData.line_items,
+            tax_type: recurringInvoiceData.tax_type,
+            tax_percentage: recurringInvoiceData.tax_percentage,
+            tds_option: recurringInvoiceData.tds_option,
+            tds_id: recurringInvoiceData.tds_id,
+            tcs_id: recurringInvoiceData.tcs_id,
+            sub_total: recurringInvoiceData.sub_total,
+            tax_total: recurringInvoiceData.tax_total,
+            total: recurringInvoiceData.total,
+            payment_terms: recurringInvoiceData.payment_terms,
+            payment_terms_label: recurringInvoiceData.payment_terms_label,
+            place_of_supply: recurringInvoiceData.place_of_supply,
+            gst_treatment: recurringInvoiceData.gst_treatment,
+            reference_number: recurringInvoiceData.reference_number,
+            order_number: recurringInvoiceData.order_number,
+            // Keep the original invoice date and number
+            date: invoice.date,
+            invoice_number: invoice.invoice_number,
+            status: invoice.status, // Keep original status
+          };
+
+          // Update the invoice
+          console.log(`📝 Updating invoice ${invoice.invoice_number} with data:`, invoiceUpdateData);
+          
+          const updateResponse = await apiService({
+            method: "PATCH",
+            url: `/api/v1/invoices`,
+            data: invoiceUpdateData,
+            params: {
+              organization_id: organization_id,
+              invoice_id: invoice.invoice_id,
+            },
+            customBaseUrl: config.SO_Base_url,
+          });
+
+          console.log(`📋 Invoice update response:`, updateResponse);
+
+          if (updateResponse.data && (updateResponse.data.status || updateResponse.statusCode === 200)) {
+            updatedInvoices++;
+            console.log(`✅ Updated invoice ${invoice.invoice_number}`);
+
+            // Now update payment records for this invoice
+            console.log(`🔍 Searching for payments for invoice: ${invoice.invoice_id}`);
+            
+            const paymentsResponse = await apiService({
+              method: "GET",
+              url: `/api/v1/payment/getPaymentsReceived`,
+              params: {
+                organization_id: organization_id,
+                invoice_id: invoice.invoice_id,
+                page: 1,
+                limit: 1000,
+              },
+              customBaseUrl: config.SO_Base_url,
+            });
+
+            console.log(`💰 Payments API Response:`, paymentsResponse);
+
+            if (paymentsResponse.data && paymentsResponse.data.payments) {
+              const payments = paymentsResponse.data.payments;
+              totalPayments += payments.length;
+              console.log(`💰 Found ${payments.length} payments for invoice ${invoice.invoice_number}`);
+
+              for (const payment of payments) {
+                try {
+                  console.log(`🔄 Updating payment: ${payment.payment_number}`);
+                  
+                  // Update payment record with new invoice data
+                  const updatedPaymentData = {
+                    customer_id: recurringInvoiceData.customer_id,
+                    customer_name: recurringInvoiceData.customer_name,
+                    amount: payment.amount,
+                    payment_mode: payment.payment_mode,
+                    deposite_to: payment.deposite_to,
+                    reference_number: payment.reference_number,
+                    date: payment.date,
+                    description: payment.description,
+                    // Update the invoice reference in payment
+                    invoices: [{
+                      invoice_id: invoice.invoice_id,
+                      invoice_number: invoice.invoice_number,
+                      amount: payment.amount,
+                      balance: 0, // Assuming full payment
+                    }],
+                  };
+
+                  console.log(`📝 Payment update data:`, updatedPaymentData);
+
+                  const paymentUpdateResponse = await apiService({
+                    method: "PUT",
+                    url: `/api/v1/payment/individual/update`,
+                    data: updatedPaymentData,
+                    params: {
+                      organization_id: organization_id,
+                      payment_id: payment.payment_id,
+                    },
+                    customBaseUrl: config.SO_Base_url,
+                  });
+
+                  console.log(`📋 Payment update response:`, paymentUpdateResponse);
+
+                  if (paymentUpdateResponse.data && (paymentUpdateResponse.data.status || paymentUpdateResponse.statusCode === 200)) {
+                    updatedPayments++;
+                    console.log(`✅ Updated payment ${payment.payment_number}`);
+                  } else {
+                    failedPayments++;
+                    console.error(`❌ Failed to update payment ${payment.payment_number}:`, paymentUpdateResponse);
+                  }
+                } catch (paymentError) {
+                  failedPayments++;
+                  console.error(`💥 Error updating payment ${payment.payment_number}:`, paymentError);
+                }
+              }
+            } else {
+              console.log(`ℹ️ No payments found for invoice ${invoice.invoice_number}`);
+            }
+          } else {
+            failedInvoices++;
+            console.error(`Failed to update invoice ${invoice.invoice_number}`);
+          }
+        } catch (invoiceError) {
+          failedInvoices++;
+          console.error(`Error updating invoice ${invoice.invoice_number}:`, invoiceError);
+        }
+      }
+
+      const result = {
+        success: true,
+        total: generatedInvoices.length,
+        updated: updatedInvoices,
+        failed: failedInvoices,
+        totalPayments,
+        updatedPayments,
+        failedPayments,
+      };
+
+      console.log("Update result:", result);
+      return result;
+
+    } catch (error) {
+      console.error("Error updating generated invoices and payments:", error);
+      return {
+        success: false,
+        error: error.message,
+        total: 0,
+        updated: 0,
+        failed: 0,
+        totalPayments: 0,
+        updatedPayments: 0,
+        failedPayments: 0,
+      };
+    } // Removed: finally block with setPaymentUpdateStatus
+  };
 
   return (
     <Box sx={{ overflowX: "hidden", backgroundColor: "#f6f6f6" }}>

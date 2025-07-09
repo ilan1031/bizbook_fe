@@ -177,7 +177,14 @@ const ItemsTable = () => {
   const [welcomePg, setWelcomPg] = useState(false);
 
   const handleRowClick = (item) => {
-    router.push(`/item/${item.id}`);
+    // Check for different possible ID fields
+    const itemId = item.id || item.item_id || item._id || item.itemId;
+    if (itemId) {
+      router.push(`/item/${itemId}`);
+    } else {
+      console.error("No ID found in item:", item);
+      showMessage("Error: Item ID not found", "error");
+    }
   };
 
   const handleSelectAll = () => {
@@ -747,7 +754,7 @@ const ItemsTable = () => {
             setSelectedMenuItem={setSelectedMenuItem}
             handleOpenSearchDialog={handleOpenSearchDialog}
             selectedType={selectedType}
-            value={false}
+            value="item"
           />
         ) : (
           <Typography variant="h6" sx={{ textAlign: "center", my: 4 }}>
