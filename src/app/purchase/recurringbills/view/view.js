@@ -70,6 +70,7 @@ export default function View({
   childLoading,
   setFilterStatus,
   filterStatus,
+  journalId,
 }) {
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -143,9 +144,10 @@ export default function View({
 
   const handleDelete = async () => {
     try {
+      console.log(journalId,"journalIdjournalIdjournalIdjournalIdjournalIdjournalId")
       const response = await apiService({
         method: "DELETE",
-        url: `/api/v1/recurring-bill/${uniqueId}?organization_id=${organization_id}`,
+        url: `/api/v1/recurring-bill/${uniqueId}?organization_id=${organization_id}&journal_id=${journalId}`,
         customBaseUrl: config.PO_Base_url,
       });
       const data = response.data;

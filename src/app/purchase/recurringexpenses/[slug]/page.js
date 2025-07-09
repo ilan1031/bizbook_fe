@@ -38,6 +38,7 @@ import {
   Upload,
 } from "lucide-react";
 import ListAltIcon from "@mui/icons-material/ListAlt";
+import RecurringExpense from "../createrecurringexpense/page";
 
 // SideBarSkeleton component for the sidebar list items
 const SideBarSkeleton = () => {
@@ -979,6 +980,9 @@ const Page = () => {
         <Box sx={{ flexGrow: 1 }}>
           <RecurringExpenseViewComponent />
         </Box>
+        {/* <Box sx={{ flexGrow: 1 }}>
+          <RecurringExpense  journalId={journalId}/>
+        </Box> */}
       </Box>
     </Box>
   );
