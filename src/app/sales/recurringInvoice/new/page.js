@@ -283,6 +283,7 @@ const InvoiceCreationPage = () => {
   const [anchorElSales, setAnchorElSales] = useState(null);
   const [selectedSalesperson, setSelectedSalesperson] = useState("");
   const organization_id = localStorage.getItem("organization_id");
+  const admin_id = localStorage.getItem("admin_id"); // Add this line to get admin_id
   const [invoiceId, setInvoiceId] = useState("");
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -1248,7 +1249,7 @@ const InvoiceCreationPage = () => {
         // Use the recurring invoice endpoint
         const response = await apiService({
           method: "POST",
-          url: `/api/v1/RecurringInvoices/recurring?organization_id=${organization_id}`,
+          url: `/api/v1/RecurringInvoices/recurring?organization_id=${organization_id}${admin_id ? `&admin_id=${admin_id}` : ''}`,
           data: requestData,
           customBaseUrl: config.SO_Base_url,
           file: true,
