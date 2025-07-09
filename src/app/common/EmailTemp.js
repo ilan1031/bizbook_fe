@@ -1463,6 +1463,8 @@ url =`/api/v1/estimate/status?organization_id=${organization_id}&quote_id=${id}`
                       ? "Payment Made"
                       : getPathEntity() === "quotes"
                       ? "Quote"
+                      : getPathEntity() === "paymentsReceived"
+                      ? "Payment Receipt"
                       : "Purchase Order"
                   } PDF`}
                 />

@@ -47,6 +47,7 @@ import {
 } from "lucide-react";
 import ExportModal from "../../common/export/ExportModal";
 import CustomFilterMenu from "../../common/customFilterMenu";
+import { useSnackbar } from "../../../components/SnackbarProvider";
 
 const TableSkeleton = () => {
   const columns = [
@@ -386,6 +387,7 @@ const RecurringInvoicePage = () => {
   const [sortColumn, setSortColumn] = useState("customer_name");
   const [sortOrder, setSortOrder] = useState("A");
   let submenuCloseTimeout = useRef(null);
+  const { showMessage } = useSnackbar();
 
   // Add export modal state and handlers
   const [exportModalOpen, setExportModalOpen] = useState(false);
@@ -438,7 +440,18 @@ const RecurringInvoicePage = () => {
   const handleSettingsClose = () => setSettingsAnchorEl(null);
 
   const handleSelect = (type, value, key) => {
-    setSelectedType(type);
+    let displayType = type;
+    if (value === "Status.All") {
+      displayType = "All";
+    } else if (value === "Status.Expired") {
+      displayType = "Expired";
+    } else if (value === "Status.Active") {
+      displayType = "Active";
+    } else if (value === "Status.Stopped") {
+      displayType = "Stopped";
+    }
+    
+    setSelectedType(displayType);
     setSelectedKey(key);
     setFilterBy(value);
     page.current = 1;
@@ -482,11 +495,15 @@ const RecurringInvoicePage = () => {
   const fetchInvoiceList = async (filterValue, sort_column, sort_order) => {
     setLoading(true);
     try {
+      let filterParam = filterValue;
+      if (filterValue === "Status.All") filterParam = "";
+      if (filterValue === "Status.Expired") filterParam = "Status.Expired";
+      
       const response = await apiService({
         method: "GET",
         url: `/api/v1/RecurringInvoices/getall`,
         params: {
-          filter_by: filterValue,
+          filter: filterParam,
           page: page.current,
           per_page: limit.current,
           sort_column: sort_column,
@@ -505,9 +522,6 @@ const RecurringInvoicePage = () => {
       const data = response.data.recurring_invoices || [];
       const totalCount = response.data.totalCount || 0;
       const hasMore = response.data.page_context?.has_more_page || false;
-
-      // Log the raw data to see what we're receiving
-      console.log("Raw API Response:", data);
 
       // Format the data to match the table columns
       const formattedData = data.map((invoice) => {
@@ -539,9 +553,6 @@ const RecurringInvoicePage = () => {
           }
         }
 
-        // Log individual invoice data for debugging
-        console.log("Processing invoice:", invoice);
-
         // Ensure we have all required fields
         const formattedInvoice = {
           ...invoice,
@@ -558,14 +569,11 @@ const RecurringInvoicePage = () => {
           recurrence_status: invoice.recurrence_status || "N/A",
         };
 
-        // Log the formatted invoice for debugging
-        console.log("Formatted invoice:", formattedInvoice);
-
         return formattedInvoice;
       });
 
-      // Show welcome page if there's no data
-      if (formattedData.length === 0) {
+      
+      if (formattedData.length === 0 && filterParam === "") {
         setWelcomePg(true);
       } else {
         setWelcomePg(false);

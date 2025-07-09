@@ -145,7 +145,7 @@ const InvoiceView = ({
     try {
       const response = await apiService({
         method: "DELETE",
-        url: `/api/v1/invoices?organization_id=${organization_id}&invoice_id=${data.invoice_id}`,
+        url: `/api/v1/invoices?org_id=${organization_id}&invoice_id=${data.invoice_id}`,
         customBaseUrl: config.SO_Base_url,
       });
       const dataInvoice = response.data;

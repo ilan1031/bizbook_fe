@@ -321,6 +321,13 @@ const InvoiceCreationPage = () => {
     }
   }, [clone_id]);
 
+  useEffect(() => {
+    console.log("useEffect triggered with invoice_id:", invoice_id);
+    if (invoice_id) {
+      fetchInvoiceData(invoice_id);
+    }
+  }, [invoice_id]);
+
   const fetchRecurringInvoiceData = async (id) => {
     try {
       const organization_id = localStorage.getItem("organization_id");
@@ -340,8 +347,10 @@ const InvoiceCreationPage = () => {
         customBaseUrl: config.SO_Base_url,
       });
 
-      if (response.data && response.data.data) {
-        const invoiceData = response.data.data;
+      // if (response.data && response.data.data) {
+      //   const invoiceData = response.data.data;
+      if (response.data && response.data.invoice) {
+        const invoiceData = response.data.invoice;
 
         // Set customer data
         if (invoiceData.customer_id) {
@@ -439,6 +448,148 @@ const InvoiceCreationPage = () => {
     }
   };
 
+  const fetchInvoiceData = async (id) => {
+    try {
+      if (!id) {
+        showMessage("Invoice ID is required", "error");
+        return;
+      }
+
+      const organization_id = localStorage.getItem("organization_id");
+
+      if (!organization_id) {
+        showMessage("Organization ID not found", "error");
+        return;
+      }
+
+      console.log("Fetching invoice data for ID:", id);
+      console.log("Organization ID:", organization_id);
+      
+      const response = await apiService({
+        method: "GET",
+        url: `/api/v1/invoices/${id}`,
+        params: {
+          organization_id: organization_id,
+        },
+        customBaseUrl: config.SO_Base_url,
+      });
+
+      console.log("API Response:", response);
+
+      if (response.data && response.data.invoice) {
+        const invoiceData = response.data.invoice;
+        console.log("Invoice Data:", invoiceData);
+
+        // Set customer data
+        if (invoiceData.customer_id) {
+          try {
+            const customerResponse = await apiService({
+              method: "GET",
+              url: `/api/v1/contact/${invoiceData.customer_id}`,
+              params: {
+                organization_id: organization_id,
+              },
+              file: false,
+            });
+
+            const { data: customerData } = customerResponse.data;
+            setCustomerData(customerData);
+            setSelectedCustomer(customerData);
+          } catch (error) {
+            console.error("Error fetching customer data:", error);
+            showMessage("Failed to fetch customer data", "error");
+          }
+        }
+
+        // Set formik values with the invoice data
+        if (formik && formik.setValues) {
+          formik.setValues({
+            customer_id: invoiceData.customer_id || "",
+            customer_name: invoiceData.customer_name || "",
+            invoice_number: invoiceData.invoice_number || "",
+            date: invoiceData.date || "",
+            date_formatted: invoiceData.date_formatted || "",
+            billing_address: invoiceData.billing_address || {},
+            shipping_address: invoiceData.shipping_address || {},
+            line_items: invoiceData.line_items?.map((item) => ({
+              item_id: item.item_id,
+              name: item.name,
+              description: item.description || "",
+              quantity: item.quantity,
+              rate: item.rate,
+              discount: item.discount || 0,
+              amount: item.quantity * item.rate,
+              unit: item.unit || "",
+              tax_percentage: item.tax_percentage || 0,
+            })) || [],
+            tax_type: invoiceData.tax_type || "TDS",
+            discount_percent: invoiceData.discount_percent || 0,
+            discount_amount_formatted: invoiceData.discount_amount_formatted || "",
+            discount_amount: invoiceData.discount_amount || "",
+            tds_option: invoiceData.tds_option || "",
+            tds_id: invoiceData.tds_id || "",
+            tcs_id: invoiceData.tcs_id || "",
+            sub_total: invoiceData.sub_total || 0,
+            sub_total_formatted: invoiceData.sub_total_formatted || "₹0.00",
+            tax_total: invoiceData.tax_total || 0,
+            tax_total_formatted: invoiceData.tax_total_formatted || "₹0.00",
+            total_amount: invoiceData.total || 0,
+            total_amount_formatted: invoiceData.total_formatted || "₹0.00",
+            adjustment: invoiceData.adjustment || 0,
+            payment_terms: invoiceData.payment_terms || 0,
+            payment_terms_label: invoiceData.payment_terms_label || "Due On Receipt",
+            repeat_every: 1, // Default value for recurring
+            repeat_value: "Week", // Default value for recurring
+            recurrence_frequency: "week", // Default value for recurring
+            status: "draft", // Default status for new recurring invoice
+            status_formatted: "Draft", // Default status for new recurring invoice
+            general: [],
+            place_of_supply: invoiceData.place_of_supply || "",
+            gst_treatment: invoiceData.gst_treatment || "",
+            gst_no: invoiceData.gst_no || "",
+            reference_number: invoiceData.reference_number || "",
+            recurrence_name: `${invoiceData.invoice_number} - Recurring`, // Generate a default name
+            order_number: invoiceData.order_number || "",
+            terms: invoiceData.terms || "",
+            notes: invoiceData.notes || "",
+            salesperson_name: invoiceData.salesperson_name || "",
+            tax_percentage: invoiceData.tax_percentage || 0,
+            never_expires: false, // Default value for recurring
+          });
+
+          // Update the quoteItems state for the table display
+          if (invoiceData.line_items && invoiceData.line_items.length > 0) {
+            setQuoteItems(invoiceData.line_items.map((item) => ({
+              id: item.item_id || Math.random(),
+              quantity: item.quantity || 1,
+              rate: item.rate || 0,
+              amount: (item.quantity || 1) * (item.rate || 0),
+              name: item.name || "",
+              description: item.description || "",
+            })));
+          }
+        }
+
+        // Show success message
+        showMessage("Invoice data fetched successfully for recurring setup", "success");
+      } else {
+        showMessage("Failed to fetch invoice data", "error");
+      }
+    } catch (error) {
+      console.error("Error fetching invoice data:", error);
+      console.error("Error details:", {
+        message: error.message,
+        response: error.response?.data,
+        status: error.response?.status,
+        statusText: error.response?.statusText
+      });
+      showMessage(
+        error.response?.data?.message || "Failed to fetch invoice data",
+        "error"
+      );
+    }
+  };
+
   const handleClickBA = (event, value) => {
     if (value === "edit") {
       setAddress("edit");
@@ -485,7 +636,12 @@ const InvoiceCreationPage = () => {
   };
 
   const handleUpdateEdit = (updatedData) => {
-    onUpdateGST && onUpdateGST(updatedData);
+    // Update customerData with new GST Treatment and GSTIN if provided
+    setCustomerData((prev) => ({
+      ...prev,
+      ...(updatedData.gst_treatment && { gst_treatment: updatedData.gst_treatment }),
+      ...(updatedData.gst_no && { gst_no: updatedData.gst_no }),
+    }));
     handleCloseEdit();
   };
 
@@ -504,7 +660,11 @@ const InvoiceCreationPage = () => {
   };
 
   const handleUpdateGSTIN = (updatedData) => {
-    onUpdateGSTIN && onUpdateGSTIN(updatedData);
+    // Update customerData with new GSTIN
+    setCustomerData((prev) => ({
+      ...prev,
+      ...(updatedData.gst_no && { gst_no: updatedData.gst_no }),
+    }));
     handleCloseGSTIN();
   };
   // Format date helper function
@@ -1891,17 +2051,7 @@ const InvoiceCreationPage = () => {
                     }}
                   >
                     {customerData?.gst_no || "Not provided"}
-                    <IconButton
-                      size="small"
-                      sx={{
-                        p: 0.5,
-                        height: "fit-content",
-                        color: "#757575",
-                      }}
-                      onClick={handleGSTINClick}
-                    >
-                      <EditIcon sx={{ fontSize: "16px" }} />
-                    </IconButton>
+                   
                   </Typography>
                 </Typography>
               </Box>

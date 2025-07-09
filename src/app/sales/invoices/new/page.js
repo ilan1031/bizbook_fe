@@ -352,7 +352,12 @@ const InvoiceCreationPage = () => {
   };
 
   const handleUpdateEdit = (updatedData) => {
-    onUpdateGST && onUpdateGST(updatedData);
+    // Update customerData with new GST Treatment and GSTIN if provided
+    setCustomerData((prev) => ({
+      ...prev,
+      ...(updatedData.gst_treatment && { gst_treatment: updatedData.gst_treatment }),
+      ...(updatedData.gst_no && { gst_no: updatedData.gst_no }),
+    }));
     handleCloseEdit();
   };
 
@@ -371,7 +376,11 @@ const InvoiceCreationPage = () => {
   };
 
   const handleUpdateGSTIN = (updatedData) => {
-    onUpdateGSTIN && onUpdateGSTIN(updatedData);
+    // Update customerData with new GSTIN
+    setCustomerData((prev) => ({
+      ...prev,
+      ...(updatedData.gst_no && { gst_no: updatedData.gst_no }),
+    }));
     handleCloseGSTIN();
   };
   // Format date helper function
@@ -1258,174 +1267,252 @@ const InvoiceCreationPage = () => {
     },
     // validationSchema,
     onSubmit: async (values, { setSubmitting, setFieldValue }) => {
+  try {
+    const errors = [];
+
+    // Validate customer selection
+    if (!customerData?.contact_id) {
+      errors.push("Please select a customer");
+    }
+
+    // Validate place of supply if GST treatment is not Overseas
+    if (
+      customerData?.gst_treatment !== "Overseas" &&
+      !values.place_of_supply
+    ) {
+      errors.push("Please select Place of supply");
+    }
+
+    // Validate invoice date
+    if (!values.date) {
+      errors.push("Please select an invoice date");
+    }
+
+    // Validate line items and TCS/TDS option
+    const hasValidLineItems = values.line_items.some(
+      (item) => item.name && item.quantity > 0 && item.rate > 0
+    );
+    if (!hasValidLineItems) {
+      errors.push("Please add at least one item");
+    }
+
+    // Validate TCS/TDS option
+    if (!values.tax_type) {
+      errors.push("Please select TCS/TDS option");
+    }
+
+    if (!values.payment_terms_label) {
+      errors.push("Please select terms");
+    }
+
+    // If there are validation errors, update the general errors and stop submission
+    if (errors.length > 0) {
+      await setFieldValue("general", errors);
+      setSubmitting(false);
+      return;
+    }
+
+    const organization_id = localStorage.getItem("organization_id");
+    if (!organization_id) {
+      throw new Error("Organization ID not found");
+    }
+
+    // Format dates consistently
+    const formattedDate = values.date
+      ? dayjs(values.date).format("YYYY-MM-DD")
+      : "";
+    const formattedDueDate = values.due_date
+      ? dayjs(values.due_date).format("YYYY-MM-DD")
+      : "";
+
+    // Prepare data for backend
+    const requestData = {
+      customer_id: customerData?.contact_id,
+      customer_name: customerData?.contact_name,
+      invoice_number: values.invoice_number,
+      date: formattedDate,
+      date_formatted: values.date_formatted,
+      organization_id: organization_id,
+      due_date: formattedDueDate,
+      due_date_formatted: values.due_date_formatted,
+      billing_address: customerData?.billing_address,
+      shipping_address: customerData?.shipping_address,
+      line_items: values.line_items.map((item) => ({
+        ...item,
+        item_total:
+          item.quantity * item.rate * (1 - (item.discount || 0) / 100),
+        item_id: item.item_id,
+        name: item.name,
+        quantity: parseFloat(item.quantity) || 0,
+        rate: parseFloat(item.rate) || 0,
+        discount: parseFloat(item.discount) || 0,
+        amount: parseFloat(item.amount) || 0,
+      })),
+      tax_type: values.tax_type,
+      tax_percentage: parseFloat(values.tax_percentage) || 0,
+      tds_option: values.tds_option,
+      sub_total: parseFloat(values.sub_total) || 0,
+      sub_total_formatted: values.sub_total_formatted,
+      tax_total: parseFloat(values.tax_total) || 0,
+      tax_total_formatted: values.tax_total_formatted,
+      total: values.total_amount || 0,
+      total_formatted: values.total_amount_formatted,
+      adjustment: parseFloat(values.adjustment) || 0,
+      status: values.status,
+      discount_percent: values.discount_percent,
+      discount_amount_formatted: values.discount_amount_formatted,
+      discount_amount: values.discount_amount,
+      status_formatted: values.status_formatted,
+      place_of_supply: values.place_of_supply,
+      gst_treatment: values.gst_treatment,
+      reference_number: values.reference_number,
+      tds_id: values.tds_id,
+      payment_terms: values.payment_terms,
+      payment_terms_label: values.payment_terms_label,
+      tcs_id: values.tcs_id,
+      tax_percentage: values.tax_percentage,
+      documents: values.documents || null,
+    };
+
+    console.log("Request Data:", requestData);
+
+    // Determine the correct API endpoint
+    let url;
+    if (quote_id) {
+      url = `/api/v1/estimates/convert?organization_id=${organization_id}&quote_id=${quote_id}`;
+    } else if (salesorder_id) {
+      url = `/api/v1/salesorders/convert-to-invoice?organization_id=${organization_id}&salesorder_id=${salesorder_id}`;
+    } else if (deliverychallan_id) {
+      url = `/api/v1/deliverychallans/convert-to-invoice?organization_id=${organization_id}&deliverychallan_id=${deliverychallan_id}`;
+    } else {
+      url = `/api/v1/invoices?org_id=${organization_id}`;
+    }
+
+    const params = {
+      method: "POST",
+      url: url,
+      data: requestData,
+      customBaseUrl: config.SO_Base_url,
+      file: deliverychallan_id ? false : true,
+    };
+
+    console.log("API Request Parameters:", params);
+
+    // Make the API call
+    const response = await apiService(params);
+    
+    console.log("API Response:", response);
+
+    // Check if the response indicates success
+    // Handle different response structures
+    const isSuccess = response?.data?.success || response?.data?.status;
+    const responseData = response?.data?.data;
+    const message = response?.data?.message;
+
+    if (isSuccess) {
+      // Show success message
+      showMessage(message || "Invoice created successfully", "success");
+      
+      console.log("Invoice created successfully:", responseData);
+
+      // Handle navigation based on the source and status
       try {
-        const errors = [];
-
-        // Validate customer selection
-        if (!customerData?.contact_id) {
-          errors.push("Please select a customer");
+        let invoiceId;
+        
+        // Extract invoice ID from different possible response structures
+        if (responseData?.invoice?.invoice_id) {
+          invoiceId = responseData.invoice.invoice_id;
+        } else if (responseData?.invoice_id) {
+          invoiceId = responseData.invoice_id;
+        } else if (responseData?._id) {
+          invoiceId = responseData._id;
         }
 
-        // Validate place of supply if GST treatment is not Overseas
-        if (
-          customerData?.gst_treatment !== "Overseas" &&
-          !values.place_of_supply
-        ) {
-          errors.push("Please select Place of supply");
-        }
+        console.log("Extracted Invoice ID:", invoiceId);
+        console.log("Status:", status);
 
-        // Validate invoice date
-        if (!values.date) {
-          errors.push("Please select an invoice date");
-        }
-
-        // Validate line items and TCS/TDS option
-        const hasValidLineItems = values.line_items.some(
-          (item) => item.name && item.quantity > 0 && item.rate > 0
-        );
-        if (!hasValidLineItems) {
-          errors.push("Please add at least one item");
-        }
-
-        // Validate TCS/TDS option
-        if (!values.tax_type) {
-          errors.push("Please select TCS/TDS option");
-        }
-
-        if (!values.payment_terms_label) {
-          errors.push("Please select terms");
-        }
-
-        // If there are validation errors, update the general errors and stop submission
-        if (errors.length > 0) {
-          await setFieldValue("general", errors);
-          setSubmitting(false);
-          return;
-        }
-
-        const organization_id = localStorage.getItem("organization_id");
-        if (!organization_id) {
-          console.error("Organization ID not found");
-          return;
-        }
-
-        // Format dates consistently
-        const formattedDate = values.date
-          ? dayjs(values.date).format("YYYY-MM-DD")
-          : "";
-        const formattedDueDate = values.due_date
-          ? dayjs(values.due_date).format("YYYY-MM-DD")
-          : "";
-        console.log(customerData?.billing_address, "Address: ");
-        // Prepare data for backend
-        const requestData = {
-          customer_id: customerData?.contact_id,
-          customer_name: customerData?.contact_name,
-          invoice_number: values.invoice_number,
-          date: formattedDate,
-          date_formatted: values.date_formatted,
-          organization_id: organization_id,
-          due_date: formattedDueDate,
-          due_date_formatted: values.due_date_formatted,
-          billing_address: customerData?.billing_address,
-          shipping_address: customerData?.shipping_address,
-          line_items: values.line_items.map((item) => ({
-            ...item,
-            item_total:
-              item.quantity * item.rate * (1 - (item.discount || 0) / 100),
-            item_id: item.item_id,
-            name: item.name,
-            quantity: parseFloat(item.quantity) || 0,
-            rate: parseFloat(item.rate) || 0,
-            discount: parseFloat(item.discount) || 0,
-            amount: parseFloat(item.amount) || 0,
-          })),
-          tax_type: values.tax_type,
-          tax_percentage: parseFloat(values.tax_percentage) || 0,
-          tds_option: values.tds_option,
-          sub_total: parseFloat(values.sub_total) || 0,
-          sub_total_formatted: values.sub_total_formatted,
-          tax_total: parseFloat(values.tax_total) || 0,
-          tax_total_formatted: values.tax_total_formatted,
-          total: values.total_amount || 0,
-          total_formatted: values.total_amount_formatted,
-          adjustment: parseFloat(values.adjustment) || 0,
-          status: values.status,
-          discount_percent: values.discount_percent,
-          discount_amount_formatted: values.discount_amount_formatted,
-          discount_amount: values.discount_amount,
-          status_formatted: values.status_formatted,
-          place_of_supply: values.place_of_supply,
-          gst_treatment: values.gst_treatment,
-          reference_number: values.reference_number,
-          tds_id: values.tds_id,
-          payment_terms: values.payment_terms,
-          payment_terms_label: values.payment_terms_label,
-          tcs_id: values.tcs_id,
-          tax_percentage: values.tax_percentage,
-          documents: values.documents || null,
-        };
-
-        console.log(requestData, "requestData:");
-
-        let url;
+        // Navigate based on the source and status
         if (quote_id) {
-          url = `/api/v1/estimates/convert?organization_id=${organization_id}&quote_id=${quote_id}`;
-        } else if (salesorder_id) {
-          url = `/api/v1/salesorders/convert-to-invoice?organization_id=${organization_id}&salesorder_id=${salesorder_id}`;
-        } else if (deliverychallan_id) {
-          url = `/api/v1/deliverychallans/convert-to-invoice?organization_id=${organization_id}&deliverychallan_id=${deliverychallan_id}`;
-        } else {
-          url = `/api/v1/invoices?organization_id=${organization_id}`;
-        }
-        let params = {
-          method: "POST",
-          url: url,
-          data: requestData,
-          customBaseUrl: config.SO_Base_url,
-          file: deliverychallan_id ? false : true,
-        };
-
-        const response = await apiService(params);
-
-        if (response.data && response.data.status) {
-          const { data } = response.data;
-          showMessage("Invoice created successfully", "success");
-          console.log(data, "data*****");
-          if (quote_id) {
-            if (status === "draft") {
-              router.push(`/sales/quotes/${quote_id}`);
+          if (status === "draft") {
+            router.push(`/sales/quotes/${quote_id}`);
+          } else {
+            if (invoiceId) {
+              router.push(`/sales/invoices/${invoiceId}/email`);
             } else {
-              router.push(`/sales/invoices/${data?.invoice?.invoice_id}/email`);
+              router.push(`/sales/invoices`);
             }
-          } else if (salesorder_id || deliverychallan_id) {
-            if (status === "draft") {
-              router.push(`/sales/invoices/${data?.invoice?.invoice_id}`);
+          }
+        } else if (salesorder_id || deliverychallan_id) {
+          if (status === "draft") {
+            if (invoiceId) {
+              router.push(`/sales/invoices/${invoiceId}`);
             } else {
-              router.push(`/sales/invoices/${data?.invoice?.invoice_id}/email`);
+              router.push(`/sales/invoices`);
             }
           } else {
-            if (status === "draft") {
-              router.push(`/sales/invoices/${data?.invoice_id}`);
+            if (invoiceId) {
+              router.push(`/sales/invoices/${invoiceId}/email`);
             } else {
-              router.push(`/sales/invoices/${data?.invoice_id}/email`);
+              router.push(`/sales/invoices`);
             }
           }
         } else {
-          throw new Error(response.data?.message || "Failed to create invoice");
+          // Regular invoice creation
+          if (status === "draft") {
+            if (invoiceId) {
+              router.push(`/sales/invoices/${invoiceId}`);
+            } else {
+              router.push(`/sales/invoices`);
+            }
+          } else {
+            if (invoiceId) {
+              router.push(`/sales/invoices/${invoiceId}/email`);
+            } else {
+              router.push(`/sales/invoices`);
+            }
+          }
         }
-      } catch (error) {
-        console.error("Error creating invoice:", error);
-        showMessage(
-          error.response?.data?.message ||
-            error.message ||
-            "Failed to create invoice",
-          "error"
-        );
-      } finally {
-        setSubmitting(false);
+      } catch (navigationError) {
+        console.error("Navigation error:", navigationError);
+        // Fallback navigation
+        router.push("/sales/invoices");
       }
-    },
+    } else {
+      // Handle API error response
+      const errorMessage = message || "Failed to create invoice";
+      console.error("API returned error:", errorMessage);
+      throw new Error(errorMessage);
+    }
+
+  } catch (error) {
+    console.error("Error creating invoice:", error);
+    
+    // Extract meaningful error message
+    let errorMessage = "Failed to create invoice";
+    
+    if (error.response?.data?.message) {
+      errorMessage = error.response.data.message;
+    } else if (error.message) {
+      errorMessage = error.message;
+    } else if (error.response?.data?.error) {
+      errorMessage = error.response.data.error;
+    }
+
+    // Show error message
+    showMessage(errorMessage, "error");
+    
+    // Log detailed error for debugging
+    console.error("Detailed error:", {
+      message: error.message,
+      response: error.response?.data,
+      status: error.response?.status,
+      stack: error.stack
+    });
+    
+  } finally {
+    setSubmitting(false);
+  }
+},
   });
   // Add this useEffect after the other useEffect hooks
   useEffect(() => {
@@ -2141,40 +2228,7 @@ const InvoiceCreationPage = () => {
             </Grid>
           </Grid>
         )}
-        {/* GSTIN Section */}
-        {customerData !== null && customerData?.gst_treatment !== "" && (
-          <Grid container>
-            <Grid item xs={1.8}></Grid>
-            <Grid item xs={8}>
-              <Box sx={{ fontSize: "13px" }}>
-                <Typography variant="body3" color="#4c526c">
-                  GSTIN:{" "}
-                  <Typography
-                    component="span"
-                    sx={{
-                      color: "#000",
-                      cursor: "pointer",
-                      fontSize: "13px",
-                    }}
-                  >
-                    {customerData?.gst_no || "Not provided"}
-                    <IconButton
-                      size="small"
-                      sx={{
-                        p: 0.5,
-                        height: "fit-content",
-                        color: "#757575",
-                      }}
-                      onClick={handleGSTINClick}
-                    >
-                      <EditIcon sx={{ fontSize: "16px" }} />
-                    </IconButton>
-                  </Typography>
-                </Typography>
-              </Box>
-            </Grid>
-          </Grid>
-        )}
+     
 
         {/* Tax Preferences Popover */}
         <TaxPreferencesPopover

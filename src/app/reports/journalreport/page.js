@@ -693,7 +693,7 @@ const JournalReport = () => {
                                 color: "black",
                               }}
                             >
-                              33
+                            
                             </Typography>
                             <Typography
                               sx={{
@@ -703,7 +703,7 @@ const JournalReport = () => {
                                 color: "#1b6de0",
                               }}
                             >
-                              ({data.vendor_name})
+                              ({data?.vendor_name || data?.customer_name})
                             </Typography>
                           </Box>
                         </TableCell>
