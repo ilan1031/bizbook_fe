@@ -88,7 +88,7 @@ const StyledTextArea = styled("textarea")(({ error }) => ({
   },
 }));
 
-const CreateAccountPopup = ({ open, onClose, onSuccess, accountId }) => {
+const CreateAccountPopup = ( ) => {
   const [accountTypes, setAccountTypes] = useState([]);
   const [selectedAccountTypeInfo, setSelectedAccountTypeInfo] = useState(
     defaultAccountTypeInfo

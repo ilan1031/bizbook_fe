@@ -257,8 +257,9 @@ const Page = () => {
 
       const response = await apiService(params);
       console.log(response, "response");
-      if (response.statusCode === 200) {
-        const expenses = response.data.data.chart_of_accounts;
+      if (response.statusCode === 200 || response.status === 200) {
+        const expenses = response.data?.data?.chart_of_accounts;
+        console.log(expenses, "The Status of our data");
         if (expenses.length == 0) {
         }
         setExpenseList(expenses);
