@@ -1302,6 +1302,7 @@ export default function CustomizedTable({
   sortOrder,
   handleSort,
 }) {
+
   const [hoveredRow, setHoveredRow] = useState(null);
   const [actionAnchorEl, setActionAnchorEl] = useState(null);
   // Pagination states
@@ -1591,8 +1592,10 @@ export default function CustomizedTable({
             borderRadius: "0px",
             // Make table scrollable only if there are more than 8 columns
             overflow:
-              columnList.filter((col) => col.is_default_select_column).length >
-              8
+              (columnList.length > 0 
+                ? columnList.filter((col) => col.is_default_select_column)
+                : columns
+              ).length > 8
                 ? "auto"
                 : "visible",
             position: "relative", // Required for fixed columns
@@ -1603,8 +1606,10 @@ export default function CustomizedTable({
             sx={{
               // Use fixed layout when not scrolling, auto when scrolling
               tableLayout:
-                columnList.filter((col) => col.is_default_select_column)
-                  .length > 8
+                (columnList.length > 0 
+                  ? columnList.filter((col) => col.is_default_select_column)
+                  : columns
+                ).length > 8
                   ? "auto"
                   : "fixed",
               minWidth: "100%",
@@ -1781,9 +1786,10 @@ export default function CustomizedTable({
                 </TableCell>
 
                 {/* Dynamic width columns - will adjust to content */}
-                {columnList
-                  .filter((col) => col.is_default_select_column)
-                  .map((col, index) => (
+                {(columnList.length > 0 
+                  ? columnList.filter((col) => col.is_default_select_column)
+                  : columns
+                ).map((col, index) => (
                     <TableCell
                       key={col.value}
                       sortDirection="asc"
@@ -1804,20 +1810,23 @@ export default function CustomizedTable({
                         whiteSpace: "nowrap", // Prevents text wrapping
                         // Conditional width based on column count
                         minWidth:
-                          columnList.filter(
-                            (col) => col.is_default_select_column
+                          (columnList.length > 0 
+                            ? columnList.filter((col) => col.is_default_select_column)
+                            : columns
                           ).length > 8
                             ? "100px"
                             : "auto",
                         // When not scrolling, distribute width evenly
                         width:
-                          columnList.filter(
-                            (col) => col.is_default_select_column
+                          (columnList.length > 0 
+                            ? columnList.filter((col) => col.is_default_select_column)
+                            : columns
                           ).length <= 8
                             ? `${
                                 100 /
-                                columnList.filter(
-                                  (col) => col.is_default_select_column
+                                (columnList.length > 0 
+                                  ? columnList.filter((col) => col.is_default_select_column)
+                                  : columns
                                 ).length
                               }%`
                             : "auto",
@@ -1898,8 +1907,10 @@ export default function CustomizedTable({
                     minWidth: 40,
                     // When not scrolling, give this cell a fixed width
                     width:
-                      columnList.filter((col) => col.is_default_select_column)
-                        .length <= 8
+                      (columnList.length > 0 
+                        ? columnList.filter((col) => col.is_default_select_column)
+                        : columns
+                      ).length <= 8
                         ? "40px"
                         : "auto",
                   }}
@@ -1926,7 +1937,7 @@ export default function CustomizedTable({
                 </TableRow>
               ) : !loading && staticData.length > 0 ? (
                 <>
-                  {columnList.length > 0 &&
+                  {(columnList.length > 0 || columns.length > 0) &&
                     staticData.map((row) => (
                       <TableRow
                         key={row._id}
@@ -1945,8 +1956,9 @@ export default function CustomizedTable({
                             width: 60, // Fixed width for checkbox column
                             // Only make it sticky when there's horizontal scrolling
                             position:
-                              columnList.filter(
-                                (col) => col.is_default_select_column
+                              (columnList.length > 0 
+                                ? columnList.filter((col) => col.is_default_select_column)
+                                : columns
                               ).length > 8
                                 ? "sticky"
                                 : "static",
@@ -1970,9 +1982,10 @@ export default function CustomizedTable({
                         </TableCell>
 
                         {/* Dynamic width data columns */}
-                        {columnList
-                          .filter((col) => col.is_default_select_column)
-                          .map((col, index) => (
+                        {(columnList.length > 0 
+                          ? columnList.filter((col) => col.is_default_select_column)
+                          : columns
+                        ).map((col, index) => (
                             <TableCell
                               key={col.value}
                               align={
@@ -2024,19 +2037,22 @@ export default function CustomizedTable({
                                 whiteSpace: "nowrap", // Prevents text wrapping
                                 // Conditional sizing based on column count
                                 width:
-                                  columnList.filter(
-                                    (col) => col.is_default_select_column
+                                  (columnList.length > 0 
+                                    ? columnList.filter((col) => col.is_default_select_column)
+                                    : columns
                                   ).length <= 8
                                     ? `${
                                         100 /
-                                        columnList.filter(
-                                          (col) => col.is_default_select_column
+                                        (columnList.length > 0 
+                                          ? columnList.filter((col) => col.is_default_select_column)
+                                          : columns
                                         ).length
                                       }%`
                                     : "auto",
                                 maxWidth:
-                                  columnList.filter(
-                                    (col) => col.is_default_select_column
+                                  (columnList.length > 0 
+                                    ? columnList.filter((col) => col.is_default_select_column)
+                                    : columns
                                   ).length > 8
                                     ? "300px"
                                     : "none",
