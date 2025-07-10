@@ -616,7 +616,7 @@ const InvoiceHomePage = () => {
             startIcon={<AddIcon />}
             sx={{ mx: 1 }}
             onClick={() =>
-              router.push("/sales/paymentsReceived/newPaymentReceived")
+              router.push("/sales/invoices/new")
             }
           >
             New
