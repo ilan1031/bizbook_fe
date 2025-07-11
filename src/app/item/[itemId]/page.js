@@ -30,8 +30,32 @@ import {
 } from "lucide-react";
 import { useSnackbar } from "../../../components/SnackbarProvider";
 import KeyboardArrowDownIcon from "@mui/icons-material/KeyboardArrowDown";
+import StarIcon from "@mui/icons-material/Star";
+import StarBorderIcon from "@mui/icons-material/StarBorder";
+import FileDownloadIcon from "@mui/icons-material/FileDownload";
+import FileUploadIcon from "@mui/icons-material/FileUpload";
+import SwapHorizIcon from "@mui/icons-material/SwapHoriz";
+import RefreshIcon from "@mui/icons-material/Refresh";
+import SettingsIcon from "@mui/icons-material/Settings";
+import ItemOverview from "../../common/itemDetail/overview";
+import ItemTransactions from "../../common/itemDetail/transactions";
+import ItemHistory from "../../common/itemDetail/history";
 
 const ITEM_LIST_LIMIT = 50;
+
+const itemOptions = [
+  { id: "all-items", is_favorite: true, title: "All Items", value: "Status.All" },
+  { id: "active-items", is_favorite: true, title: "Active Items", value: "Status.Active" },
+  { id: "inactive-items", is_favorite: false, title: "Inactive Items", value: "Status.Inactive" },
+  { id: "low-stock-items", is_favorite: false, title: "Low Stock Items", value: "Status.LowStock" },
+];
+const menuItems = [
+  { text: "Import Items", icon: <FileUploadIcon sx={{ fontSize: 14, color: "#408dfb" }} /> },
+  { text: "Export Items", icon: <FileDownloadIcon sx={{ fontSize: 14, color: "#408dfb" }} /> },
+  { text: "Preferences", icon: <SettingsIcon sx={{ fontSize: 14, color: "#408dfb" }} /> },
+  { text: "Refresh List", icon: <RefreshIcon sx={{ fontSize: 14, color: "#408dfb" }} /> },
+  { text: "Reset Column Width", icon: <SwapHorizIcon sx={{ fontSize: 14, color: "#408dfb" }} /> },
+];
 
 const ItemSplitView = () => {
   const { itemId } = useParams();
@@ -45,6 +69,11 @@ const ItemSplitView = () => {
   const [leftMenuAnchor, setLeftMenuAnchor] = useState(null);
   const [rightMenuAnchor, setRightMenuAnchor] = useState(null);
   const [search, setSearch] = useState("");
+  // Add filter/menu state
+  const [itemStatusOptions, setItemStatusOptions] = useState(itemOptions);
+  const [selectedStatus, setSelectedStatus] = useState(itemOptions[0]);
+  const [anchorEl, setAnchorEl] = useState(null);
+  const [menuAnchorEl, setMenuAnchorEl] = useState(null);
 
   // Fetch item list
   useEffect(() => {
@@ -52,11 +81,18 @@ const ItemSplitView = () => {
       setLoading(true);
       try {
         const organization_id = localStorage.getItem("organization_id");
+        let queryParams = `organization_id=${organization_id}&page=1&limit=${ITEM_LIST_LIMIT}`;
+        if (selectedStatus.value !== "Status.All") {
+          const status = selectedStatus.value.replace("Status.", "");
+          queryParams += `&status=${status.toLowerCase()}`;
+        }
         const res = await apiService({
           method: "GET",
-          url: `/api/v1/item/getitems?organization_id=${organization_id}&page=1&limit=${ITEM_LIST_LIMIT}`,
+          url: `/api/v1/item/getitems?${queryParams}`,
         });
-        setItems(res.data.data || []);
+        const itemsData = res.data.data || [];
+        console.log("Fetched items list:", itemsData);
+        setItems(itemsData);
       } catch (err) {
         setItems([]);
       } finally {
@@ -64,15 +100,17 @@ const ItemSplitView = () => {
       }
     };
     fetchItems();
-  }, []);
+  }, [selectedStatus]);
 
   // Fetch selected item details
   useEffect(() => {
     if (!selectedId) return;
+    console.log("Fetching item details for selectedId:", selectedId);
     setLoading(true);
     const fetchItem = async () => {
       try {
         const organization_id = localStorage.getItem("organization_id");
+        console.log("Organization ID:", organization_id);
         let response = null;
         try {
           response = await apiService({
@@ -109,7 +147,21 @@ const ItemSplitView = () => {
           }
         }
         console.log("Final item API response:", response);
-        setItem(response?.data?.data || null);
+        let itemData = response?.data?.data || null;
+        
+        // If API call failed, try to get item from the items list
+        if (!itemData && items.length > 0) {
+          const itemFromList = items.find(itm => 
+            (itm.item_id || itm._id || itm.id) === selectedId
+          );
+          if (itemFromList) {
+            console.log("Using item data from list as fallback:", itemFromList);
+            itemData = itemFromList;
+          }
+        }
+        
+        console.log("Setting item data:", itemData);
+        setItem(itemData);
       } catch (err) {
         console.error("Error fetching item details:", err);
         setItem(null);
@@ -118,7 +170,7 @@ const ItemSplitView = () => {
       }
     };
     fetchItem();
-  }, [selectedId]);
+  }, [selectedId, items]);
 
   // Handle item selection
   const handleSelectItem = (id) => {
@@ -137,6 +189,18 @@ const ItemSplitView = () => {
   // Tab change
   const handleTabChange = (e, v) => setTab(v);
 
+  // Filter/menu handlers
+  const handleSelectStatus = (option) => {
+    setSelectedStatus(option);
+    setAnchorEl(null);
+  };
+  const toggleFavorite = (optionId, e) => {
+    e.stopPropagation();
+    setItemStatusOptions((prev) => prev.map((opt) =>
+      opt.id === optionId ? { ...opt, is_favorite: !opt.is_favorite } : opt
+    ));
+  };
+
   // Search filter
   const filteredItems = items.filter(
     (item) =>
@@ -150,22 +214,223 @@ const ItemSplitView = () => {
       {/* Left Panel */}
       <Box sx={{ width: 340, borderRight: "1px solid #eee", display: "flex", flexDirection: "column" }}>
         {/* Top Bar */}
-        <Box sx={{ display: "flex", alignItems: "center", px: 2, py: 2, borderBottom: "1px solid #eee" }}>
-          <Button
-            variant="text"
-            endIcon={<KeyboardArrowDownIcon />}
-            sx={{ fontWeight: 700, fontSize: 18, color: "#222", textTransform: "none", px: 1 }}
+        <Box sx={{ display: "flex", alignItems: "center", justifyContent: "space-between", px: 2, py: 2, borderBottom: "1px solid #eee" }}>
+          {/* Left Side - Filter Dropdown */}
+          <Box onClick={(e) => setAnchorEl(e.currentTarget)} sx={{ display: "flex", alignItems: "center", cursor: "pointer" }}>
+            <Typography color="black" style={{ fontWeight: 700, fontSize: "large", textTransform: "none" }}>
+              {selectedStatus.title}
+            </Typography>
+            <KeyboardArrowDownIcon />
+          </Box>
+          <Menu
+            anchorEl={anchorEl}
+            open={Boolean(anchorEl)}
+            onClose={() => setAnchorEl(null)}
+            PaperProps={{
+              elevation: 3,
+              sx: {
+                width: 250,
+                marginLeft: "-10px",
+                maxHeight: 500,
+                overflowY: "auto",
+                boxShadow: "0px 4px 10px rgba(0, 0, 0, 0.1)",
+                borderRadius: "8px",
+                mt: 1,
+                "&::-webkit-scrollbar": {
+                  width: "6px",
+                },
+                "&::-webkit-scrollbar-thumb": {
+                  backgroundColor: "#888",
+                  borderRadius: "10px",
+                },
+                "&::-webkit-scrollbar-thumb:hover": {
+                  backgroundColor: "#555",
+                },
+                "& .MuiList-root": {
+                  padding: "0px",
+                },
+              },
+            }}
           >
-            Active Items
-          </Button>
-          <Box sx={{ flexGrow: 1 }} />
-          <IconButton size="small" sx={{ mr: 1 }} onClick={() => router.push("/common/newitem")}> <AddIcon /> </IconButton>
-          <IconButton size="small" onClick={handleLeftMenuOpen}> <MoreVertIcon /> </IconButton>
-          <Menu anchorEl={leftMenuAnchor} open={Boolean(leftMenuAnchor)} onClose={handleLeftMenuClose}>
-            <MenuItem disabled>Import Items</MenuItem>
-            <MenuItem disabled>Export Items</MenuItem>
-            <MenuItem disabled>Preferences</MenuItem>
+            <Box
+              sx={{
+                overflowY: "auto",
+                "&::-webkit-scrollbar": {
+                  width: "6px",
+                },
+                "&::-webkit-scrollbar-thumb": {
+                  backgroundColor: "#888",
+                  borderRadius: "10px",
+                },
+              }}
+            >
+              {itemStatusOptions.filter(opt => opt.is_favorite).length > 0 && (
+                <>
+                  <Typography sx={{ fontSize: "13px", fontWeight: 600, color: "black", px: 2, py: 1 }}>
+                    FAVORITES
+                  </Typography>
+                  <Divider />
+                  {itemStatusOptions.filter(opt => opt.is_favorite).map((option) => (
+                    <MenuItem
+                      key={option.id}
+                      onClick={() => handleSelectStatus(option)}
+                      sx={{
+                        fontSize: "13px",
+                        backgroundColor: selectedStatus.id === option.id ? "#E6F1FF" : "transparent",
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "space-between",
+                        px: 2,
+                        py: 1,
+                        "&:hover": {
+                          backgroundColor: "#408dfb",
+                          color: "white",
+                        },
+                      }}
+                    >
+                      <Typography
+                        sx={{
+                          fontSize: "14px",
+                          fontWeight: selectedStatus.id === option.id ? 600 : 400,
+                          color: selectedStatus.id === option.id ? "#4285F4" : "inherit",
+                        }}
+                      >
+                        {option.title}
+                      </Typography>
+                      <IconButton size="small" onClick={(e) => toggleFavorite(option.id, e)} sx={{ padding: 0 }}>
+                        <StarIcon sx={{ fontSize: 18, color: "orange" }} />
+                      </IconButton>
+                    </MenuItem>
+                  ))}
+                  {itemStatusOptions.filter(opt => !opt.is_favorite).length > 0 && itemStatusOptions.filter(opt => opt.is_favorite).length > 0 && <Divider />}
+                </>
+              )}
+              {itemStatusOptions.filter(opt => !opt.is_favorite).length > 0 && (
+                <>
+                  <Typography sx={{ fontSize: "13px", fontWeight: 600, color: "black", px: 2, py: 1 }}>
+                    DEFAULT FILTERS
+                  </Typography>
+                  <Divider />
+                  {itemStatusOptions.filter(opt => !opt.is_favorite).map((option) => (
+                    <MenuItem
+                      key={option.id}
+                      onClick={() => handleSelectStatus(option)}
+                      sx={{
+                        fontSize: "13px",
+                        backgroundColor: selectedStatus.id === option.id ? "#E6F1FF" : "transparent",
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "space-between",
+                        px: 2,
+                        py: 1,
+                        "&:hover": {
+                          backgroundColor: "#408dfb",
+                          color: "white",
+                        },
+                      }}
+                    >
+                      <Typography
+                        sx={{
+                          fontSize: "14px",
+                          fontWeight: selectedStatus.id === option.id ? 600 : 400,
+                          color: selectedStatus.id === option.id ? "#4285F4" : "inherit",
+                        }}
+                      >
+                        {option.title}
+                      </Typography>
+                      <IconButton size="small" onClick={(e) => toggleFavorite(option.id, e)} sx={{ padding: 0 }}>
+                        {option.is_favorite ? (
+                          <StarIcon sx={{ fontSize: 18, color: "#4285F4" }} />
+                        ) : (
+                          <StarBorderIcon sx={{ fontSize: 18, color: "#888" }} />
+                        )}
+                      </IconButton>
+                    </MenuItem>
+                  ))}
+                </>
+              )}
+            </Box>
+            <Divider />
+            <MenuItem
+              onClick={() => router.push("/common/newitem")}
+              sx={{
+                display: "flex",
+                alignItems: "center",
+                px: 2,
+                py: 1,
+                position: "sticky",
+                bottom: 0,
+                backgroundColor: "white",
+                zIndex: 1,
+                "&:hover": {
+                  backgroundColor: "#E6F1FF",
+                },
+              }}
+            >
+              <IconButton
+                size="small"
+                sx={{
+                  backgroundColor: "#4285F4",
+                  width: 20,
+                  height: 20,
+                  borderRadius: "50%",
+                  marginRight: 1,
+                }}
+              >
+                <AddIcon sx={{ fontSize: 14, color: "white" }} />
+              </IconButton>
+              <Typography sx={{ fontSize: "13px", color: "#4285F4" }}>
+                New Custom View
+              </Typography>
+            </MenuItem>
           </Menu>
+          
+          {/* Right Side - Menu and Add Icons */}
+          <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+          <IconButton size="small" onClick={() => router.push("/common/newitem")}>
+              <AddIcon />
+            </IconButton>
+            <IconButton size="small" onClick={(e) => setMenuAnchorEl(e.currentTarget)}>
+              <MoreVertIcon />
+            </IconButton>
+            <Menu 
+              anchorEl={menuAnchorEl} 
+              open={Boolean(menuAnchorEl)} 
+              onClose={() => setMenuAnchorEl(null)}
+              PaperProps={{
+                sx: {
+                  width: "200px",
+                  fontSize: "12px",
+                  boxShadow: "0px 2px 8px rgba(0, 0, 0, 0.15)",
+                  borderRadius: "8px",
+                  mt: 1,
+                },
+              }}
+            >
+              {menuItems.map((item) => (
+                <MenuItem
+                  key={item.text}
+                  sx={{
+                    fontSize: "13px",
+                    display: "flex",
+                    alignItems: "center",
+                    gap: 1,
+                    py: 1,
+                    px: 2,
+                    "&:hover": {
+                      backgroundColor: "#E6F1FF",
+                    },
+                  }}
+                >
+                  {item.icon}
+                  <Typography sx={{ fontSize: "0.875rem", fontWeight: 400 }}>
+                    {item.text}
+                  </Typography>
+                </MenuItem>
+              ))}
+            </Menu>
+         
+          </Box>
         </Box>
       
         {/* Item List */}
@@ -224,232 +489,42 @@ const ItemSplitView = () => {
         </Box>
         {/* Tabs */}
         <Box sx={{ px: 4, borderBottom: "1px solid #eee" }}>
-          <Tabs value={tab} onChange={handleTabChange} sx={{ minHeight: 44 }} TabIndicatorProps={{ sx: { height: 3, bgcolor: "#222" } }}>
-            <Tab label="Overview" sx={{ fontWeight: 500, fontSize: 16, minWidth: 120, color: "#222" }} />
-            <Tab label="Transactions" sx={{ fontWeight: 500, fontSize: 16, minWidth: 120, color: "#222" }} />
-            <Tab label="History" sx={{ fontWeight: 500, fontSize: 16, minWidth: 120, color: "#222" }} />
+          <Tabs value={tab} onChange={handleTabChange} sx={{ minHeight: 36 }} TabIndicatorProps={{ sx: { height: 2, bgcolor: "#222" } }}>
+            <Tab label="Overview" sx={{ fontWeight: 500, fontSize: 13, minWidth: 80, color: "#222", py: 0.5, minHeight: 32 }} />
+            <Tab label="Transactions" sx={{ fontWeight: 500, fontSize: 13, minWidth: 80, color: "#222", py: 0.5, minHeight: 32 }} />
+            <Tab label="History" sx={{ fontWeight: 500, fontSize: 13, minWidth: 80, color: "#222", py: 0.5, minHeight: 32 }} />
           </Tabs>
         </Box>
         {/* Tab Content */}
         <Box sx={{ flex: 1, overflowY: "auto", px: 4, py: 3 }}>
+          {console.log("Debug - loading:", loading, "item:", item, "tab:", tab, "selectedId:", selectedId)}
           {loading ? (
             <Box sx={{ display: "flex", justifyContent: "center", mt: 4 }}><CircularProgress size={32} /></Box>
           ) : !item ? (
             <Typography color="text.secondary">No item data found.</Typography>
           ) : tab === 0 ? (
             // --- Overview Tab ---
-            <Box>
-              <Box sx={{ mb: 4 }}>
-                <Box sx={{ display: 'flex', mb: 2 }}>
-                  <Box sx={{ width: 220, color: 'text.secondary' }}>Item Type</Box>
-                  <Box sx={{ fontWeight: 500 }}>{item.type_formatted || item.type || '-'}</Box>
-                </Box>
-                <Box sx={{ display: 'flex', mb: 2 }}>
-                  <Box sx={{ width: 220, color: 'text.secondary' }}>HSN Code</Box>
-                  <Box sx={{ fontWeight: 500 }}>{item.hsn_code || item.hsn_or_sac || '-'}</Box>
-                </Box>
-                <Box sx={{ display: 'flex', mb: 2 }}>
-                  <Box sx={{ width: 220, color: 'text.secondary' }}>Created Source</Box>
-                  <Box sx={{ fontWeight: 500 }}>{item.created_source || 'User'}</Box>
-                </Box>
-                <Box sx={{ display: 'flex', mb: 2 }}>
-                  <Box sx={{ width: 220, color: 'text.secondary' }}>Tax Preference</Box>
-                  <Box sx={{ fontWeight: 500 }}>{item.tax_preference || (item.is_taxable ? 'Taxable' : 'Non-Taxable') || '-'}</Box>
-                </Box>
-              </Box>
-              <Box sx={{ mb: 4 }}>
-                <Typography sx={{ fontWeight: 600, mb: 2 }}>Purchase Information</Typography>
-                <Box sx={{ display: 'flex', mb: 2 }}>
-                  <Box sx={{ width: 220, color: 'text.secondary' }}>Cost Price</Box>
-                  <Box sx={{ fontWeight: 500 }}>₹{Number(item.purchase_rate || item.cost_price || 0).toLocaleString('en-IN', { minimumFractionDigits: 2 })}</Box>
-                </Box>
-                <Box sx={{ display: 'flex', mb: 2 }}>
-                  <Box sx={{ width: 220, color: 'text.secondary' }}>Purchase Account</Box>
-                  <Box sx={{ fontWeight: 500 }}>{item.purchase_account_name || item.purchase_account || '-'}</Box>
-                </Box>
-              </Box>
-              <Box>
-                <Typography sx={{ fontWeight: 600, mb: 2 }}>Sales Information</Typography>
-                <Box sx={{ display: 'flex', mb: 2 }}>
-                  <Box sx={{ width: 220, color: 'text.secondary' }}>Selling Price</Box>
-                  <Box sx={{ fontWeight: 500 }}>₹{Number(item.rate || item.selling_price || 0).toLocaleString('en-IN', { minimumFractionDigits: 2 })}</Box>
-                </Box>
-                <Box sx={{ display: 'flex', mb: 2 }}>
-                  <Box sx={{ width: 220, color: 'text.secondary' }}>Sales Account</Box>
-                  <Box sx={{ fontWeight: 500 }}>{item.account_name || item.sales_account || '-'}</Box>
-                </Box>
-              </Box>
-            </Box>
+            <ItemOverview 
+              data={item} 
+              onEdit={() => router.push(`/item/edit/${selectedId}`)}
+            />
           ) : tab === 1 ? (
             // --- Transactions Tab ---
-            <ItemTransactions itemId={selectedId} />
+            <ItemTransactions 
+              itemId={selectedId} 
+              organizationId={localStorage.getItem("organization_id")}
+            />
           ) : (
             // --- History Tab ---
-            <ItemHistory itemId={selectedId} />
+            <ItemHistory 
+              itemId={selectedId} 
+              organizationId={localStorage.getItem("organization_id")}
+            />
           )}
         </Box>
       </Box>
     </Box>
   );
 };
-
-// --- Replace ItemTransactions and ItemHistory with dynamic implementations ---
-const TRANSACTION_TYPES = [
-  { label: 'Quotes', value: 'quotes' },
-  { label: 'Sales Orders', value: 'sales_orders' },
-  { label: 'Invoices', value: 'invoices' },
-  { label: 'Delivery Challans', value: 'delivery_challans' },
-  { label: 'Credit Notes', value: 'credit_notes' },
-  { label: 'Recurring Invoices', value: 'recurring_invoices' },
-  { label: 'Purchase Orders', value: 'purchase_orders' },
-  { label: 'Bills', value: 'bills' },
-  { label: 'Vendor Credits', value: 'vendor_credits' },
-];
-const STATUS_TYPES = [
-  { label: 'All', value: 'all' },
-  { label: 'Open', value: 'open' },
-  { label: 'Closed', value: 'closed' },
-  { label: 'Draft', value: 'draft' },
-  { label: 'Paid', value: 'paid' },
-  { label: 'Unpaid', value: 'unpaid' },
-];
-
-function ItemTransactions({ itemId }) {
-  const [type, setType] = useState(TRANSACTION_TYPES[0].value);
-  const [status, setStatus] = useState(STATUS_TYPES[0].value);
-  const [data, setData] = useState([]);
-  const [loading, setLoading] = useState(false);
-  const [anchorEl, setAnchorEl] = useState(null);
-
-  useEffect(() => {
-    if (!itemId) return;
-    setLoading(true);
-    const fetchData = async () => {
-      try {
-        const organization_id = localStorage.getItem('organization_id');
-        // Example endpoint, adjust as needed
-        const res = await apiService({
-          method: 'GET',
-          url: `/api/v1/items/${itemId}/transactions`,
-          params: { organization_id, type, status },
-        });
-        setData(res.data.data || []);
-      } catch {
-        setData([]);
-      } finally {
-        setLoading(false);
-      }
-    };
-    fetchData();
-  }, [itemId, type, status]);
-
-  return (
-    <Box>
-      <Box sx={{ display: 'flex', alignItems: 'center', mb: 3 }}>
-        <Button
-          variant="outlined"
-          size="small"
-          sx={{ mr: 2, textTransform: 'none', fontWeight: 500 }}
-          onClick={e => setAnchorEl(e.currentTarget)}
-        >
-          Filter By: {TRANSACTION_TYPES.find(t => t.value === type)?.label}
-        </Button>
-        <Menu anchorEl={anchorEl} open={Boolean(anchorEl)} onClose={() => setAnchorEl(null)}>
-          {TRANSACTION_TYPES.map(t => (
-            <MenuItem key={t.value} selected={t.value === type} onClick={() => { setType(t.value); setAnchorEl(null); }}>{t.label}</MenuItem>
-          ))}
-        </Menu>
-        <Button
-          variant="outlined"
-          size="small"
-          sx={{ textTransform: 'none', fontWeight: 500 }}
-          onClick={() => setStatus(status === 'all' ? 'open' : 'all')}
-        >
-          Status: {STATUS_TYPES.find(s => s.value === status)?.label}
-        </Button>
-      </Box>
-      {loading ? (
-        <Box sx={{ display: 'flex', justifyContent: 'center', mt: 4 }}><CircularProgress size={28} /></Box>
-      ) : data.length === 0 ? (
-        <Typography color="text.secondary" sx={{ mt: 6, textAlign: 'center' }}>
-          There are no {TRANSACTION_TYPES.find(t => t.value === type)?.label.toLowerCase()}
-        </Typography>
-      ) : (
-        <Box component="table" sx={{ width: '100%', borderCollapse: 'collapse' }}>
-          <thead>
-            <tr>
-              <th style={{ textAlign: 'left', color: '#888', fontWeight: 500, padding: '8px 0' }}>Date</th>
-              <th style={{ textAlign: 'left', color: '#888', fontWeight: 500, padding: '8px 0' }}>Reference</th>
-              <th style={{ textAlign: 'left', color: '#888', fontWeight: 500, padding: '8px 0' }}>Amount</th>
-              <th style={{ textAlign: 'left', color: '#888', fontWeight: 500, padding: '8px 0' }}>Status</th>
-            </tr>
-          </thead>
-          <tbody>
-            {data.map(row => (
-              <tr key={row.id}>
-                <td style={{ padding: '8px 0' }}>{row.date || '-'}</td>
-                <td style={{ padding: '8px 0' }}>{row.reference || '-'}</td>
-                <td style={{ padding: '8px 0' }}>₹{Number(row.amount || 0).toLocaleString('en-IN', { minimumFractionDigits: 2 })}</td>
-                <td style={{ padding: '8px 0' }}>{row.status || '-'}</td>
-              </tr>
-            ))}
-          </tbody>
-        </Box>
-      )}
-    </Box>
-  );
-}
-
-function ItemHistory({ itemId }) {
-  const [data, setData] = useState([]);
-  const [loading, setLoading] = useState(false);
-  useEffect(() => {
-    if (!itemId) return;
-    setLoading(true);
-    const fetchData = async () => {
-      try {
-        const organization_id = localStorage.getItem('organization_id');
-        // Example endpoint, adjust as needed
-        const res = await apiService({
-          method: 'GET',
-          url: `/api/v1/items/${itemId}/history`,
-          params: { organization_id },
-        });
-        setData(res.data.data || []);
-      } catch {
-        setData([]);
-      } finally {
-        setLoading(false);
-      }
-    };
-    fetchData();
-  }, [itemId]);
-  return (
-    <Box>
-      <Box component="table" sx={{ width: '100%', borderCollapse: 'collapse', mb: 2 }}>
-        <thead>
-          <tr>
-            <th style={{ textAlign: 'left', color: '#888', fontWeight: 500, padding: '8px 0' }}>DATE</th>
-            <th style={{ textAlign: 'left', color: '#888', fontWeight: 500, padding: '8px 0' }}>DETAILS</th>
-          </tr>
-        </thead>
-        <tbody>
-          {loading ? (
-            <tr><td colSpan={2}><Box sx={{ display: 'flex', justifyContent: 'center', mt: 2 }}><CircularProgress size={24} /></Box></td></tr>
-          ) : data.length === 0 ? (
-            <tr><td colSpan={2}><Typography color="text.secondary" sx={{ mt: 6, textAlign: 'center' }}>No activity history</Typography></td></tr>
-          ) : (
-            data.map(row => (
-              <tr key={row.id}>
-                <td style={{ padding: '8px 0' }}>{row.date || row.timestamp || '-'}</td>
-                <td style={{ padding: '8px 0' }}>{row.details || row.description || '-'}</td>
-              </tr>
-            ))
-          )}
-        </tbody>
-      </Box>
-    </Box>
-  );
-}
 
 export default ItemSplitView;
