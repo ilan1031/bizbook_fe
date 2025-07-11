@@ -10,365 +10,137 @@ import {
   TableContainer,
   TableHead,
   TableRow,
-  Chip,
-  Tabs,
-  Tab,
-  Divider,
+  Button,
+  Menu,
+  MenuItem,
   CircularProgress,
   Alert,
-  Grid,
 } from "@mui/material";
-import {
-  TrendingUp,
-  TrendingDown,
-  Package,
-  DollarSign,
-  Calendar,
-  User,
-} from "lucide-react";
+
+const statusColor = (status) => {
+  if (!status) return "inherit";
+  const s = status.toLowerCase();
+  if (s === "accepted") return "#22b378";
+  if (s === "sent") return "#408dfb";
+  if (s === "invoiced") return "#f76831";
+  return "#888";
+};
+
+const formatCurrency = (value) =>
+  value != null ? `₹${Number(value).toLocaleString("en-IN", { minimumFractionDigits: 2 })}` : "-";
 
 const ItemTransactions = ({ itemId, organizationId }) => {
-  const [activeTab, setActiveTab] = useState(0);
   const [loading, setLoading] = useState(false);
   const [transactions, setTransactions] = useState([]);
   const [error, setError] = useState(null);
-
-  const tabLabels = ["Sales", "Purchases", "Stock Movements", "All"];
+  const [filterAnchor, setFilterAnchor] = useState(null);
+  const [statusAnchor, setStatusAnchor] = useState(null);
+  const [filterBy, setFilterBy] = useState("Quotes");
+  const [status, setStatus] = useState("All");
 
   useEffect(() => {
     if (itemId) {
       fetchTransactions();
     }
-  }, [itemId, activeTab]);
+    // eslint-disable-next-line
+  }, [itemId, filterBy, status]);
 
   const fetchTransactions = async () => {
     setLoading(true);
     setError(null);
-    
     try {
-      // This would be replaced with actual API call
-      // const response = await apiService({
-      //   method: "GET",
-      //   url: `/api/v1/items/${itemId}/transactions`,
-      //   params: { 
-      //     organization_id: organizationId,
-      //     type: activeTab === 3 ? "all" : tabLabels[activeTab].toLowerCase()
-      //   },
-      // });
-
-      // Mock data for demonstration
+      // Replace with real API call
       const mockTransactions = [
-        {
-          id: 1,
-          type: "sale",
-          date: "2024-01-15",
-          reference: "INV-001",
-          quantity: 10,
-          amount: 15000,
-          customer: "ABC Company",
-          status: "completed",
-        },
-        {
-          id: 2,
-          type: "purchase",
-          date: "2024-01-10",
-          reference: "PO-001",
-          quantity: 50,
-          amount: 50000,
-          vendor: "XYZ Suppliers",
-          status: "completed",
-        },
-        {
-          id: 3,
-          type: "stock_adjustment",
-          date: "2024-01-08",
-          reference: "ADJ-001",
-          quantity: -5,
-          amount: 0,
-          reason: "Damaged goods",
-          status: "completed",
-        },
-        {
-          id: 4,
-          type: "sale",
-          date: "2024-01-05",
-          reference: "INV-002",
-          quantity: 5,
-          amount: 7500,
-          customer: "DEF Corp",
-          status: "pending",
-        },
+        { date: "16/04/2025", quote_number: "QT-000014", customer_name: "Ms. divya", quantity_sold: 1, price: 60000, total: 60000, status: "Accepted" },
+        { date: "16/04/2025", quote_number: "QT-000017", customer_name: "Ms. Shree nevikha", quantity_sold: 1, price: 60000, total: 60000, status: "Sent" },
+        { date: "16/04/2025", quote_number: "QT-000013", customer_name: "Ms. divya", quantity_sold: 1, price: 60000, total: 60000, status: "Invoiced" },
+        { date: "16/04/2025", quote_number: "QT-000016", customer_name: "Ms. Shree nevikha", quantity_sold: 1, price: 60000, total: 60000, status: "Accepted" },
+        { date: "16/04/2025", quote_number: "QT-000012", customer_name: "Ms. Shree nevikha", quantity_sold: 1, price: 60000, total: 60000, status: "Accepted" },
+        { date: "16/04/2025", quote_number: "QT-000015", customer_name: "Ms. divya", quantity_sold: 1, price: 60000, total: 60000, status: "Sent" },
+        { date: "16/04/2025", quote_number: "QT-000011", customer_name: "Ms. divya", quantity_sold: 1, price: 60000, total: 60000, status: "Accepted" },
+        { date: "26/03/2025", quote_number: "QT-000004", customer_name: "bharathi & co", quantity_sold: 1, price: 60000, total: 60000, status: "Invoiced" },
       ];
-
-      // Filter based on active tab
-      let filteredTransactions = mockTransactions;
-      if (activeTab === 0) { // Sales
-        filteredTransactions = mockTransactions.filter(t => t.type === "sale");
-      } else if (activeTab === 1) { // Purchases
-        filteredTransactions = mockTransactions.filter(t => t.type === "purchase");
-      } else if (activeTab === 2) { // Stock Movements
-        filteredTransactions = mockTransactions.filter(t => t.type === "stock_adjustment");
-      }
-
-      setTransactions(filteredTransactions);
+      setTransactions(mockTransactions);
     } catch (err) {
       setError("Failed to fetch transactions");
-      console.error("Error fetching transactions:", err);
     } finally {
       setLoading(false);
     }
   };
 
-  const getTransactionIcon = (type) => {
-    switch (type) {
-      case "sale":
-        return <TrendingUp size={16} color="#22b378" />;
-      case "purchase":
-        return <TrendingDown size={16} color="#408dfb" />;
-      case "stock_adjustment":
-        return <Package size={16} color="#f76831" />;
-      default:
-        return <Package size={16} />;
-    }
-  };
-
-  const getTransactionTypeLabel = (type) => {
-    switch (type) {
-      case "sale":
-        return "Sale";
-      case "purchase":
-        return "Purchase";
-      case "stock_adjustment":
-        return "Stock Adjustment";
-      default:
-        return type;
-    }
-  };
-
-  const getStatusColor = (status) => {
-    switch (status?.toLowerCase()) {
-      case "completed":
-      case "paid":
-        return "success";
-      case "pending":
-      case "draft":
-        return "warning";
-      case "cancelled":
-      case "failed":
-        return "error";
-      default:
-        return "default";
-    }
-  };
-
-  const formatAmount = (amount) => {
-    return new Intl.NumberFormat("en-IN", {
-      style: "currency",
-      currency: "INR",
-    }).format(amount);
-  };
-
-  const formatDate = (dateString) => {
-    return new Date(dateString).toLocaleDateString("en-IN", {
-      year: "numeric",
-      month: "short",
-      day: "numeric",
-    });
-  };
-
-  if (error) {
-    return (
-      <Box sx={{ p: 3 }}>
-        <Alert severity="error">{error}</Alert>
-      </Box>
-    );
-  }
-
   return (
-    <Box sx={{ p: 3 }}>
-      {/* Header */}
-      <Box sx={{ mb: 3 }}>
-        <Typography variant="h5" sx={{ fontWeight: 600, mb: 1 }}>
-          Transaction History
-        </Typography>
-        <Typography variant="body2" color="text.secondary">
-          View all transactions related to this item
-        </Typography>
+    <Box sx={{ p: 0, pt: 3, pr: 6 }}>
+      {/* Filter Bar */}
+      <Box sx={{ display: "flex", alignItems: "center", gap: 2, mb: 2 }}>
+        <Button
+          variant="outlined"
+          size="small"
+          sx={{ textTransform: "none", fontWeight: 500, borderRadius: 2, px: 2, py: 0.5, fontSize: 15 }}
+          onClick={(e) => setFilterAnchor(e.currentTarget)}
+        >
+          Filter By: {filterBy}
+        </Button>
+        <Menu anchorEl={filterAnchor} open={Boolean(filterAnchor)} onClose={() => setFilterAnchor(null)}>
+          {["Quotes", "Sales Orders", "Invoices", "Delivery Challans", "Credit Notes", "Recurring Invoices"].map((option) => (
+            <MenuItem key={option} selected={option === filterBy} onClick={() => { setFilterBy(option); setFilterAnchor(null); }}>{option}</MenuItem>
+          ))}
+        </Menu>
+        <Button
+          variant="outlined"
+          size="small"
+          sx={{ textTransform: "none", fontWeight: 500, borderRadius: 2, px: 2, py: 0.5, fontSize: 15 }}
+          onClick={(e) => setStatusAnchor(e.currentTarget)}
+        >
+          Status: {status}
+        </Button>
+        <Menu anchorEl={statusAnchor} open={Boolean(statusAnchor)} onClose={() => setStatusAnchor(null)}>
+          {["All", "Accepted", "Sent", "Invoiced"].map((option) => (
+            <MenuItem key={option} selected={option === status} onClick={() => { setStatus(option); setStatusAnchor(null); }}>{option}</MenuItem>
+          ))}
+        </Menu>
       </Box>
 
-      {/* Tabs */}
-      <Paper sx={{ mb: 3 }}>
-        <Tabs
-          value={activeTab}
-          onChange={(e, newValue) => setActiveTab(newValue)}
-          sx={{ borderBottom: 1, borderColor: "divider" }}
-        >
-          {tabLabels.map((label, index) => (
-            <Tab
-              key={label}
-              label={
-                <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
-                  {label}
-                  {index < 3 && (
-                    <Chip
-                      label={
-                        transactions.filter(t => 
-                          index === 0 ? t.type === "sale" :
-                          index === 1 ? t.type === "purchase" :
-                          t.type === "stock_adjustment"
-                        ).length
-                      }
-                      size="small"
-                      sx={{ minWidth: 20, height: 20, fontSize: "0.75rem" }}
-                    />
-                  )}
-                </Box>
-              }
-            />
-          ))}
-        </Tabs>
-      </Paper>
-
-      {/* Transactions Table */}
+      {/* Table */}
       <Paper>
         {loading ? (
           <Box sx={{ display: "flex", justifyContent: "center", p: 4 }}>
             <CircularProgress />
           </Box>
-        ) : transactions.length > 0 ? (
+        ) : error ? (
+          <Box sx={{ p: 3 }}><Alert severity="error">{error}</Alert></Box>
+        ) : (
           <TableContainer>
             <Table>
               <TableHead>
                 <TableRow>
-                  <TableCell sx={{ fontWeight: 600 }}>Type</TableCell>
-                  <TableCell sx={{ fontWeight: 600 }}>Date</TableCell>
-                  <TableCell sx={{ fontWeight: 600 }}>Reference</TableCell>
-                  <TableCell sx={{ fontWeight: 600 }}>Quantity</TableCell>
-                  <TableCell sx={{ fontWeight: 600 }}>Amount</TableCell>
-                  <TableCell sx={{ fontWeight: 600 }}>Party</TableCell>
-                  <TableCell sx={{ fontWeight: 600 }}>Status</TableCell>
+                  <TableCell sx={{ fontWeight: 600, fontSize: 13, color: "#888" }}>DATE</TableCell>
+                  <TableCell sx={{ fontWeight: 600, fontSize: 13, color: "#888" }}>QUOTE NUMBER</TableCell>
+                  <TableCell sx={{ fontWeight: 600, fontSize: 13, color: "#888" }}>CUSTOMER NAME</TableCell>
+                  <TableCell sx={{ fontWeight: 600, fontSize: 13, color: "#888" }}>QUANTITY SOLD</TableCell>
+                  <TableCell sx={{ fontWeight: 600, fontSize: 13, color: "#888" }}>PRICE</TableCell>
+                  <TableCell sx={{ fontWeight: 600, fontSize: 13, color: "#888" }}>TOTAL</TableCell>
+                  <TableCell sx={{ fontWeight: 600, fontSize: 13, color: "#888" }}>STATUS</TableCell>
                 </TableRow>
               </TableHead>
               <TableBody>
-                {transactions.map((transaction) => (
-                  <TableRow key={transaction.id} hover>
-                    <TableCell>
-                      <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
-                        {getTransactionIcon(transaction.type)}
-                        <Typography variant="body2">
-                          {getTransactionTypeLabel(transaction.type)}
-                        </Typography>
-                      </Box>
-                    </TableCell>
-                    <TableCell>
-                      <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
-                        <Calendar size={14} />
-                        <Typography variant="body2">
-                          {formatDate(transaction.date)}
-                        </Typography>
-                      </Box>
-                    </TableCell>
-                    <TableCell>
-                      <Typography variant="body2" sx={{ fontWeight: 500 }}>
-                        {transaction.reference}
-                      </Typography>
-                    </TableCell>
-                    <TableCell>
-                      <Typography
-                        variant="body2"
-                        sx={{
-                          color: transaction.quantity > 0 ? "success.main" : "error.main",
-                          fontWeight: 600,
-                        }}
-                      >
-                        {transaction.quantity > 0 ? "+" : ""}{transaction.quantity}
-                      </Typography>
-                    </TableCell>
-                    <TableCell>
-                      <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
-                        <DollarSign size={14} />
-                        <Typography variant="body2" sx={{ fontWeight: 600 }}>
-                          {formatAmount(transaction.amount)}
-                        </Typography>
-                      </Box>
-                    </TableCell>
-                    <TableCell>
-                      <Typography variant="body2">
-                        {transaction.customer || transaction.vendor || transaction.reason || "N/A"}
-                      </Typography>
-                    </TableCell>
-                    <TableCell>
-                      <Chip
-                        label={transaction.status}
-                        color={getStatusColor(transaction.status)}
-                        size="small"
-                      />
-                    </TableCell>
-                  </TableRow>
-                ))}
+                {transactions
+                  .filter((row) => status === "All" || row.status === status)
+                  .map((row, idx) => (
+                    <TableRow key={idx} hover>
+                      <TableCell sx={{ fontSize: 15 }}>{row.date}</TableCell>
+                      <TableCell sx={{ fontSize: 15 }}>{row.quote_number}</TableCell>
+                      <TableCell sx={{ fontSize: 15 }}>{row.customer_name}</TableCell>
+                      <TableCell sx={{ fontSize: 15 }}>{row.quantity_sold}</TableCell>
+                      <TableCell sx={{ fontSize: 15 }}>{formatCurrency(row.price)}</TableCell>
+                      <TableCell sx={{ fontSize: 15 }}>{formatCurrency(row.total)}</TableCell>
+                      <TableCell sx={{ fontSize: 15, fontWeight: 600, color: statusColor(row.status) }}>{row.status}</TableCell>
+                    </TableRow>
+                  ))}
               </TableBody>
             </Table>
           </TableContainer>
-        ) : (
-          <Box sx={{ p: 4, textAlign: "center" }}>
-            <Package size={48} color="#ccc" />
-            <Typography variant="h6" color="text.secondary" sx={{ mt: 2 }}>
-              No transactions found
-            </Typography>
-            <Typography variant="body2" color="text.secondary">
-              There are no {tabLabels[activeTab].toLowerCase()} transactions for this item.
-            </Typography>
-          </Box>
         )}
       </Paper>
-
-      {/* Summary Stats */}
-      {transactions.length > 0 && (
-        <Box sx={{ mt: 3 }}>
-          <Grid container spacing={2}>
-            <Grid item xs={12} md={3}>
-              <Paper sx={{ p: 2, textAlign: "center" }}>
-                <Typography variant="h6" color="primary">
-                  {transactions.filter(t => t.type === "sale").length}
-                </Typography>
-                <Typography variant="body2" color="text.secondary">
-                  Total Sales
-                </Typography>
-              </Paper>
-            </Grid>
-            <Grid item xs={12} md={3}>
-              <Paper sx={{ p: 2, textAlign: "center" }}>
-                <Typography variant="h6" color="primary">
-                  {transactions.filter(t => t.type === "purchase").length}
-                </Typography>
-                <Typography variant="body2" color="text.secondary">
-                  Total Purchases
-                </Typography>
-              </Paper>
-            </Grid>
-            <Grid item xs={12} md={3}>
-              <Paper sx={{ p: 2, textAlign: "center" }}>
-                <Typography variant="h6" color="primary">
-                  {formatAmount(transactions.reduce((sum, t) => sum + (t.amount || 0), 0))}
-                </Typography>
-                <Typography variant="body2" color="text.secondary">
-                  Total Value
-                </Typography>
-              </Paper>
-            </Grid>
-            <Grid item xs={12} md={3}>
-              <Paper sx={{ p: 2, textAlign: "center" }}>
-                <Typography variant="h6" color="primary">
-                  {transactions.reduce((sum, t) => sum + (t.quantity || 0), 0)}
-                </Typography>
-                <Typography variant="body2" color="text.secondary">
-                  Net Quantity
-                </Typography>
-              </Paper>
-            </Grid>
-          </Grid>
-        </Box>
-      )}
     </Box>
   );
 };

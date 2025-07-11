@@ -23,11 +23,24 @@ import {
   Package,
   TrendingUp,
   Clock,
+  Copy,
 } from "lucide-react";
 import { useRouter } from "next/navigation";
 import ItemOverview from "../common/itemDetail/overview";
 import ItemTransactions from "../common/itemDetail/transactions";
 import ItemHistory from "../common/itemDetail/history";
+
+const staticData = {
+  item_name: "chair",
+  item_type: "Sales and Purchase Items",
+  hsn_code: "444444",
+  created_source: "User",
+  tax_preference: "Taxable",
+  cost_price: "₹800.00",
+  purchase_account: "Cost of Goods Sold",
+  selling_price: "₹1,000.00",
+  sales_account: "Sales"
+};
 
 const ItemViewComponent = ({ data, callViewAPI, organizationData }) => {
   const [activeTab, setActiveTab] = useState(0);
@@ -35,6 +48,7 @@ const ItemViewComponent = ({ data, callViewAPI, organizationData }) => {
   const router = useRouter();
 
   const handleTabChange = (event, newValue) => {
+    console.log("Tab changed to:", newValue);
     setActiveTab(newValue);
   };
 
@@ -71,6 +85,16 @@ const ItemViewComponent = ({ data, callViewAPI, organizationData }) => {
     handleMenuClose();
     // Handle share logic
     console.log("Share item");
+  };
+
+  const handleClone = () => {
+    handleMenuClose();
+    console.log("Clone item:", data?.item_id || data?._id);
+  };
+
+  const handleMarkAsInactive = () => {
+    handleMenuClose();
+    console.log("Mark as inactive:", data?.item_id || data?._id);
   };
 
   const getStatusColor = (status) => {
@@ -176,42 +200,51 @@ const ItemViewComponent = ({ data, callViewAPI, organizationData }) => {
         <Tabs
           value={activeTab}
           onChange={handleTabChange}
-          sx={{ px: 3 }}
+          sx={{ px: 2, minHeight: 48 }}
+          variant="scrollable"
+          scrollButtons="auto"
         >
           <Tab
             label={
-              <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
-                <Package size={16} />
-                Overview
+              <Box sx={{ display: "flex", alignItems: "center", gap: 0.5 }}>
+                <Package size={8} />
+                <Typography variant="body2">Overview</Typography>
               </Box>
             }
+            sx={{ minHeight: 40, py: 0.5 }}
           />
           <Tab
             label={
-              <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
-                <TrendingUp size={16} />
-                Transactions
+              <Box sx={{ display: "flex", alignItems: "center", gap: 0.5 }}>
+                <TrendingUp size={8} />
+                <Typography variant="body2">Transactions</Typography>
               </Box>
             }
+            sx={{ minHeight: 40, py: 0.5 }}
           />
           <Tab
             label={
-              <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
-                <Clock size={16} />
-                History
+              <Box sx={{ display: "flex", alignItems: "center", gap: 0.5 }}>
+                <Clock size={8} />
+                <Typography variant="body2">History</Typography>
               </Box>
             }
+            sx={{ minHeight: 40, py: 0.5 }}
           />
         </Tabs>
       </Paper>
 
       {/* Tab Content */}
       <Box sx={{ flex: 1, overflow: "auto" }}>
+        {console.log("Current activeTab:", activeTab)}
         {activeTab === 0 && (
-          <ItemOverview 
-            data={data} 
-            onEdit={handleEdit}
-          />
+          <>
+            {console.log("Rendering ItemOverview with data:", data || staticData)}
+            <ItemOverview 
+              data={data || staticData} 
+              onEdit={handleEdit}
+            />
+          </>
         )}
         {activeTab === 1 && (
           <ItemTransactions 

@@ -188,7 +188,7 @@ const ItemsTable = () => {
   };
 
   const handleSelectAll = () => {
-    setSelected(allSelected ? [] : itemsList.map((row) => row.id));
+    setSelected(allSelected ? [] : itemsList.map((row) => row.id || row.item_id || row._id));
   };
 
   const handleSelectRow = (id) => {
@@ -209,6 +209,7 @@ const ItemsTable = () => {
   const handleSelect = (type, value) => {
     setSelectedType(type);
     setFilterBy(value);
+    setSelected([]); // Clear selections when filter changes
     fetchItemsList(value);
     setAnchorEl(null);
   };
@@ -256,20 +257,36 @@ const ItemsTable = () => {
   const fetchItemsList = async (filterValue) => {
     try {
       const organization_id = localStorage.getItem("organization_id");
+      
+      // Build query parameters based on filter
+      let queryParams = `organization_id=${organization_id}&page=1&limit=50&sortBy=createdAt&order=desc`;
+      
+      // Add status filter if not "All"
+      if (filterValue && filterValue !== "Status.All") {
+        const status = filterValue.replace("Status.", "");
+        queryParams += `&status=${status.toLowerCase()}`;
+      }
+      
       const response = await apiService({
         method: "GET",
-        url: `api/v1/item/getitems?organization_id=${organization_id}&page=1&limit=10&sortBy=createdAt&order=desc`,
+        url: `api/v1/item/getitems?${queryParams}`,
         file: false,
       });
-      const data = response.data.data;
+      
+      const data = response.data.data || [];
 
       if (filterValue === "Status.All" && data.length === 0) {
         setWelcomPg(true);
+      } else {
+        setWelcomPg(false);
       }
+      
       setItemsList(data);
     } catch (error) {
       console.error("Error fetching items:", error);
       showMessage("Error fetching items", "error");
+      setItemsList([]);
+      setWelcomPg(true);
     }
   };
 
