@@ -1505,7 +1505,7 @@
 
 //first used table
 "use client";
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useRef } from "react";
 import {
   Box,
   Typography,
@@ -1757,10 +1757,24 @@ export default function InvoiceItemTable({formik}) {
 
   const handleTaxMethodChange = (event) => {
     const method = event.target.value;
-    formik.setFieldValue('tax_type', method);
-    formik.setFieldValue('tax_percentage', '');
-    formik.setFieldValue('tds_option', '');
-    calculateTotals();
+    
+    // Update formik fields with proper error handling
+    try {
+      formik.setFieldValue('tax_type', method);
+      formik.setFieldValue('tax_percentage', '');
+      formik.setFieldValue('tds_option', '');
+      
+      // Clear related tax fields
+      formik.setFieldValue('tax_total', 0);
+      formik.setFieldValue('tax_total_formatted', '₹0.00');
+      
+      // Recalculate totals after a brief delay to ensure formik updates
+      setTimeout(() => {
+        calculateTotals();
+      }, 0);
+    } catch (error) {
+      console.error('Error updating tax method:', error);
+    }
   };
 
   const handleTdsOptionChange = (event) => {
@@ -2044,6 +2058,26 @@ export default function InvoiceItemTable({formik}) {
     event.stopPropagation(); // Prevent the Select from opening/closing
     setOpenTaxModal(true);
   };
+
+  // Add refs and state for truncation
+  const tdsSelectRef = useRef(null);
+  const [isTdsTruncated, setIsTdsTruncated] = useState(false);
+  // Helper to get full label for selected TDS option
+  const getTdsFullLabel = () => {
+    const options = formik.values.tax_type === 'TDS' ? tdsOptions : tcsOptions;
+    const selected = options.find(opt => opt.id === formik.values.tds_option);
+    if (!selected) return '';
+    return `${selected.name || selected.label} [${selected.rate}%]`;
+  };
+  useEffect(() => {
+    if (tdsSelectRef.current) {
+      setTimeout(() => {
+        setIsTdsTruncated(
+          tdsSelectRef.current.scrollWidth > tdsSelectRef.current.clientWidth
+        );
+      }, 50); // Wait for DOM update
+    }
+  }, [formik.values.tds_option, formik.values.tax_type]);
 
   return (
     <Box
@@ -2425,64 +2459,111 @@ export default function InvoiceItemTable({formik}) {
             />
           </RadioGroup>
           <Box sx={{ display: "flex", alignItems: "center", ml: 8 }}>
-            <Select
-              value={formik.values.tds_option || ''}
-              onChange={handleTdsOptionChange}
-              displayEmpty
-              IconComponent={KeyboardArrowDownIcon}
-              sx={{
-                height: '35px',
-                fontSize: "13px",
-                width:"180px",
-                backgroundColor: 'white',
-                '& .MuiSelect-select': {
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: '8px'
-                }
-              }}
-              MenuProps={{
-                PaperProps: {
-                  sx: {
-                    maxHeight: 300,
-                    width:"250px",
-                    top:"25px",
-                    fontSize: "13px",
-                    '& .MuiMenuItem-root': {
-                      padding: '8px 16px',
-                      '&:hover': {
-                        backgroundColor: '#f0f4ff'
-                      }
-                    },
-                    '& .MuiPopover-paper.MuiMenu-paper' :{
-                      top:"200px"
-                    }
-                  }
-                }
-              }}
-            >
-              <MenuItem value="" disabled sx={{color:"#838195"}}>Select a Tax</MenuItem>
-              {(formik.values.tax_type === 'TDS' ? tdsOptions : tcsOptions).map((option) => (
-                <MenuItem key={option.id} value={option.id}>
-                  {option.name} [{option.rate}%]
-                </MenuItem>
-              ))}
-              <Divider />
-              <MenuItem
-                onClick={handleManageTaxClick}
+            <Box sx={{ display: "flex", flexDirection: "column", alignItems: "flex-start" }}>
+              <Select
+                value={formik.values.tds_option || ""}
+                onChange={handleTdsOptionChange}
+                displayEmpty
+                IconComponent={KeyboardArrowDownIcon}
+                renderValue={() => (
+                  <Box
+                    sx={{
+                      width: '100%',
+                      overflow: 'hidden',
+                      textOverflow: 'ellipsis',
+                      whiteSpace: 'nowrap',
+                      display: 'block',
+                    }}
+                  >
+                    {getTdsFullLabel()}
+                  </Box>
+                )}
                 sx={{
-                  color: '#3b82f6',
-                  '&:hover': {
-                    backgroundColor: 'transparent'
+                  height: "35px",
+                  fontSize: "13px",
+                  width: "180px",
+                  backgroundColor: "white",
+                  '& .MuiSelect-select': {
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '8px',
+                    overflow: 'hidden',
+                    textOverflow: 'ellipsis',
+                    whiteSpace: 'nowrap',
                   }
                 }}
+                MenuProps={{
+                  PaperProps: {
+                    sx: {
+                      maxHeight: 300,
+                      width: "350px",
+                      fontSize: "13px",
+                      '& .MuiMenuItem-root': {
+                        padding: '8px 16px',
+                        fontSize: "13px",
+                        '&:hover': {
+                          backgroundColor: '#f0f4ff'
+                        }
+                      }
+                    }
+                  },
+                  anchorOrigin: {
+                    vertical: 'bottom',
+                    horizontal: 'left',
+                  },
+                  transformOrigin: {
+                    vertical: 'top',
+                    horizontal: 'left',
+                  }
+                }}
+                inputProps={{
+                  ref: tdsSelectRef,
+                  style: {
+                    overflow: 'hidden',
+                    textOverflow: 'ellipsis',
+                    whiteSpace: 'nowrap',
+                    width: '100%',
+                    display: 'block',
+                  },
+                }}
               >
-                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                  <SettingsOutlinedIcon sx={{ fontSize: 20 }} />
-                  Manage {formik.values.tax_type}
-                </Box>
-              </MenuItem>
-            </Select>
+                <MenuItem value="" disabled sx={{color:"#838195"}}>Select a Tax</MenuItem>
+                {(formik.values.tax_type === 'TDS' ? tdsOptions : tcsOptions).map((option) => (
+                  <MenuItem key={option.id} value={option.id}>
+                    {option.name} [{option.rate}%]
+                  </MenuItem>
+                ))}
+                <Divider />
+                <MenuItem
+                  onClick={handleManageTaxClick}
+                  sx={{
+                    color: '#3b82f6',
+                    '&:hover': {
+                      backgroundColor: 'transparent'
+                    }
+                  }}
+                >
+                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                    <SettingsOutlinedIcon sx={{ fontSize: 20 }} />
+                    Manage {formik.values.tax_type}
+                  </Box>
+                </MenuItem>
+              </Select>
+              <Typography
+                variant="caption"
+                sx={{
+                  color: '#444',
+                  mt: 0.5,
+                  fontSize: '12px',
+                  width: '180px',
+                  wordBreak: 'break-word',
+                  whiteSpace: 'normal',
+                  display: 'block'
+                }}
+              >
+                {getTdsFullLabel()}
+              </Typography>
+            </Box>
           </Box>
         </Box>
         <Typography variant="body2">
@@ -2577,7 +2658,7 @@ export default function InvoiceItemTable({formik}) {
           value={formik.values.adjustment || "0"}
           onChange={(e) => {
             const value = parseFloat(e.target.value) || 0;
-            formik.setFieldValue('adjustment', value);
+            formik.setFieldValue("adjustment", value);
             calculateTotals();
           }}
           sx={{
@@ -2609,7 +2690,7 @@ export default function InvoiceItemTable({formik}) {
           <RadioGroup
             row
             name="tax_type"
-            value={formik.values.tax_type || 'TDS'}
+            value={formik.values.tax_type || "TDS"}
             onChange={handleTaxMethodChange}
           >
             <FormControlLabel
@@ -2643,59 +2724,112 @@ export default function InvoiceItemTable({formik}) {
             />
           </RadioGroup>
           <Box sx={{ display: "flex", alignItems: "center", ml: 8 }}>
-            <Select
-              value={formik.values.tds_option || ''}
-              onChange={handleTdsOptionChange}
-              displayEmpty
-              IconComponent={KeyboardArrowDownIcon}
-              sx={{
-                height: '35px',
-                fontSize: "13px",
-                width:"150px",
-                backgroundColor: 'white',
-                '& .MuiSelect-select': {
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: '8px'
-                }
-              }}
-              MenuProps={{
-                PaperProps: {
-                  sx: {
-                    maxHeight: 300,
-                    width:"20px",
-                    '& .MuiMenuItem-root': {
-                      padding: '8px 16px',
-                      '&:hover': {
-                        backgroundColor: '#f0f4ff'
-                      }
-                    }
-                  }
-                }
-              }}
-            >
-              <MenuItem value="" disabled>Select {formik.values.tax_type}</MenuItem>
-              {(formik.values.tax_type === 'TDS' ? tdsOptions : tcsOptions).map((option) => (
-                <MenuItem key={option.id} value={option.id}>
-                  {option.name} [{option.rate}%]
-                </MenuItem>
-              ))}
-              <Divider />
-              <MenuItem
-                onClick={handleManageTaxClick}
+            <Box sx={{ display: "flex", flexDirection: "column", alignItems: "flex-start" }}>
+              <Select
+                value={formik.values.tds_option || ""}
+                onChange={handleTdsOptionChange}
+                displayEmpty
+                IconComponent={KeyboardArrowDownIcon}
+                renderValue={() => (
+                  <Box
+                    sx={{
+                      width: '100%',
+                      overflow: 'hidden',
+                      textOverflow: 'ellipsis',
+                      whiteSpace: 'nowrap',
+                      display: 'block',
+                    }}
+                  >
+                    {getTdsFullLabel()}
+                  </Box>
+                )}
                 sx={{
-                  color: '#3b82f6',
-                  '&:hover': {
-                    backgroundColor: 'transparent'
+                  height: "35px",
+                  fontSize: "13px",
+                  width: "180px",
+                  backgroundColor: "white",
+                  '& .MuiSelect-select': {
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '8px',
+                    overflow: 'hidden',
+                    textOverflow: 'ellipsis',
+                    whiteSpace: 'nowrap',
                   }
                 }}
+                MenuProps={{
+                  PaperProps: {
+                    sx: {
+                      maxHeight: 300,
+                      width: "350px",
+                      fontSize: "13px",
+                      '& .MuiMenuItem-root': {
+                        padding: '8px 16px',
+                        fontSize: "13px",
+                        '&:hover': {
+                          backgroundColor: '#f0f4ff'
+                        }
+                      }
+                    }
+                  },
+                  anchorOrigin: {
+                    vertical: 'bottom',
+                    horizontal: 'left',
+                  },
+                  transformOrigin: {
+                    vertical: 'top',
+                    horizontal: 'left',
+                  }
+                }}
+                inputProps={{
+                  ref: tdsSelectRef,
+                  style: {
+                    overflow: 'hidden',
+                    textOverflow: 'ellipsis',
+                    whiteSpace: 'nowrap',
+                    width: '100%',
+                    display: 'block',
+                  },
+                }}
               >
-                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                  <SettingsOutlinedIcon sx={{ fontSize: 20 }} />
-                  Manage {formik.values.tax_type}
-                </Box>
-              </MenuItem>
-            </Select>
+                <MenuItem value="" disabled>Select {formik.values.tax_type}</MenuItem>
+                {(formik.values.tax_type === 'TDS' ? tdsOptions : tcsOptions).map((option) => (
+                  <MenuItem key={option.id} value={option.id}>
+                    {option.name} [{option.rate}%]
+                  </MenuItem>
+                ))}
+                <Divider />
+                <MenuItem
+                  onClick={handleManageTaxClick}
+                  sx={{
+                    color: '#3b82f6',
+                    '&:hover': {
+                      backgroundColor: 'transparent'
+                    }
+                  }}
+                >
+                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                    <SettingsOutlinedIcon sx={{ fontSize: 20 }} />
+                    Manage {formik.values.tax_type}
+                  </Box>
+                </MenuItem>
+              </Select>
+              <Typography
+                variant="caption"
+                sx={{
+                  color: '#444',
+                  mt: 0.5,
+                  fontSize: '12px',
+                  maxWidth: '180px',
+                  overflow: 'hidden',
+                  textOverflow: 'ellipsis',
+                  whiteSpace: 'nowrap',
+                  display: 'block'
+                }}
+              >
+                {getTdsFullLabel()}
+              </Typography>
+            </Box>
           </Box>
         </Box>
         <Typography variant="body2">
@@ -3395,10 +3529,7 @@ export default function InvoiceItemTable({formik}) {
 //             formik.touched.line_items?.[index]?.quantity &&
 //             Boolean(formik.errors.line_items?.[index]?.quantity)
 //           }
-//           helperText={
-//             formik.touched.line_items?.[index]?.quantity &&
-//             formik.errors.line_items?.[index]?.quantity
-//           }
+//           helperText={formik.touched.line_items?.[index]?.quantity && formik.errors.line_items?.[index]?.quantity}
 //           variant="outlined"
 //           sx={{
 //             ...commonInputFieldStyle,
@@ -3420,10 +3551,7 @@ export default function InvoiceItemTable({formik}) {
 //             formik.touched.line_items?.[index]?.rate &&
 //             Boolean(formik.errors.line_items?.[index]?.rate)
 //           }
-//           helperText={
-//             formik.touched.line_items?.[index]?.rate &&
-//             formik.errors.line_items?.[index]?.rate
-//           }
+//           helperText={formik.touched.line_items?.[index]?.rate && formik.errors.line_items?.[index]?.rate}
 //           sx={{
 //             ...commonInputFieldStyle,
 //             "& .MuiOutlinedInput-root": {
@@ -3628,8 +3756,6 @@ export default function InvoiceItemTable({formik}) {
 //                   color: "black",
 //                   textTransform: "none",
 //                   fontWeight: 400,
-//                    padding:"4.875px 9.75px",
-//                 fontSize:"13px"
 //                 }}
 //               >
 //                 Add New Row
@@ -3655,10 +3781,8 @@ export default function InvoiceItemTable({formik}) {
 //                 ml: 2,
 //                 fontWeight: 400,
 //                 bgcolor: "#f0f4ff",
-//                 borderRadius: "4px",
+//                 borderRadius: "7px",
 //                 "&:hover": { bgcolor: "#e0e7ff" },
-//                 padding:"4.875px 9.75px",
-//                 fontSize:"13px"
 //               }}
 //               onClick={() => setOpen(true)} // Open popup on click
 //             >
@@ -3732,10 +3856,10 @@ export default function InvoiceItemTable({formik}) {
 //               mb: 2,
 //             }}
 //           >
-//             <Typography variant="body2" sx={{ fontWeight: "bold",fontSize:"13px" }}>
+//             <Typography variant="body2" sx={{ fontWeight: "bold" }}>
 //               Sub Total
 //             </Typography>
-//             <Typography variant="body2" sx={{fontSize:"13px"}}>{formik.values.sub_total}</Typography>
+//             <Typography variant="body2">{formik.values.sub_total}</Typography>
 //           </Box>
 //           {/* Discount */}
 //           <Box
@@ -3743,18 +3867,16 @@ export default function InvoiceItemTable({formik}) {
 //               display: "flex",
 //               justifyContent: "space-between",
 //               alignItems: "center",
-//               mb: 1.5,
+//               mb: 2,
 //             }}
 //           >
-//             <Typography variant="body2" sx={{fontSize:"13px"}}>Discount</Typography>
+//             <Typography variant="body2">Discount</Typography>
 //             <Grid
 //               item
 //               sx={{
-//                 Width: "60%",
+//                 Width: "50%",
 //                 bgcolor: "white",
-//                 borderRadius: "4px",
-//                 fontSize:"13px",
-//                 marginLeft:"24px"
+//                 borderRadius: "7px",
 //               }}
 //             >
 //               <TextField
@@ -3786,7 +3908,7 @@ export default function InvoiceItemTable({formik}) {
 //                   sx: {
 //                     pr: 0,
 //                     height: 36,
-//                     borderRadius: "2px", // Added border radius
+//                     borderRadius: "7px", // Added border radius
 //                     "& input": {
 //                       textAlign: "right",
 //                       pr: 1,
@@ -3821,7 +3943,7 @@ export default function InvoiceItemTable({formik}) {
 //             <Typography variant="body2">{calculateDiscount()}</Typography>
 //           </Box>
 
-//           {!isChallan &&
+//           {!isChallan && (
 //             (formik.values.tax_type === "TDS" ? (
 //               <>
 //                 {/* TDS/TCS Section */}
@@ -3873,323 +3995,391 @@ export default function InvoiceItemTable({formik}) {
 //                       />
 //                     </RadioGroup>
 //                     <Box sx={{ display: "flex", alignItems: "center", ml: 8 }}>
-//                       <Select
-//                         value={formik.values.tds_option || ""}
-//                         onChange={handleTdsOptionChange}
-//                         displayEmpty
-//                         IconComponent={KeyboardArrowDownIcon}
-//                         sx={{
-//                           height: "35px",
-//                           fontSize: "13px",
-//                           width: "180px",
-//                           backgroundColor: "white",
-//                           "& .MuiSelect-select": {
-//                             display: "block",
-//                             overflow: "hidden",
-//                             whiteSpace: "nowrap",
-//                             textOverflow: "ellipsis",
-//                           },
-//                         }}
-//                         MenuProps={{
-//                           PaperProps: {
-//                             sx: {
-//                               maxHeight: 300,
-//                               width: "450px",
-//                               top: "25px",
-//                               fontSize: "11px",
-//                               "& .MuiMenuItem-root": {
-//                                 padding: "8px 16px",
-//                                 "&:hover": {
-//                                   backgroundColor: "#f0f4ff",
-//                                 },
-//                               },
-//                               "& .MuiPopover-paper.MuiMenu-paper": {
-//                                 top: "200px",
-//                               },
-//                             },
-//                           },
-//                         }}
-//                       >
-//                         <MenuItem value="" disabled sx={{ color: "#838195",fontSize:"13px"}}>
-//                           Select a Tax
-//                         </MenuItem>
-//                         {(formik.values.tax_type === "TDS"
-//                           ? tdsOptions
-//                           : tcsOptions
-//                         ).map((option) => (
-//                           <MenuItem key={option.id} value={option.id} sx={{fontSize:"13px" ,width:"150px"}}>
-//                             {option.name} [{option.rate}%]
-//                           </MenuItem>
-//                         ))}
-//                         <Divider />
-//                         <MenuItem
-//                           onClick={handleManageTaxClick}
+//                       <Box sx={{ display: "flex", flexDirection: "column", alignItems: "flex-start" }}>
+//                         <Select
+//                           value={formik.values.tds_option || ""}
+//                           onChange={handleTdsOptionChange}
+//                           displayEmpty
+//                           IconComponent={KeyboardArrowDownIcon}
 //                           sx={{
-//                             color: "#3b82f6",
-//                             fontSize:"13px",
+//                             height: "35px",
+//                             fontSize: "13px",
+//                             width: "180px",
+//                             backgroundColor: "white",
+//                             '& .MuiSelect-select': {
+//                               display: 'flex',
+//                               alignItems: 'center',
+//                               gap: '8px',
+//                               overflow: 'hidden',
+//                               textOverflow: 'ellipsis',
+//                               whiteSpace: 'nowrap',
+//                             }
+//                           }}
+//                           MenuProps={{
+//                             PaperProps: {
+//                               sx: {
+//                                 maxHeight: 300,
+//                                 width: "350px",
+//                                 fontSize: "13px",
+//                                 '& .MuiMenuItem-root': {
+//                                   padding: '8px 16px',
+//                                   fontSize: "13px",
+//                                   '&:hover': {
+//                                     backgroundColor: '#f0f4ff'
+//                                   }
+//                                 }
+//                               }
+//                             },
+//                             anchorOrigin: {
+//                               vertical: 'bottom',
+//                               horizontal: 'left',
+//                             },
+//                             transformOrigin: {
+//                               vertical: 'top',
+//                               horizontal: 'left',
+//                             }
+//                           }}
+//                           inputProps={{
+//                             ref: tdsSelectRef,
+//                             style: {
+//                               overflow: 'hidden',
+//                               textOverflow: 'ellipsis',
+//                               whiteSpace: 'nowrap',
+//                               width: '100%',
+//                               display: 'block',
+//                             },
+//                           }}
+//                         >
+//                           <MenuItem value="" disabled sx={{color:"#838195"}}>Select a Tax</MenuItem>
+//                           {(formik.values.tax_type === 'TDS' ? tdsOptions : tcsOptions).map((option) => (
+//                             <MenuItem key={option.id} value={option.id}>
+//                               {option.name} [{option.rate}%]
+//                             </MenuItem>
+//                           ))}
+//                           <Divider />
+//                           <MenuItem
+//                             onClick={handleManageTaxClick}
+//                             sx={{
+//                               color: "#3b82f6",
+//                               fontSize:"13px",
 
-//                             "&:hover": {
-//                               backgroundColor: "transparent",
-//                             },
-//                           }}
-//                         >
-//                           <Box
-//                             sx={{
-//                               display: "flex",
-//                               alignItems: "center",
-//                               gap: 1,
+//                               "&:hover": {
+//                                 backgroundColor: "transparent",
+//                               },
 //                             }}
 //                           >
-//                             <SettingsOutlinedIcon sx={{ fontSize: 20 }} />
-//                             Manage {formik.values.tax_type}
-//                           </Box>
-//                         </MenuItem>
-//                       </Select>
+//                             <Box
+//                               sx={{
+//                                 display: "flex",
+//                                 alignItems: "center",
+//                                 gap: 1,
+//                               }}
+//                             >
+//                               <SettingsOutlinedIcon sx={{ fontSize: 20 }} />
+//                               Manage {formik.values.tax_type}
+//                             </Box>
+//                           </MenuItem>
+//                         </Select>
+//                         <Typography
+//                           variant="caption"
+//                           sx={{
+//                             color: '#444',
+//                             mt: 0.5,
+//                             ml: 0.5,
+//                             fontSize: '12px',
+//                             maxWidth: '180px',
+//                             overflow: 'hidden',
+//                             textOverflow: 'ellipsis',
+//                             whiteSpace: 'nowrap',
+//                             display: 'block'
+//                           }}
+//                         >
+//                           {getTdsFullLabel()}
+//                         </Typography>
+//                       </Box>
 //                     </Box>
+//                     <Typography variant="body2" sx={{fontSize:"13px"}}>
+//                       {formik.values.tax_type === "TDS" ? "- " : " "}
+//                       {formik.values.tax_total_formatted}
+//                     </Typography>
 //                   </Box>
-//                   <Typography variant="body2" sx={{fontSize:"13px"}}>
-//                     {formik.values.tax_type === "TDS" ? "- " : " "}
-//                     {formik.values.tax_total_formatted}
-//                   </Typography>
-//                 </Box>
-//                 {/* Adjustment Section */}
-//                 <Box
-//                   sx={{
-//                     display: "flex",
-//                     justifyContent: "space-between",
-//                     alignItems: "center",
-//                     mb: 2,
-//                   }}
-//                 >
-//                   <Box sx={{ display: "flex", alignItems: "center" }}>
-//                     <Button
-//                       variant="outlined"
-//                       size="small"
-//                       sx={{
-//                         borderColor: "#cbd5e1",
-//                         color: "#475569",
-//                         bgcolor: "white",
-//                         textTransform: "none",
-//                         borderStyle: "dashed",
-//                         height: "36px",
-//                         px: 2,
-//                         borderRadius: "4px",
-//                         maxWidth: 150,
-//                         fontSize:"13px"
-//                       }}
-//                     >
-//                       Adjustment
-//                     </Button>
-//                   </Box>
-//                   <TextField
-//                     size="small"
-//                     value={formik.values.adjustment || "0"}
-//                     onChange={(e) => {
-//                       const value = parseFloat(e.target.value) || 0;
-//                       formik.setFieldValue("adjustment", value);
-//                       calculateTotals();
-//                     }}
+//                   {/* Adjustment Section */}
+//                   <Box
 //                     sx={{
-//                       width: "135px",
-//                       ml: 2.3,
-//                       "& .MuiOutlinedInput-root": {
-//                         bgcolor: "white",
-//                         height: "36px",
-//                         fontSize: "13px !important",
-//                         borderRadius: "4px",
-//                       },
+//                       display: "flex",
+//                       justifyContent: "space-between",
+//                       alignItems: "center",
+//                       mb: 2,
 //                     }}
-//                   />
-//                   <IconButton size="small" sx={{}}>
-//                     <HelpOutlineIcon
-//                       fontSize="small"
-//                       sx={{ color: "#94a3b8" }}
-//                     />
-//                   </IconButton>
-//                   <Typography variant="body2" sx={{fontSize:"13px"}}>
-//                     {(formik.values.adjustment || 0).toFixed(2)}
-//                   </Typography>
-//                 </Box>
-//               </>
-//             ) : (
-//               <>
-//                 {/* Adjustment Section */}
-//                 <Box
-//                   sx={{
-//                     display: "flex",
-//                     justifyContent: "space-between",
-//                     alignItems: "center",
-//                     mb: 2,
-//                   }}
-//                 >
-//                   <Box sx={{ display: "flex", alignItems: "center" }}>
-//                     <Button
-//                       variant="outlined"
-//                       size="small"
-//                       sx={{
-//                         borderColor: "#cbd5e1",
-//                         color: "#475569",
-//                         bgcolor: "white",
-//                         textTransform: "none",
-//                         borderStyle: "dashed",
-//                         height: "36px",
-//                         px: 2,
-//                         borderRadius: "7px",
-//                         maxWidth: 150,
-//                       }}
-//                     >
-//                       Adjustment
-//                     </Button>
-//                   </Box>
-//                   <TextField
-//                     size="small"
-//                     value={formik.values.adjustment || "0"}
-//                     onChange={(e) => {
-//                       const value = parseFloat(e.target.value) || 0;
-//                       formik.setFieldValue("adjustment", value);
-//                       calculateTotals();
-//                     }}
-//                     sx={{
-//                       width: "120px",
-//                       ml: 2.3,
-//                       "& .MuiOutlinedInput-root": {
-//                         bgcolor: "white",
-//                         height: "36px",
-//                         fontSize: "13px !important",
-//                         borderRadius: "7px",
-//                       },
-//                     }}
-//                   />
-//                   <IconButton size="small" sx={{ ml: 0.5 }}>
-//                     <HelpOutlineIcon
-//                       fontSize="small"
-//                       sx={{ color: "#94a3b8" }}
-//                     />
-//                   </IconButton>
-//                   <Typography variant="body2">
-//                     {(formik.values.adjustment || 0).toFixed(2)}
-//                   </Typography>
-//                 </Box>
-//                 {/* TDS/TCS Section */}
-//                 <Box
-//                   sx={{
-//                     display: "flex",
-//                     alignItems: "center",
-//                     justifyContent: "space-between",
-//                     mb: 2,
-//                   }}
-//                 >
-//                   <Box sx={{ display: "flex", alignItems: "center" }}>
-//                     <RadioGroup
-//                       row
-//                       name="tax_type"
-//                       value={formik.values.tax_type || "TDS"}
-//                       onChange={handleTaxMethodChange}
-//                     >
-//                       <FormControlLabel
-//                         value="TDS"
-//                         control={
-//                           <Radio
-//                             size="small"
-//                             sx={{
-//                               color: "#3b82f6",
-//                               padding: "4px",
-//                               "&.Mui-checked": { color: "#3b82f6" },
-//                             }}
-//                           />
-//                         }
-//                         label={<Typography variant="body2">TDS</Typography>}
-//                         sx={{ mr: 2 }}
-//                       />
-//                       <FormControlLabel
-//                         value="TCS"
-//                         control={
-//                           <Radio
-//                             size="small"
-//                             sx={{
-//                               color: "#3b82f6",
-//                               padding: "4px",
-//                               "&.Mui-checked": { color: "#3b82f6" },
-//                             }}
-//                           />
-//                         }
-//                         label={<Typography variant="body2">TCS</Typography>}
-//                       />
-//                     </RadioGroup>
-//                     <Box sx={{ display: "flex", alignItems: "center", ml: 8 }}>
-//                       <Select
-//                         value={formik.values.tds_option || ""}
-//                         onChange={handleTdsOptionChange}
-//                         displayEmpty
-//                         IconComponent={KeyboardArrowDownIcon}
+//                   >
+//                     <Box sx={{ display: "flex", alignItems: "center" }}>
+//                       <Button
+//                         variant="outlined"
+//                         size="small"
 //                         sx={{
-//                           height: "35px",
-//                           fontSize: "13px",
-//                           width: "150px",
-//                           backgroundColor: "white",
-//                           "& .MuiSelect-select": {
-//                             display: "flex",
-//                             alignItems: "center",
-//                             gap: "8px",
-//                           },
-//                         }}
-//                         MenuProps={{
-//                           PaperProps: {
-//                             sx: {
-//                               maxHeight: 300,
-//                               width: "20px",
-//                               "& .MuiMenuItem-root": {
-//                                 padding: "8px 16px",
-//                                 "&:hover": {
-//                                   backgroundColor: "#f0f4ff",
-//                                 },
-//                               },
-//                             },
-//                           },
+//                           borderColor: "#cbd5e1",
+//                           color: "#475569",
+//                           bgcolor: "white",
+//                           textTransform: "none",
+//                           borderStyle: "dashed",
+//                           height: "36px",
+//                           px: 2,
+//                           borderRadius: "7px",
+//                           maxWidth: 150,
+//                           fontSize:"13px"
 //                         }}
 //                       >
-//                         <MenuItem value="" disabled>
-//                           Select {formik.values.tax_type}
-//                         </MenuItem>
-//                         {(formik.values.tax_type === "TDS"
-//                           ? tdsOptions
-//                           : tcsOptions
-//                         ).map((option) => (
-//                           <MenuItem key={option.id} value={option.id}>
-//                             {option.name} [{option.rate}%]
-//                           </MenuItem>
-//                         ))}
-//                         <Divider />
-//                         <MenuItem
-//                           onClick={handleManageTaxClick}
-//                           sx={{
-//                             color: "#3b82f6",
-//                             "&:hover": {
-//                               backgroundColor: "transparent",
-//                             },
-//                           }}
-//                         >
-//                           <Box
+//                         Adjustment
+//                       </Button>
+//                     </Box>
+//                     <TextField
+//                       size="small"
+//                       value={formik.values.adjustment || "0"}
+//                       onChange={(e) => {
+//                         const value = parseFloat(e.target.value) || 0;
+//                         formik.setFieldValue("adjustment", value);
+//                         calculateTotals();
+//                       }}
+//                       sx={{
+//                         width: "135px",
+//                         ml: 2.3,
+//                         "& .MuiOutlinedInput-root": {
+//                           bgcolor: "white",
+//                           height: "36px",
+//                           fontSize: "13px !important",
+//                           borderRadius: "4px",
+//                         },
+//                       }}
+//                     />
+//                     <IconButton size="small" sx={{}}>
+//                       <HelpOutlineIcon
+//                         fontSize="small"
+//                         sx={{ color: "#94a3b8" }}
+//                       />
+//                     </IconButton>
+//                     <Typography variant="body2" sx={{fontSize:"13px"}}>
+//                       {(formik.values.adjustment || 0).toFixed(2)}
+//                     </Typography>
+//                   </Box>
+//                 </>
+//               ) : (
+//                 <>
+//                   {/* Adjustment Section */}
+//                   <Box
+//                     sx={{
+//                       display: "flex",
+//                       justifyContent: "space-between",
+//                       alignItems: "center",
+//                       mb: 2,
+//                     }}
+//                   >
+//                     <Box sx={{ display: "flex", alignItems: "center" }}>
+//                       <Button
+//                         variant="outlined"
+//                         size="small"
+//                         sx={{
+//                           borderColor: "#cbd5e1",
+//                           color: "#475569",
+//                           bgcolor: "white",
+//                           textTransform: "none",
+//                           borderStyle: "dashed",
+//                           height: "36px",
+//                           px: 2,
+//                           borderRadius: "7px",
+//                           maxWidth: 150,
+//                         }}
+//                       >
+//                         Adjustment
+//                       </Button>
+//                     </Box>
+//                     <TextField
+//                       size="small"
+//                       value={formik.values.adjustment || "0"}
+//                       onChange={(e) => {
+//                         const value = parseFloat(e.target.value) || 0;
+//                         formik.setFieldValue("adjustment", value);
+//                         calculateTotals();
+//                       }}
+//                       sx={{
+//                         width: "120px",
+//                         ml: 2.3,
+//                         "& .MuiOutlinedInput-root": {
+//                           bgcolor: "white",
+//                           height: "36px",
+//                           fontSize: "13px !important",
+//                           borderRadius: "7px",
+//                         },
+//                       }}
+//                     />
+//                     <IconButton size="small" sx={{ ml: 0.5 }}>
+//                       <HelpOutlineIcon
+//                         fontSize="small"
+//                         sx={{ color: "#94a3b8" }}
+//                       />
+//                     </IconButton>
+//                     <Typography variant="body2">
+//                       {(formik.values.adjustment || 0).toFixed(2)}
+//                     </Typography>
+//                   </Box>
+//                   {/* TDS/TCS Section */}
+//                   <Box
+//                     sx={{
+//                       display: "flex",
+//                       alignItems: "center",
+//                       justifyContent: "space-between",
+//                       mb: 2,
+//                     }}
+//                   >
+//                     <Box sx={{ display: "flex", alignItems: "center" }}>
+//                       <RadioGroup
+//                         row
+//                         name="tax_type"
+//                         value={formik.values.tax_type || "TDS"}
+//                         onChange={handleTaxMethodChange}
+//                       >
+//                         <FormControlLabel
+//                           value="TDS"
+//                           control={
+//                             <Radio
+//                               size="small"
+//                               sx={{
+//                                 color: "#3b82f6",
+//                                 padding: "4px",
+//                                 "&.Mui-checked": { color: "#3b82f6" },
+//                               }}
+//                             />
+//                           }
+//                           label={<Typography variant="body2">TDS</Typography>}
+//                           sx={{ mr: 2 }}
+//                         />
+//                         <FormControlLabel
+//                           value="TCS"
+//                           control={
+//                             <Radio
+//                               size="small"
+//                               sx={{
+//                                 color: "#3b82f6",
+//                                 padding: "4px",
+//                                 "&.Mui-checked": { color: "#3b82f6" },
+//                               }}
+//                             />
+//                           }
+//                           label={<Typography variant="body2">TCS</Typography>}
+//                         />
+//                       </RadioGroup>
+//                       <Box sx={{ display: "flex", alignItems: "center", ml: 8 }}>
+//                         <Box sx={{ display: "flex", flexDirection: "column", alignItems: "flex-start" }}>
+//                           <Select
+//                             value={formik.values.tds_option || ""}
+//                             onChange={handleTdsOptionChange}
+//                             displayEmpty
+//                             IconComponent={KeyboardArrowDownIcon}
 //                             sx={{
-//                               display: "flex",
-//                               alignItems: "center",
-//                               gap: 1,
+//                               height: "35px",
+//                               fontSize: "13px",
+//                               width: "180px",
+//                               backgroundColor: "white",
+//                               '& .MuiSelect-select': {
+//                                 display: 'flex',
+//                                 alignItems: 'center',
+//                                 gap: '8px',
+//                                 overflow: 'hidden',
+//                                 textOverflow: 'ellipsis',
+//                                 whiteSpace: 'nowrap',
+//                               }
+//                             }}
+//                             MenuProps={{
+//                               PaperProps: {
+//                                 sx: {
+//                                   maxHeight: 300,
+//                                   width: "350px",
+//                                   fontSize: "13px",
+//                                   '& .MuiMenuItem-root': {
+//                                     padding: '8px 16px',
+//                                     fontSize: "13px",
+//                                     '&:hover': {
+//                                       backgroundColor: '#f0f4ff'
+//                                     }
+//                                   }
+//                                 }
+//                               },
+//                               anchorOrigin: {
+//                                 vertical: 'bottom',
+//                                 horizontal: 'left',
+//                               },
+//                               transformOrigin: {
+//                                 vertical: 'top',
+//                                 horizontal: 'left',
+//                               }
+//                             }}
+//                             inputProps={{
+//                               ref: tdsSelectRef,
+//                               style: {
+//                                 overflow: 'hidden',
+//                                 textOverflow: 'ellipsis',
+//                                 whiteSpace: 'nowrap',
+//                                 width: '100%',
+//                                 display: 'block',
+//                               },
 //                             }}
 //                           >
-//                             <SettingsOutlinedIcon sx={{ fontSize: 20 }} />
-//                             Manage {formik.values.tax_type}
-//                           </Box>
-//                         </MenuItem>
-//                       </Select>
+//                             <MenuItem value="" disabled>Select {formik.values.tax_type}</MenuItem>
+//                             {(formik.values.tax_type === "TDS"
+//                               ? tdsOptions
+//                               : tcsOptions
+//                             ).map((option) => (
+//                               <MenuItem key={option.id} value={option.id}>
+//                                 {option.name} [{option.rate}%]
+//                               </MenuItem>
+//                             ))}
+//                             <Divider />
+//                             <MenuItem
+//                               onClick={handleManageTaxClick}
+//                               sx={{
+//                                 color: "#3b82f6",
+//                                 "&:hover": {
+//                                   backgroundColor: "transparent",
+//                                 },
+//                               }}
+//                             >
+//                               <Box
+//                                 sx={{
+//                                   display: "flex",
+//                                   alignItems: "center",
+//                                   gap: 1,
+//                                 }}
+//                               >
+//                                 <SettingsOutlinedIcon sx={{ fontSize: 20 }} />
+//                                 Manage {formik.values.tax_type}
+//                               </Box>
+//                             </MenuItem>
+//                           </Select>
+//                           <Typography
+//                             variant="caption"
+//                             sx={{
+//                               color: '#444',
+//                               mt: 0.5,
+//                               ml: 0.5,
+//                               fontSize: '12px',
+//                               maxWidth: '180px',
+//                               overflow: 'hidden',
+//                               textOverflow: 'ellipsis',
+//                               whiteSpace: 'nowrap',
+//                               display: 'block'
+//                             }}
+//                           >
+//                             {getTdsFullLabel()}
+//                           </Typography>
+//                         </Box>
+//                       </Box>
+//                       <Typography variant="body2">
+//                         {formik.values.tax_type === "TDS" ? "- " : "+ "}
+//                         {formik.values.tax_total_formatted}
+//                       </Typography>
 //                     </Box>
 //                   </Box>
-//                   <Typography variant="body2">
-//                     {formik.values.tax_type === "TDS" ? "- " : "+ "}
-//                     {formik.values.tax_total_formatted}
-//                   </Typography>
-//                 </Box>
-//               </>
-//             ))}
+//                 </>
+//               ))}
 
 //           {isChallan && (
 //             <Box
@@ -4319,3 +4509,4 @@ export default function InvoiceItemTable({formik}) {
 //     </Box>
 //   );
 // }
+

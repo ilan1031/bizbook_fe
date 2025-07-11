@@ -1,238 +1,235 @@
 "use client";
-import React from "react";
-import {
-  Box,
-  Typography,
-  Grid,
-  Paper,
-  Divider,
-  Chip,
-  Table,
-  TableBody,
-  TableCell,
-  TableContainer,
-  TableRow,
-} from "@mui/material";
-import { Edit, Package, DollarSign, Inventory, Category, Code } from "lucide-react";
+import React, { useEffect, useState } from "react";
+import { Box, Typography, Divider, CircularProgress } from "@mui/material";
+import apiService from "../../../services/axiosService";
+import config from "../../../services/config";
 
-const ItemOverview = ({ data, onEdit }) => {
-  if (!data) {
+const sections = [
+  {
+    title: null,
+    fields: [
+      { key: "item_type", label: "Item Type", apiKeys: ["type", "item_type", "category"] },
+      { key: "unit", label: "Unit", apiKeys: ["unit", "unit_name"] },
+      { key: "created_source", label: "Created Source", apiKeys: ["created_source", "source"] },
+      { key: "tax_preference", label: "Tax Preference", apiKeys: ["tax_preference", "tax_treatment", "tax_type"] },
+      { key: "inventory_account", label: "Inventory Account", apiKeys: ["inventory_account", "inventory_account_name"] },
+      { key: "inventory_valuation_method", label: "Inventory Valuation Method", apiKeys: ["inventory_valuation_method", "valuation_method"] },
+    ],
+  },
+  {
+    title: "Purchase Information",
+    fields: [
+      { key: "cost_price", label: "Cost Price", isCurrency: true, apiKeys: ["cost_price", "purchase_rate", "purchase_price"] },
+      { key: "purchase_account", label: "Purchase Account", apiKeys: ["purchase_account", "purchase_account_name"] },
+      { key: "purchase_description", label: "Description", apiKeys: ["purchase_description", "description"] },
+      { key: "preferred_vendor", label: "Preferred Vendor", apiKeys: ["preferred_vendor", "vendor_name"] },
+    ],
+  },
+  {
+    title: "Sales Information",
+    fields: [
+      { key: "selling_price", label: "Selling Price", isCurrency: true, apiKeys: ["selling_price", "rate", "sales_price"] },
+      { key: "sales_account", label: "Sales Account", apiKeys: ["sales_account", "account_name", "sales_account_name"] },
+      { key: "sales_description", label: "Description", apiKeys: ["sales_description", "description"] },
+    ],
+  },
+];
+
+const ItemOverview = ({ data: propData, itemId, organizationId }) => {
+  const [data, setData] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+
+  // Use prop data if provided, otherwise fetch from API
+  useEffect(() => {
+    if (propData) {
+      setData(propData);
+      setLoading(false);
+      return;
+    }
+
+    if (!itemId || !organizationId) {
+      setLoading(false);
+      setError("Missing item ID or organization ID");
+      return;
+    }
+
+    const fetchItemDetails = async () => {
+      setLoading(true);
+      setError(null);
+      
+      try {
+        let response = null;
+        
+        // Try multiple API endpoint patterns like other parts of the app
+        try {
+          response = await apiService({
+            method: "GET",
+            url: `/api/v1/items/${itemId}`,
+            params: { organization_id: organizationId },
+          });
+        } catch (err) {
+          console.log("Pattern 1 failed, trying pattern 2...");
+        }
+        
+        if (!response) {
+          try {
+            response = await apiService({
+              method: "GET",
+              url: `/api/v1/item/individual`,
+              params: { 
+                organization_id: organizationId, 
+                item_id: itemId 
+              },
+            });
+          } catch (err) {
+            console.log("Pattern 2 failed, trying pattern 3...");
+          }
+        }
+        
+        if (!response) {
+          try {
+            response = await apiService({
+              method: "GET",
+              url: `/api/v1/item/get-individual-item`,
+              params: { 
+                organization_id: organizationId, 
+                item_id: itemId 
+              },
+            });
+          } catch (err) {
+            console.log("Pattern 3 failed");
+          }
+        }
+
+        if (response && response.data) {
+          const itemData = response.data.data || response.data;
+          console.log("Fetched item data:", itemData);
+          setData(itemData);
+        } else {
+          throw new Error("No data received from API");
+        }
+      } catch (err) {
+        console.error("Error fetching item details:", err);
+        setError("Failed to load item details");
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchItemDetails();
+  }, [propData, itemId, organizationId]);
+
+  const formatCurrency = (value) =>
+    value != null && value !== "-" && value !== ""
+      ? `₹${Number(value).toLocaleString("en-IN", { minimumFractionDigits: 2 })}`
+      : "-";
+
+  // Helper function to get field value with fallbacks
+  const getFieldValue = (field, data) => {
+    if (!data) return null;
+    
+    // Try the primary key first
+    if (data[field.key] !== undefined && data[field.key] !== null && data[field.key] !== "") {
+      return data[field.key];
+    }
+    
+    // Try alternative API keys
+    if (field.apiKeys) {
+      for (const apiKey of field.apiKeys) {
+        if (data[apiKey] !== undefined && data[apiKey] !== null && data[apiKey] !== "") {
+          return data[apiKey];
+        }
+      }
+    }
+    
+    return null;
+  };
+
+  if (loading) {
     return (
-      <Box sx={{ p: 3, textAlign: "center" }}>
-        <Typography variant="h6" color="text.secondary">
-          No item data available
+      <Box sx={{ display: "flex", justifyContent: "center", mt: 4 }}>
+        <CircularProgress size={32} />
+      </Box>
+    );
+  }
+
+  if (error) {
+    return (
+      <Box sx={{ p: 0, pt: 3, pr: 6 }}>
+        <Typography color="error" sx={{ fontSize: 15, mb: 2 }}>
+          {error}
         </Typography>
       </Box>
     );
   }
 
-  const getStatusColor = (status) => {
-    switch (status?.toLowerCase()) {
-      case "active":
-      case "available":
-      case "in_stock":
-        return "success";
-      case "draft":
-      case "pending":
-        return "warning";
-      case "inactive":
-      case "discontinued":
-      case "out_of_stock":
-        return "error";
-      default:
-        return "default";
-    }
-  };
+  if (!data) {
+    return (
+      <Box sx={{ p: 0, pt: 3, pr: 6 }}>
+        <Typography color="text.secondary" sx={{ fontSize: 15, mb: 2 }}>
+          No item data found.
+        </Typography>
+      </Box>
+    );
+  }
 
   return (
-    <Box sx={{ p: 3 }}>
-      {/* Header */}
-      <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", mb: 3 }}>
-        <Box>
-          <Typography variant="h4" sx={{ fontWeight: 600, mb: 1 }}>
-            {data.item_name || data.name || "Item Name"}
-          </Typography>
-          <Box sx={{ display: "flex", alignItems: "center", gap: 2 }}>
-            <Chip
-              label={data.status_formatted || data.status || "Active"}
-              color={getStatusColor(data.status)}
-              size="small"
-            />
-            <Typography variant="body2" color="text.secondary">
-              Item Code: {data.item_code || data.code || "N/A"}
-            </Typography>
-          </Box>
-        </Box>
-        <Box sx={{ display: "flex", gap: 1 }}>
-          <Chip
-            icon={<Edit size={16} />}
-            label="Edit"
-            variant="outlined"
-            onClick={onEdit}
-            sx={{ cursor: "pointer" }}
-          />
-        </Box>
-      </Box>
-
-      <Grid container spacing={3}>
-        {/* Basic Information */}
-        <Grid item xs={12} md={6}>
-          <Paper sx={{ p: 3, height: "100%" }}>
-            <Typography variant="h6" sx={{ mb: 2, display: "flex", alignItems: "center", gap: 1 }}>
-              <Package size={20} />
-              Basic Information
-            </Typography>
-            <Divider sx={{ mb: 2 }} />
-            
-            <TableContainer>
-              <Table size="small">
-                <TableBody>
-                  <TableRow>
-                    <TableCell sx={{ fontWeight: 600, width: "40%" }}>Item Name</TableCell>
-                    <TableCell>{data.item_name || data.name || "N/A"}</TableCell>
-                  </TableRow>
-                  <TableRow>
-                    <TableCell sx={{ fontWeight: 600 }}>Item Code</TableCell>
-                    <TableCell>{data.item_code || data.code || "N/A"}</TableCell>
-                  </TableRow>
-                  <TableRow>
-                    <TableCell sx={{ fontWeight: 600 }}>Category</TableCell>
-                    <TableCell>{data.category_name || data.category || "N/A"}</TableCell>
-                  </TableRow>
-                  <TableRow>
-                    <TableCell sx={{ fontWeight: 600 }}>Description</TableCell>
-                    <TableCell>
-                      {data.description || "No description available"}
-                    </TableCell>
-                  </TableRow>
-                  <TableRow>
-                    <TableCell sx={{ fontWeight: 600 }}>Unit</TableCell>
-                    <TableCell>{data.unit || "N/A"}</TableCell>
-                  </TableRow>
-                  <TableRow>
-                    <TableCell sx={{ fontWeight: 600 }}>Status</TableCell>
-                    <TableCell>
-                      <Chip
-                        label={data.status_formatted || data.status || "Active"}
-                        color={getStatusColor(data.status)}
-                        size="small"
-                      />
-                    </TableCell>
-                  </TableRow>
-                </TableBody>
-              </Table>
-            </TableContainer>
-          </Paper>
-        </Grid>
-
-        {/* Pricing & Stock */}
-        <Grid item xs={12} md={6}>
-          <Paper sx={{ p: 3, height: "100%" }}>
-            <Typography variant="h6" sx={{ mb: 2, display: "flex", alignItems: "center", gap: 1 }}>
-              <DollarSign size={20} />
-              Pricing & Stock
-            </Typography>
-            <Divider sx={{ mb: 2 }} />
-            
-            <TableContainer>
-              <Table size="small">
-                <TableBody>
-                  <TableRow>
-                    <TableCell sx={{ fontWeight: 600, width: "40%" }}>Rate</TableCell>
-                    <TableCell>
-                      <Typography variant="h6" color="primary" sx={{ fontWeight: 700 }}>
-                        {data.rate_formatted || data.rate || "₹0.00"}
+    <Box sx={{ p: 0, pt: 3, pr: 6 }}>
+      {sections.map((section, idx) => {
+        const fieldsWithData = section.fields.filter(
+          (field) => getFieldValue(field, data) !== null
+        );
+        return (
+          <Box key={idx} sx={{ mb: 4 }}>
+            {section.title && (
+              <>
+                <Typography variant="subtitle1" sx={{ fontWeight: 600, mb: 1, mt: idx === 0 ? 0 : 2 }}>
+                  {section.title}
+                </Typography>
+                <Divider sx={{ mb: 2 }} />
+              </>
+            )}
+            <Box sx={{ display: "flex", flexDirection: "column", gap: 1 }}>
+              {fieldsWithData.length > 0 ? (
+                fieldsWithData.map((field) => {
+                  const value = getFieldValue(field, data);
+                  return (
+                    <Box key={field.key} sx={{ display: "flex", alignItems: "center", py: 0.5 }}>
+                      <Typography 
+                        color="text.secondary" 
+                        sx={{ 
+                          fontSize: 15, 
+                          fontWeight: 500,
+                          minWidth: "200px",
+                          mr: 2
+                        }}
+                      >
+                        {field.label}
                       </Typography>
-                    </TableCell>
-                  </TableRow>
-                  <TableRow>
-                    <TableCell sx={{ fontWeight: 600 }}>Stock Quantity</TableCell>
-                    <TableCell>
-                      <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
-                        <Inventory size={16} />
-                        <Typography variant="h6" color="text.primary">
-                          {data.stock_quantity || data.quantity || 0}
-                        </Typography>
-                      </Box>
-                    </TableCell>
-                  </TableRow>
-                  <TableRow>
-                    <TableCell sx={{ fontWeight: 600 }}>Reorder Level</TableCell>
-                    <TableCell>{data.reorder_level || "N/A"}</TableCell>
-                  </TableRow>
-                  <TableRow>
-                    <TableCell sx={{ fontWeight: 600 }}>Tax Rate</TableCell>
-                    <TableCell>{data.tax_rate ? `${data.tax_rate}%` : "N/A"}</TableCell>
-                  </TableRow>
-                  <TableRow>
-                    <TableCell sx={{ fontWeight: 600 }}>HSN Code</TableCell>
-                    <TableCell>{data.hsn_code || "N/A"}</TableCell>
-                  </TableRow>
-                  <TableRow>
-                    <TableCell sx={{ fontWeight: 600 }}>SKU</TableCell>
-                    <TableCell>{data.sku || "N/A"}</TableCell>
-                  </TableRow>
-                </TableBody>
-              </Table>
-            </TableContainer>
-          </Paper>
-        </Grid>
-
-        {/* Additional Details */}
-        <Grid item xs={12}>
-          <Paper sx={{ p: 3 }}>
-            <Typography variant="h6" sx={{ mb: 2, display: "flex", alignItems: "center", gap: 1 }}>
-              <Code size={20} />
-              Additional Details
-            </Typography>
-            <Divider sx={{ mb: 2 }} />
-            
-            <Grid container spacing={2}>
-              <Grid item xs={12} md={6}>
-                <TableContainer>
-                  <Table size="small">
-                    <TableBody>
-                      <TableRow>
-                        <TableCell sx={{ fontWeight: 600, width: "40%" }}>Created Date</TableCell>
-                        <TableCell>{data.created_at_formatted || data.createdAt || "N/A"}</TableCell>
-                      </TableRow>
-                      <TableRow>
-                        <TableCell sx={{ fontWeight: 600 }}>Last Modified</TableCell>
-                        <TableCell>{data.updated_at_formatted || data.updatedAt || "N/A"}</TableCell>
-                      </TableRow>
-                      <TableRow>
-                        <TableCell sx={{ fontWeight: 600 }}>Created By</TableCell>
-                        <TableCell>{data.created_by || "N/A"}</TableCell>
-                      </TableRow>
-                    </TableBody>
-                  </Table>
-                </TableContainer>
-              </Grid>
-              
-              <Grid item xs={12} md={6}>
-                <TableContainer>
-                  <Table size="small">
-                    <TableBody>
-                      <TableRow>
-                        <TableCell sx={{ fontWeight: 600, width: "40%" }}>Brand</TableCell>
-                        <TableCell>{data.brand || "N/A"}</TableCell>
-                      </TableRow>
-                      <TableRow>
-                        <TableCell sx={{ fontWeight: 600 }}>Model</TableCell>
-                        <TableCell>{data.model || "N/A"}</TableCell>
-                      </TableRow>
-                      <TableRow>
-                        <TableCell sx={{ fontWeight: 600 }}>Weight</TableCell>
-                        <TableCell>{data.weight ? `${data.weight} ${data.weight_unit || 'kg'}` : "N/A"}</TableCell>
-                      </TableRow>
-                    </TableBody>
-                  </Table>
-                </TableContainer>
-              </Grid>
-            </Grid>
-          </Paper>
-        </Grid>
-      </Grid>
+                      <Typography sx={{ fontSize: 15, fontWeight: 400 }}>
+                        {field.isCurrency
+                          ? formatCurrency(value)
+                          : value}
+                      </Typography>
+                    </Box>
+                  );
+                })
+              ) : section.title ? (
+                <Box>
+                  <Typography color="text.secondary" sx={{ fontSize: 15, mb: 2 }}>
+                    {section.title === "Purchase Information"
+                      ? "No purchase information provided."
+                      : section.title === "Sales Information"
+                      ? "No sales information provided."
+                      : "No information provided."}
+                  </Typography>
+                </Box>
+              ) : null}
+            </Box>
+          </Box>
+        );
+      })}
     </Box>
   );
 };
