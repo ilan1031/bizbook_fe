@@ -338,20 +338,35 @@ const InvoiceCreationPage = () => {
         return;
       }
 
+      console.log("Fetching recurring invoice data for ID:", id);
+      console.log("Organization ID:", organization_id);
+
       const response = await apiService({
         method: "GET",
-        url: `/api/v1/RecurringInvoices/individual`, // No :id in URL
+        url: `/api/v1/RecurringInvoices/individual/${id}`,
         params: {
           organization_id: organization_id,
-          recurring_invoice_id: id, // Pass both in query
+          recurring_invoice_id: id,
         },
         customBaseUrl: config.SO_Base_url,
       });
 
-      // if (response.data && response.data.data) {
-      //   const invoiceData = response.data.data;
-      if (response.data && response.data.invoice) {
-        const invoiceData = response.data.invoice;
+      console.log("Recurring Invoice API Response:", response);
+
+      if (!response.data) {
+        console.error("No data received from API");
+        throw new Error("No data received from the server");
+      }
+
+      // Get the invoice data from the response
+      const invoiceData = response.data?.data || response.data;
+
+      if (!invoiceData) {
+        console.error("Invalid data format received from server");
+        throw new Error("Invalid data format received from server");
+      }
+
+      console.log("Invoice Data:", invoiceData);
 
         // Set customer data
         if (invoiceData.customer_id) {
@@ -436,14 +451,17 @@ const InvoiceCreationPage = () => {
 
         // Show success message
         showMessage("Recurring invoice data fetched successfully", "success");
-      } else {
-        showMessage("Failed to fetch recurring invoice data", "error");
-      }
     } catch (error) {
       console.error("Error fetching recurring invoice data:", error);
+      console.error("Error details:", {
+        message: error.message,
+        response: error.response?.data,
+        status: error.response?.status,
+        statusText: error.response?.statusText
+      });
       showMessage(
-        error.response?.data?.message ||
-          "Failed to fetch recurring invoice data",
+        error.response?.data?.message || 
+        `Failed to fetch recurring invoice data: ${error.message}`,
         "error"
       );
     }
