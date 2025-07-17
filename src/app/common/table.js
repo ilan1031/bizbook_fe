@@ -1301,6 +1301,9 @@ export default function CustomizedTable({
   sortColumn,
   sortOrder,
   handleSort,
+  getStatusColor,
+  getStatusText,
+  handleStatusChange,
 }) {
 
   const [hoveredRow, setHoveredRow] = useState(null);
@@ -2025,7 +2028,9 @@ export default function CustomizedTable({
                                       col.value === "salesorder_number" ||
                                       col.value === "deliverychallan_number" ||
                                       col.value === "recurrence_name"
-                                    ? getColor(col.value, row[col.value])
+                                    ? (getStatusColor && value === "vendor_payment" && col.value === "status_formatted" 
+                                        ? getStatusColor(row[col.value]) 
+                                        : getColor(col.value, row[col.value]))
                                     : "inherit",
                                 textTransform:
                                   col.value === "order_status_formatted" ||
@@ -2172,7 +2177,8 @@ export default function CustomizedTable({
                             (value === "invoice" ||
                               value === "customer" ||
                               value === "vendor" ||
-                              value === "recurring_invoice") && (
+                              value === "recurring_invoice" ||
+                              value === "vendor_payment") && (
                               <>
                                 <IconButton
                                   onClick={(e) => handleActionClick(e, row._id)}
