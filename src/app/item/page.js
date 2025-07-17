@@ -177,9 +177,10 @@ const ItemsTable = () => {
   const [welcomePg, setWelcomPg] = useState(false);
 
   const handleRowClick = (item) => {
-    // Check for different possible ID fields
-    const itemId = item.id || item.item_id || item._id || item.itemId;
+    // Check for different possible ID fields - prioritize _id as it's the primary identifier
+    const itemId = item._id || item.item_id || item.id || item.itemId;
     if (itemId) {
+      console.log("Navigating to item:", itemId, "from item data:", item);
       router.push(`/item/${itemId}`);
     } else {
       console.error("No ID found in item:", item);
@@ -188,7 +189,7 @@ const ItemsTable = () => {
   };
 
   const handleSelectAll = () => {
-    setSelected(allSelected ? [] : itemsList.map((row) => row.id || row.item_id || row._id));
+    setSelected(allSelected ? [] : itemsList.map((row) => row._id || row.item_id || row.id));
   };
 
   const handleSelectRow = (id) => {
@@ -274,6 +275,17 @@ const ItemsTable = () => {
       });
       
       const data = response.data.data || [];
+      
+      // Debug: Log the first item to understand the data structure
+      if (data.length > 0) {
+        console.log("First item structure:", data[0]);
+        console.log("Available ID fields:", {
+          _id: data[0]._id,
+          id: data[0].id,
+          item_id: data[0].item_id,
+          itemId: data[0].itemId
+        });
+      }
 
       if (filterValue === "Status.All" && data.length === 0) {
         setWelcomPg(true);
