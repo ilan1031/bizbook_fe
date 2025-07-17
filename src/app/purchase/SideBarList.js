@@ -40,6 +40,7 @@ export default function UserManagementInterface({
 
   useEffect(() => {
     console.log(staticData, "staticData");
+    console.log("Type received:", type);
     setLoading(false);
 
     const timer = setTimeout(() => {
@@ -60,6 +61,8 @@ export default function UserManagementInterface({
           ? "account_id"
           : type === "RecurringBills"
           ? "recurring_bill_id"
+          : type === "PaymentMade" || type === "paymentmade"
+          ? "payment_id"
           : "";
       console.log(activeID, "activeID", fetchType, "fetchType", "#####");
       // Ensure we create a new array to avoid mutating state
@@ -252,7 +255,15 @@ export default function UserManagementInterface({
                                 fontSize: "0.75rem",
                                 textTransform: "uppercase",
                                 color:
-                                  user.status_type === "OPEN"
+                                  (type === "PaymentMade" || type === "paymentmade")
+                                    ? user.status === "draft" || user.status === 1
+                                      ? "#94a5a6"
+                                      : user.status === "paid" || user.status === 2
+                                      ? "#1fcd6d"
+                                      : user.status === "void" || user.status === 3
+                                      ? "#474747"
+                                      : "#94a5a6"
+                                    : user.status_type === "OPEN"
                                     ? "#408dfb"
                                     : user.status_type === "VOID"
                                     ? "#d3d3d3"
@@ -291,7 +302,21 @@ export default function UserManagementInterface({
                                   : user.status === 2
                                   ? "INVOICED"
                                   : ""
+                                : (type === "PaymentMade" || type === "paymentmade")
+                                ? user.status === "draft" || user.status === 1
+                                  ? "DRAFT"
+                                  : user.status === "paid" || user.status === 2
+                                  ? "PAID"
+                                  : user.status === "void" || user.status === 3
+                                  ? "VOID"
+                                  : "DRAFT"
                                 : user.status_type}
+                              {/* Debug info */}
+                              {(type === "PaymentMade" || type === "paymentmade") && (
+                                <span style={{ fontSize: "10px", color: "red" }}>
+                                  (Type: {type}, Status: {user.status})
+                                </span>
+                              )}
                               {type === "PurchaseOrder" ? (
                                 <></>
                               ) : type === "Payment" ? (
