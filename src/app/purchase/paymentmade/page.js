@@ -239,6 +239,7 @@ const columns = [
   { key: "payment_mode", label: "MODE" },
   { key: "amount_formatted", label: "AMOUNT" },
   { key: "paid_through_account_id", label: "Paid Through Account" },
+  { key: "status_formatted", label: "STATUS" },
 ];
 
 function PaymentMade() {
@@ -441,6 +442,74 @@ function PaymentMade() {
 
   const handleNewCustomView = () => {
     setAnchorEl(null);
+  };
+
+  // Status management functions
+  const getStatusColor = (status) => {
+    // Ensure status is a string and handle null/undefined
+    const statusStr = String(status || "").toLowerCase();
+    switch (statusStr) {
+      case "draft":
+      case "1":
+        return "#94a5a6";
+      case "paid":
+      case "2":
+        return "#1fcd6d";
+      case "void":
+      case "3":
+        return "#474747";
+      default:
+        return "#474747";
+    }
+  };
+
+  const getStatusText = (status) => {
+    // Ensure status is a string and handle null/undefined
+    const statusStr = String(status || "").toLowerCase();
+    switch (statusStr) {
+      case "draft":
+      case "1":
+        return "Draft";
+      case "paid":
+      case "2":
+        return "Paid";
+      case "void":
+      case "3":
+        return "Void";
+      default:
+        return "Draft";
+    }
+  };
+
+  const handleStatusChange = async (paymentId, newStatus) => {
+    try {
+      const org_id = localStorage.getItem("organization_id");
+
+      if (!org_id || !paymentId) {
+        console.error("Organization or Payment ID is missing");
+        return;
+      }
+
+      const response = await apiService({
+        method: "PUT",
+        url: `/api/v1/payments/status?organization_id=${org_id}&payment_id=${paymentId}`,
+        data: {
+          status: newStatus,
+          status_formatted: getStatusText(newStatus)
+        },
+        customBaseUrl: config.PO_Base_url,
+      });
+
+      if (response.statusCode === 200 || response.statusCode === true) {
+        console.log(`Payment status updated to ${getStatusText(newStatus)}`);
+        // Refresh payment list
+        getPaymentMade(filterBy, sortColumn, sortOrder);
+      } else {
+        console.error("Failed to update payment status");
+      }
+    } catch (error) {
+      console.error("Error updating payment status:", error);
+    }
   };
 
   return (
@@ -1030,6 +1099,9 @@ function PaymentMade() {
                     sortColumn={sortColumn} //sortby
                     sortOrder={sortOrder} //sortby
                     handleSort={handleSort} //sortby
+                    getStatusColor={getStatusColor}
+                    getStatusText={getStatusText}
+                    handleStatusChange={handleStatusChange}
                   />
                 )}
               </>

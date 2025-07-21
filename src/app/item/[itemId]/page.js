@@ -40,6 +40,7 @@ import SettingsIcon from "@mui/icons-material/Settings";
 import ItemOverview from "../../common/itemDetail/overview";
 import ItemTransactions from "../../common/itemDetail/transactions";
 import ItemHistory from "../../common/itemDetail/history";
+import ItemViewComponent from "../ItemViewComponent";
 
 const ITEM_LIST_LIMIT = 50;
 
@@ -62,7 +63,7 @@ const ItemSplitView = () => {
   const router = useRouter();
   const { showMessage } = useSnackbar();
   const [items, setItems] = useState([]);
-  const [selectedId, setSelectedId] = useState(itemId);
+  const [selectedId, setSelectedId] = useState(itemId || null);
   const [item, setItem] = useState(null);
   const [loading, setLoading] = useState(false);
   const [tab, setTab] = useState(0);
@@ -75,85 +76,207 @@ const ItemSplitView = () => {
   const [anchorEl, setAnchorEl] = useState(null);
   const [menuAnchorEl, setMenuAnchorEl] = useState(null);
 
+  // Debug: Check if organization_id is available
+  useEffect(() => {
+    const organization_id = localStorage.getItem("organization_id");
+    console.log("Organization ID from localStorage:", organization_id);
+    console.log("Current URL:", window.location.href);
+    console.log("Current pathname:", window.location.pathname);
+    
+    if (!organization_id) {
+      console.error("No organization_id found in localStorage!");
+      showMessage("Error: Organization ID not found", "error");
+    }
+    
+    // Test API connectivity
+    const testAPI = async () => {
+      try {
+        const res = await apiService({
+          method: "GET",
+          url: `/api/v1/item/getitems?organization_id=${organization_id}&page=1&limit=1`,
+        });
+        console.log("API test successful:", res);
+      } catch (err) {
+        console.error("API test failed:", err);
+      }
+    };
+    
+    if (organization_id) {
+      testAPI();
+    }
+  }, []);
+
+  // Update selectedId when itemId changes
+  useEffect(() => {
+    console.log("URL itemId parameter:", itemId);
+    console.log("itemId type:", typeof itemId);
+    console.log("itemId === 'undefined':", itemId === 'undefined');
+    
+    if (itemId && itemId !== 'undefined') {
+      console.log("Setting selectedId to:", itemId);
+      setSelectedId(itemId);
+    } else {
+      console.log("Invalid itemId, not setting selectedId");
+    }
+  }, [itemId]);
+
   // Fetch item list
   useEffect(() => {
     const fetchItems = async () => {
       setLoading(true);
       try {
         const organization_id = localStorage.getItem("organization_id");
+        console.log("Fetching items with organization_id:", organization_id);
+        
         let queryParams = `organization_id=${organization_id}&page=1&limit=${ITEM_LIST_LIMIT}`;
         if (selectedStatus.value !== "Status.All") {
           const status = selectedStatus.value.replace("Status.", "");
           queryParams += `&status=${status.toLowerCase()}`;
         }
+        
+        console.log("API URL:", `/api/v1/item/getitems?${queryParams}`);
+        
         const res = await apiService({
           method: "GET",
           url: `/api/v1/item/getitems?${queryParams}`,
         });
+        
+        console.log("API Response:", res);
         const itemsData = res.data.data || [];
         console.log("Fetched items list:", itemsData);
+        
+        // Debug: Log the first item structure
+        if (itemsData.length > 0) {
+          console.log("First item structure:", itemsData[0]);
+          console.log("Available ID fields in first item:", {
+            _id: itemsData[0]._id,
+            id: itemsData[0].id,
+            item_id: itemsData[0].item_id,
+            itemId: itemsData[0].itemId,
+            ItemId: itemsData[0].ItemId
+          });
+        }
+        
         setItems(itemsData);
       } catch (err) {
+        console.error("Error fetching items list:", err);
         setItems([]);
       } finally {
         setLoading(false);
       }
     };
     fetchItems();
+  }, []); // Remove selectedStatus dependency for initial load
+
+  // Handle status changes
+  useEffect(() => {
+    if (selectedStatus.value !== "Status.All") {
+      const fetchItemsByStatus = async () => {
+        setLoading(true);
+        try {
+          const organization_id = localStorage.getItem("organization_id");
+          const status = selectedStatus.value.replace("Status.", "");
+          const queryParams = `organization_id=${organization_id}&page=1&limit=${ITEM_LIST_LIMIT}&status=${status.toLowerCase()}`;
+          
+          console.log("Fetching items by status:", status);
+          console.log("API URL:", `/api/v1/item/getitems?${queryParams}`);
+          
+          const res = await apiService({
+            method: "GET",
+            url: `/api/v1/item/getitems?${queryParams}`,
+          });
+          const itemsData = res.data.data || [];
+          console.log("Fetched items by status:", itemsData);
+          setItems(itemsData);
+        } catch (err) {
+          console.error("Error fetching items by status:", err);
+        } finally {
+          setLoading(false);
+        }
+      };
+      fetchItemsByStatus();
+    }
   }, [selectedStatus]);
 
   // Fetch selected item details
   useEffect(() => {
-    if (!selectedId) return;
+    if (!selectedId || selectedId === 'undefined') {
+      console.log("No selectedId available, skipping item fetch");
+      return;
+    }
+    
+    // Check if we already have the item data
+    const existingItem = items.find(itm => {
+      const itemId = itm._id || itm.item_id || itm.id;
+      return itemId === selectedId || itemId === selectedId.toString();
+    });
+    
+    if (existingItem) {
+      console.log("Using existing item data:", existingItem);
+      setItem(existingItem);
+      return;
+    }
+    
     console.log("Fetching item details for selectedId:", selectedId);
     setLoading(true);
     const fetchItem = async () => {
       try {
         const organization_id = localStorage.getItem("organization_id");
         console.log("Organization ID:", organization_id);
+        console.log("Selected ID type:", typeof selectedId);
+        console.log("Selected ID value:", selectedId);
         let response = null;
+        
+        // Try the getitems endpoint with item_id filter first
         try {
           response = await apiService({
             method: "GET",
-            url: `/api/v1/items/${selectedId}`,
-            params: { organization_id },
+            url: `/api/v1/item/getitems`,
+            params: { 
+              organization_id, 
+              item_id: selectedId 
+            },
           });
-          console.log("API /api/v1/items/ response:", response);
+          console.log("API /api/v1/item/getitems response:", response);
+          
+          // Extract the specific item from the list
+          if (response?.data?.data && Array.isArray(response.data.data)) {
+            const itemFromList = response.data.data.find(item => {
+              const itemId = item._id || item.item_id || item.id;
+              return itemId === selectedId || itemId === selectedId.toString();
+            });
+            if (itemFromList) {
+              console.log("Found item from getitems list:", itemFromList);
+              response = { data: { data: itemFromList } };
+            }
+          }
         } catch (err) {
-          console.log("Pattern 1 failed", err);
+          console.log("Primary API endpoint failed:", err);
         }
-        if (!response) {
+        
+        // Fallback to singleitems endpoint if getitems fails
+        if (!response || !response.data?.data) {
           try {
             response = await apiService({
               method: "GET",
-              url: `/api/v1/item/individual`,
-              params: { organization_id, item_id: selectedId },
+              url: `/api/v1/item/singleitems/${selectedId}`,
+              params: { organization_id },
             });
-            console.log("API /api/v1/item/individual response:", response);
+            console.log("API /api/v1/item/singleitems response:", response);
           } catch (err) {
-            console.log("Pattern 2 failed", err);
+            console.log("Fallback API endpoint failed:", err);
           }
         }
-        if (!response) {
-          try {
-            response = await apiService({
-              method: "GET",
-              url: `/api/v1/item/get-individual-item`,
-              params: { organization_id, item_id: selectedId },
-            });
-            console.log("API /api/v1/item/get-individual-item response:", response);
-          } catch (err) {
-            console.log("Pattern 3 failed", err);
-          }
-        }
+        
         console.log("Final item API response:", response);
         let itemData = response?.data?.data || null;
         
         // If API call failed, try to get item from the items list
         if (!itemData && items.length > 0) {
-          const itemFromList = items.find(itm => 
-            (itm.item_id || itm._id || itm.id) === selectedId
-          );
+          const itemFromList = items.find(itm => {
+            const itemId = itm._id || itm.item_id || itm.id;
+            return itemId === selectedId || itemId === selectedId.toString();
+          });
           if (itemFromList) {
             console.log("Using item data from list as fallback:", itemFromList);
             itemData = itemFromList;
@@ -170,12 +293,59 @@ const ItemSplitView = () => {
       }
     };
     fetchItem();
-  }, [selectedId, items]);
+  }, [selectedId]); // Remove items dependency to prevent re-renders
 
   // Handle item selection
   const handleSelectItem = (id) => {
+    console.log("Selecting item with ID:", id);
+    if (id && id !== selectedId) {
     setSelectedId(id);
     router.push(`/item/${id}`);
+    }
+  };
+
+  // Handle item creation
+  const handleCreateItem = async (itemData) => {
+    try {
+      const organization_id = localStorage.getItem("organization_id");
+      const response = await apiService({
+        method: "POST",
+        url: `/api/v1/items/newitems`,
+        data: {
+          ...itemData,
+          organization_id
+        }
+      });
+      console.log("Item created successfully:", response.data);
+      showMessage("Item created successfully", "success");
+      // Refresh the items list
+      // You can add logic here to refresh the list
+    } catch (err) {
+      console.error("Error creating item:", err);
+      showMessage("Failed to create item", "error");
+    }
+  };
+
+  // Handle item update
+  const handleUpdateItem = async (itemId, itemData) => {
+    try {
+      const organization_id = localStorage.getItem("organization_id");
+      const response = await apiService({
+        method: "PUT",
+        url: `/api/v1/item/${itemId}`,
+        data: {
+          ...itemData,
+          organization_id
+        }
+      });
+      console.log("Item updated successfully:", response.data);
+      showMessage("Item updated successfully", "success");
+      // Refresh the current item data
+      setItem(response.data.data || response.data);
+    } catch (err) {
+      console.error("Error updating item:", err);
+      showMessage("Failed to update item", "error");
+    }
   };
 
   // Top left menu
@@ -440,14 +610,16 @@ const ItemSplitView = () => {
           ) : (
             <Box component="table" sx={{ width: "100%", borderCollapse: "collapse" }}>
               <tbody>
-                {filteredItems.map((itm) => (
+                {filteredItems.map((itm) => {
+                  const itemId = itm._id || itm.item_id || itm.id;
+                  return (
                   <tr
-                    key={itm.item_id || itm._id || itm.id}
+                      key={itemId}
                     style={{
-                      background: (itm.item_id || itm._id || itm.id) === selectedId ? "#f5f7fa" : "#fff",
+                        background: itemId === selectedId || itemId === selectedId?.toString() ? "#f5f7fa" : "#fff",
                       cursor: "pointer",
                     }}
-                    onClick={() => handleSelectItem(itm.item_id || itm._id || itm.id)}
+                                            onClick={() => handleSelectItem(itemId)}
                   >
                     <td style={{ width: 36, padding: 0, textAlign: "center" }}>
                       <Checkbox
@@ -465,63 +637,16 @@ const ItemSplitView = () => {
                       ₹{Number(itm.rate || itm.rate_formatted || 0).toLocaleString("en-IN", { minimumFractionDigits: 2 })}
                     </td>
                   </tr>
-                ))}
+                  );
+                })}
               </tbody>
             </Box>
           )}
         </Box>
       </Box>
-
-      {/* Right Panel */}
-      <Box sx={{ flex: 1, display: "flex", flexDirection: "column", minWidth: 0 }}>
-        {/* Top Bar */}
-        <Box sx={{ display: "flex", alignItems: "center", px: 4, py: 3, borderBottom: "1px solid #eee" }}>
-          <Typography variant="h5" sx={{ fontWeight: 600, flex: 1, color: "#222" }} noWrap>
-            {item?.item_name || item?.name || ""}
-          </Typography>
-          <IconButton onClick={() => router.push(`/item/edit/${selectedId}`)}><EditIcon /></IconButton>
-          <IconButton onClick={handleRightMenuOpen}><MoreVertIcon /></IconButton>
-          <Menu anchorEl={rightMenuAnchor} open={Boolean(rightMenuAnchor)} onClose={handleRightMenuClose}>
-            <MenuItem onClick={() => router.push(`/item/edit/${selectedId}`)}>Edit</MenuItem>
-            <MenuItem disabled>Delete</MenuItem>
-          </Menu>
-          <IconButton onClick={() => router.push("/item")}> <CloseIcon /> </IconButton>
-        </Box>
-        {/* Tabs */}
-        <Box sx={{ px: 4, borderBottom: "1px solid #eee" }}>
-          <Tabs value={tab} onChange={handleTabChange} sx={{ minHeight: 36 }} TabIndicatorProps={{ sx: { height: 2, bgcolor: "#222" } }}>
-            <Tab label="Overview" sx={{ fontWeight: 500, fontSize: 13, minWidth: 80, color: "#222", py: 0.5, minHeight: 32 }} />
-            <Tab label="Transactions" sx={{ fontWeight: 500, fontSize: 13, minWidth: 80, color: "#222", py: 0.5, minHeight: 32 }} />
-            <Tab label="History" sx={{ fontWeight: 500, fontSize: 13, minWidth: 80, color: "#222", py: 0.5, minHeight: 32 }} />
-          </Tabs>
-        </Box>
-        {/* Tab Content */}
-        <Box sx={{ flex: 1, overflowY: "auto", px: 4, py: 3 }}>
-          {console.log("Debug - loading:", loading, "item:", item, "tab:", tab, "selectedId:", selectedId)}
-          {loading ? (
-            <Box sx={{ display: "flex", justifyContent: "center", mt: 4 }}><CircularProgress size={32} /></Box>
-          ) : !item ? (
-            <Typography color="text.secondary">No item data found.</Typography>
-          ) : tab === 0 ? (
-            // --- Overview Tab ---
-            <ItemOverview 
-              data={item} 
-              onEdit={() => router.push(`/item/edit/${selectedId}`)}
-            />
-          ) : tab === 1 ? (
-            // --- Transactions Tab ---
-            <ItemTransactions 
-              itemId={selectedId} 
-              organizationId={localStorage.getItem("organization_id")}
-            />
-          ) : (
-            // --- History Tab ---
-            <ItemHistory 
-              itemId={selectedId} 
-              organizationId={localStorage.getItem("organization_id")}
-            />
-          )}
-        </Box>
+      {/* Right Panel: ItemViewComponent */}
+      <Box sx={{ flex: 1, minWidth: 0 }}>
+        <ItemViewComponent itemId={selectedId} />
       </Box>
     </Box>
   );

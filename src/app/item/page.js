@@ -177,18 +177,44 @@ const ItemsTable = () => {
   const [welcomePg, setWelcomPg] = useState(false);
 
   const handleRowClick = (item) => {
-    // Check for different possible ID fields
-    const itemId = item.id || item.item_id || item._id || item.itemId;
+    // Debug: Log the entire item to see its structure
+    console.log("MAIN PAGE - Row clicked - Full item data:", item);
+    console.log("MAIN PAGE - All item keys:", Object.keys(item));
+    
+    // Try different possible ID fields - check all possible variations
+    const possibleIdFields = ['_id', 'item_id', 'id', 'itemId', 'ItemId'];
+    let itemId = null;
+    
+    for (const field of possibleIdFields) {
+      if (item[field]) {
+        itemId = item[field];
+        console.log(`MAIN PAGE - Found ID in field '${field}':`, itemId);
+        break;
+      }
+    }
+    
+    console.log("MAIN PAGE - Final extracted itemId:", itemId);
+    
     if (itemId) {
+      console.log("MAIN PAGE - Navigating to item:", itemId, "from item data:", item);
       router.push(`/item/${itemId}`);
     } else {
-      console.error("No ID found in item:", item);
-      showMessage("Error: Item ID not found", "error");
+      console.error("MAIN PAGE - No ID found in item:", item);
+      console.log("MAIN PAGE - All item fields:", Object.keys(item));
+      
+      // Temporary fallback: use item name as ID for testing
+      const fallbackId = item.item_name || item.name || item.ItemName || item.itemName;
+      if (fallbackId) {
+        console.log("MAIN PAGE - Using fallback ID (item name):", fallbackId);
+        router.push(`/item/${fallbackId}`);
+      } else {
+        showMessage("Error: Item ID not found", "error");
+      }
     }
   };
 
   const handleSelectAll = () => {
-    setSelected(allSelected ? [] : itemsList.map((row) => row.id || row.item_id || row._id));
+    setSelected(allSelected ? [] : itemsList.map((row) => row._id || row.item_id || row.id));
   };
 
   const handleSelectRow = (id) => {
@@ -251,12 +277,20 @@ const ItemsTable = () => {
   };
 
   useEffect(() => {
+    console.log("Initial load - fetching items with filterBy:", filterBy);
     fetchItemsList(filterBy);
   }, []);
 
   const fetchItemsList = async (filterValue) => {
     try {
       const organization_id = localStorage.getItem("organization_id");
+      console.log("Fetching items with organization_id:", organization_id);
+      
+      if (!organization_id) {
+        console.error("No organization_id found!");
+        showMessage("Error: Organization ID not found", "error");
+        return;
+      }
       
       // Build query parameters based on filter
       let queryParams = `organization_id=${organization_id}&page=1&limit=50&sortBy=createdAt&order=desc`;
@@ -267,6 +301,8 @@ const ItemsTable = () => {
         queryParams += `&status=${status.toLowerCase()}`;
       }
       
+      console.log("API URL:", `api/v1/item/getitems?${queryParams}`);
+      
       const response = await apiService({
         method: "GET",
         url: `api/v1/item/getitems?${queryParams}`,
@@ -274,6 +310,38 @@ const ItemsTable = () => {
       });
       
       const data = response.data.data || [];
+      
+      // Debug: Log the first item to understand the data structure
+      if (data.length > 0) {
+        console.log("First item structure:", data[0]);
+        console.log("Available ID fields:", {
+          _id: data[0]._id,
+          id: data[0].id,
+          item_id: data[0].item_id,
+          itemId: data[0].itemId
+        });
+        console.log("All item IDs for debugging:", data.map(item => ({
+          name: item.item_name || item.name,
+          _id: item._id,
+          id: item.id,
+          item_id: item.item_id
+        })));
+        
+        // Test: Log what happens when we try to extract ID from first item
+        const testItem = data[0];
+        const possibleIdFields = ['_id', 'item_id', 'id', 'itemId', 'ItemId'];
+        let foundId = null;
+        for (const field of possibleIdFields) {
+          if (testItem[field]) {
+            foundId = testItem[field];
+            console.log(`Found ID in field '${field}':`, foundId);
+            break;
+          }
+        }
+        if (!foundId) {
+          console.log("No ID found in any field for first item");
+        }
+      }
 
       if (filterValue === "Status.All" && data.length === 0) {
         setWelcomPg(true);
@@ -756,23 +824,27 @@ const ItemsTable = () => {
         <Divider />
         {/*Full-width Table*/}
         {!welcomePg ? (
-          <CustomizedTable
-            columns={columns}
-            staticData={itemsList}
-            selected={selected}
-            handleSelectAll={handleSelectAll}
-            handleSelectRow={handleSelectRow}
-            allSelected={allSelected}
-            settingsAnchorEl={settingsAnchorEl}
-            handleSettingsClick={handleSettingsClick}
-            handleSettingsClose={handleSettingsClose}
-            selectedMenuItem={selectedMenuItem}
-            onRowClick={handleRowClick}
-            setSelectedMenuItem={setSelectedMenuItem}
-            handleOpenSearchDialog={handleOpenSearchDialog}
-            selectedType={selectedType}
-            value="item"
-          />
+          <>
+           
+            <CustomizedTable
+              columns={columns}
+              staticData={itemsList}
+              selected={selected}
+              handleSelectAll={handleSelectAll}
+              handleSelectRow={handleSelectRow}
+              allSelected={allSelected}
+              settingsAnchorEl={settingsAnchorEl}
+              handleSettingsClick={handleSettingsClick}
+              handleSettingsClose={handleSettingsClose}
+              selectedMenuItem={selectedMenuItem}
+              onRowClick={handleRowClick}
+              setSelectedMenuItem={setSelectedMenuItem}
+              handleOpenSearchDialog={handleOpenSearchDialog}
+              selectedType={selectedType}
+              value="item"
+            />
+            {console.log("MAIN PAGE - Rendering CustomizedTable with onRowClick:", handleRowClick)}
+          </>
         ) : (
           <Typography variant="h6" sx={{ textAlign: "center", my: 4 }}>
             No items found. Click the New button to create one.

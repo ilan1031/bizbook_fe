@@ -155,6 +155,8 @@ const PaymentViewComponent = (data) => {
         getJournals(response.data.data.payment.journal_id);
         console.log(response.data.data.payment.journal_id, "responsess");
         console.log("Payment details:", response.data.data);
+        console.log("Payment status:", response.data.data.payment.status);
+        console.log("Status type:", typeof response.data.data.payment.status);
       }
     } catch (error) {
       console.log("Error in Fetching the Individual Payment Details", error);
@@ -445,6 +447,76 @@ const PaymentViewComponent = (data) => {
     }
   };
 
+  // Status management functions
+  const getStatusColor = (status) => {
+    // Ensure status is a string and handle null/undefined
+    const statusStr = String(status || "").toLowerCase();
+    switch (statusStr) {
+      case "draft":
+      case "1":
+        return "#94a5a6";
+      case "paid":
+      case "2":
+        return "#1fcd6d";
+      case "void":
+      case "3":
+        return "#474747";
+      default:
+        return "#474747";
+    }
+  };
+
+  const getStatusText = (status) => {
+    // Ensure status is a string and handle null/undefined
+    const statusStr = String(status || "").toLowerCase();
+    switch (statusStr) {
+      case "draft":
+      case "1":
+        return "Draft";
+      case "paid":
+      case "2":
+        return "Paid";
+      case "void":
+      case "3":
+        return "Void";
+      default:
+        return "Draft";
+    }
+  };
+
+  const handleStatusChange = async (newStatus) => {
+    try {
+      const org_id = localStorage.getItem("organization_id");
+      const payment_id = thePayment?.payment?.payment_id;
+
+      if (!org_id || !payment_id) {
+        showMessage("Organization or Payment ID is missing", "error");
+        return;
+      }
+
+      const response = await apiService({
+        method: "PUT",
+        url: `/api/v1/payments/status?organization_id=${org_id}&payment_id=${payment_id}`,
+        data: {
+          status: newStatus,
+          status_formatted: getStatusText(newStatus)
+        },
+        customBaseUrl: config.PO_Base_url,
+      });
+
+      if (response.statusCode === 200 || response.statusCode === true) {
+        showMessage(`Payment status updated to ${getStatusText(newStatus)}`, "success");
+        // Refresh payment details
+        getPaymentDetails(paymentId, org_id);
+      } else {
+        showMessage("Failed to update payment status", "error");
+      }
+    } catch (error) {
+      console.error("Error updating payment status:", error);
+      showMessage("Failed to update payment status", "error");
+    }
+  };
+
   const Header = () => (
     <Box
       sx={{
@@ -723,33 +795,25 @@ const PaymentViewComponent = (data) => {
               elevation={3}
               sx={{ borderRadius: 2, fontSize: "13px" }}
             >
-              <MenuItem
-                sx={{
-                  fontSize: "13px",
-                  "&:hover": {
-                    backgroundColor: "#408dfb",
-                    color: "white",
-                    borderRadius: 2,
-                  },
-                }}
-              >
-                Mark as Void
-              </MenuItem>
-
-              <MenuItem
-                sx={{
-                  fontSize: "13px",
-                  "&:hover": {
-                    backgroundColor: "#408dfb",
-                    color: "white",
-                    borderRadius: 2,
+              {(String(thePayment?.payment?.status || "").toLowerCase() === "paid" || 
+                String(thePayment?.payment?.status || "") === "2") && (
+                <MenuItem
+                  onClick={() => {
+                    handleStatusChange("void");
+                    handleClose();
+                  }}
+                  sx={{
                     fontSize: "13px",
-                  },
-                }}
-              >
-                Clone
-              </MenuItem>
-
+                    "&:hover": {
+                      backgroundColor: "#408dfb",
+                      color: "white",
+                      borderRadius: 2,
+                    },
+                  }}
+                >
+                  Void
+                </MenuItem>
+              )}
               <MenuItem
                 onClick={() => {
                   handleDeletePayment();
@@ -841,7 +905,66 @@ const PaymentViewComponent = (data) => {
             </IconButton>
             <Box>Email</Box>
           </Box>
+          {/* Status change buttons based on current status */}
+          {(String(thePayment?.payment?.status || "").toLowerCase() === "draft" || 
+            String(thePayment?.payment?.status || "") === "1") && (
+            <Box
+              sx={{
+                display: "flex",
+                alignItems: "center",
+                p: 1,
+                paddingRight: 2,
+                borderRight: "1px solid #ddd",
+                cursor: "pointer",
+                "&:hover": {
+                  color: "#408dfb",
+                },
+              }}
+              onClick={() => handleStatusChange("paid")}
+            >
+              <IconButton
+                size="small"
+                sx={{
+                  "&:hover": {
+                    color: "#408dfb",
+                  },
+                }}
+              >
+              </IconButton>
+              <Box>Mark as Paid</Box>
+            </Box>
+          )}
 
+         
+
+          {(String(thePayment?.payment?.status || "").toLowerCase() === "void" || 
+            String(thePayment?.payment?.status || "") === "3") && (
+            <Box
+              sx={{
+                display: "flex",
+                alignItems: "center",
+                p: 1,
+                paddingRight: 2,
+                borderRight: "1px solid #ddd",
+                cursor: "pointer",
+                "&:hover": {
+                  color: "#408dfb",
+                },
+              }}
+              onClick={() => handleStatusChange("draft")}
+            >
+              <IconButton
+                size="small"
+                sx={{
+                  "&:hover": {
+                    color: "#408dfb",
+                  },
+                }}
+              >
+              </IconButton>
+              <Box>Convert to Draft</Box>
+            </Box>
+          )}
           {/* PDF/Print */}
           <Box
             sx={{
@@ -1008,6 +1131,8 @@ const PaymentViewComponent = (data) => {
             px: 7,
             bgcolor: "white",
             mb: 6,
+            position: "relative",
+            overflow: "hidden",
           }}
         >
           {/*The Organization Details*/}
@@ -1063,6 +1188,36 @@ const PaymentViewComponent = (data) => {
           >
             PAYMENTS MADE
           </Typography>
+
+          {/* Diagonal Status Banner */}
+          {thePayment?.payment?.status && (
+            <Box
+              sx={{
+                position: "absolute",
+                top: "10px",
+                left: "-20px",
+                backgroundColor: getStatusColor(thePayment.payment.status),
+                color: "white",
+                padding: "5px 5px",
+                fontSize: "14px",
+                fontWeight: "700",
+                textTransform: "uppercase",
+                transform: "rotate(-45deg)",
+                transformOrigin: "center",
+                zIndex: 1000,
+                boxShadow: "0 4px 8px rgba(0,0,0,0.3)",
+                letterSpacing: "1px",
+                minWidth: "120px",
+                textAlign: "center",
+                paddingLeft: "5px",
+                paddingRight: "5px",
+              }}
+            >
+              {getStatusText(thePayment.payment.status)}
+            </Box>
+          )}
+          
+         
 
           {/* Payment Details Section */}
           <Box sx={{ display: "flex", flexWrap: "wrap", mb: 4 }}>

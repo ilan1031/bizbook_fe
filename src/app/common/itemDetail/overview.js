@@ -35,19 +35,27 @@ const sections = [
   },
 ];
 
-const ItemOverview = ({ data: propData, itemId, organizationId }) => {
+const ItemOverview = ({ data: propData, itemId, organizationId, forceRefresh = false }) => {
   const [data, setData] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
   // Use prop data if provided, otherwise fetch from API
   useEffect(() => {
+    console.log("ItemOverview - propData:", propData);
+    console.log("ItemOverview - itemId:", itemId);
+    console.log("ItemOverview - organizationId:", organizationId);
+    
+    // If propData is provided, use it directly
     if (propData) {
+      console.log("ItemOverview - Using propData:", propData);
       setData(propData);
       setLoading(false);
+      setError(null);
       return;
     }
 
+    // Only fetch from API if propData is not provided
     if (!itemId || !organizationId) {
       setLoading(false);
       setError("Missing item ID or organization ID");
@@ -61,56 +69,56 @@ const ItemOverview = ({ data: propData, itemId, organizationId }) => {
       try {
         let response = null;
         
-        // Try multiple API endpoint patterns like other parts of the app
+        // Try the getitems endpoint first (more reliable)
         try {
           response = await apiService({
             method: "GET",
-            url: `/api/v1/items/${itemId}`,
-            params: { organization_id: organizationId },
+            url: `/api/v1/item/getitems`,
+            params: { 
+              organization_id: organizationId,
+              item_id: itemId 
+            },
           });
-        } catch (err) {
-          console.log("Pattern 1 failed, trying pattern 2...");
-        }
-        
-        if (!response) {
-          try {
-            response = await apiService({
-              method: "GET",
-              url: `/api/v1/item/individual`,
-              params: { 
-                organization_id: organizationId, 
-                item_id: itemId 
-              },
+          console.log("ItemOverview - getitems response:", response);
+          
+          // Extract the specific item from the list
+          if (response?.data?.data && Array.isArray(response.data.data)) {
+            const itemFromList = response.data.data.find(item => {
+              const itemId = item._id || item.item_id || item.id;
+              return itemId === itemId || itemId === itemId.toString();
             });
-          } catch (err) {
-            console.log("Pattern 2 failed, trying pattern 3...");
+            if (itemFromList) {
+              console.log("ItemOverview - Found item from getitems list:", itemFromList);
+              response = { data: { data: itemFromList } };
+            }
           }
+        } catch (err) {
+          console.log("ItemOverview - getitems API failed:", err);
         }
         
-        if (!response) {
+        // Fallback to singleitems endpoint if getitems fails
+        if (!response || !response.data?.data) {
           try {
             response = await apiService({
               method: "GET",
-              url: `/api/v1/item/get-individual-item`,
-              params: { 
-                organization_id: organizationId, 
-                item_id: itemId 
-              },
+              url: `/api/v1/item/singleitems/${itemId}`,
+              params: { organization_id: organizationId },
             });
+            console.log("ItemOverview - singleitems response:", response);
           } catch (err) {
-            console.log("Pattern 3 failed");
+            console.log("ItemOverview - singleitems API failed:", err);
           }
         }
 
         if (response && response.data) {
           const itemData = response.data.data || response.data;
-          console.log("Fetched item data:", itemData);
+          console.log("ItemOverview - Final item data:", itemData);
           setData(itemData);
         } else {
           throw new Error("No data received from API");
         }
       } catch (err) {
-        console.error("Error fetching item details:", err);
+        console.error("ItemOverview - Error fetching item details:", err);
         setError("Failed to load item details");
       } finally {
         setLoading(false);
@@ -118,7 +126,7 @@ const ItemOverview = ({ data: propData, itemId, organizationId }) => {
     };
 
     fetchItemDetails();
-  }, [propData, itemId, organizationId]);
+  }, [propData, itemId, organizationId, forceRefresh]); // Added propData to dependencies
 
   const formatCurrency = (value) =>
     value != null && value !== "-" && value !== ""
@@ -175,7 +183,7 @@ const ItemOverview = ({ data: propData, itemId, organizationId }) => {
   }
 
   return (
-    <Box sx={{ p: 0, pt: 3, pr: 6 }}>
+    <Box sx={{ p: 0, pt: 3, pr: 6,ml:2}}>
       {sections.map((section, idx) => {
         const fieldsWithData = section.fields.filter(
           (field) => getFieldValue(field, data) !== null

@@ -40,6 +40,7 @@ export default function UserManagementInterface({
 
   useEffect(() => {
     console.log(staticData, "staticData");
+    console.log("Current type:", type);
     setLoading(false);
 
     const timer = setTimeout(() => {
@@ -60,6 +61,8 @@ export default function UserManagementInterface({
           ? "account_id"
           : type === "RecurringBills"
           ? "recurring_bill_id"
+          : type === "PaymentMade"
+          ? "payment_id"
           : "";
       console.log(activeID, "activeID", fetchType, "fetchType", "#####");
       // Ensure we create a new array to avoid mutating state
@@ -252,7 +255,15 @@ export default function UserManagementInterface({
                                 fontSize: "0.75rem",
                                 textTransform: "uppercase",
                                 color:
-                                  user.status_type === "OPEN"
+                                  // Payment Made status colors - HIGHEST PRIORITY
+                                  (type === "PaymentMade" || type === "Payment") && (user.status === "draft" || user.status === 1)
+                                    ? (() => { console.log("Draft color applied"); return "#94a5a6"; })()
+                                    : (type === "PaymentMade" || type === "Payment") && (user.status === "paid" || user.status === 2)
+                                    ? (() => { console.log("Paid color applied - GREEN"); return "#1fcd6d"; })()
+                                    : (type === "PaymentMade" || type === "Payment") && (user.status === "void" || user.status === 3)
+                                    ? (() => { console.log("Void color applied"); return "#474747"; })()
+                                    // Other status colors - LOWER PRIORITY
+                                    : user.status_type === "OPEN"
                                     ? "#408dfb"
                                     : user.status_type === "VOID"
                                     ? "#d3d3d3"
@@ -261,7 +272,7 @@ export default function UserManagementInterface({
                                     : user.status === 1
                                     ? "#a696a4"
                                     : user.status === 2
-                                    ? "#f85275"
+                                    ? (() => { console.log("General status 2 - RED applied"); return "#f85275"; })()
                                     : user.status === 3
                                     ? "#3fcbe1"
                                     : user.status === "Active"
@@ -291,6 +302,14 @@ export default function UserManagementInterface({
                                   : user.status === 2
                                   ? "INVOICED"
                                   : ""
+                                : (type === "PaymentMade" || type === "Payment")
+                                ? (() => {
+                                    console.log("Payment type detected, status:", user.status, "type:", typeof user.status);
+                                    if (user.status === "draft" || user.status === 1) return "DRAFT";
+                                    if (user.status === "paid" || user.status === 2) return "PAID";
+                                    if (user.status === "void" || user.status === 3) return "VOID";
+                                    return "DRAFT";
+                                  })()
                                 : user.status_type}
                               {type === "PurchaseOrder" ? (
                                 <></>
