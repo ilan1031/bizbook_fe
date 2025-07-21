@@ -128,7 +128,7 @@ const ItemTransactions = ({ itemId, organizationId }) => {
   };
 
   return (
-    <Box sx={{ p: 0, pt: 3, pr: 6 }}>
+    <Box sx={{ p: 0, pt: 3, pr: 6 ,ml:2}}>
       {/* Filter Bar */}
       <Box sx={{ display: "flex", alignItems: "center", gap: 2, mb: 2 }}>
         <Button
