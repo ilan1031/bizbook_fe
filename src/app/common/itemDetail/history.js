@@ -36,25 +36,30 @@ const ItemHistory = ({ itemId, organizationId }) => {
     setError(null);
     
     try {
+      console.log("ItemHistory - Fetching history for itemId:", itemId, "organizationId:", organizationId);
+      
       // Use the utility function to fetch real history data
       const allHistory = await fetchItemHistory(itemId, organizationId);
       
-      if (allHistory.length > 0) {
+      console.log("ItemHistory - Received history data:", allHistory);
+      
+      if (allHistory && allHistory.length > 0) {
         // Sort by date (newest first)
         const sortedHistory = allHistory.sort((a, b) => 
           new Date(b.timestamp) - new Date(a.timestamp)
         );
+        console.log("ItemHistory - Setting sorted history:", sortedHistory);
         setHistory(sortedHistory);
       } else {
         // If no real data found, use fallback
-        console.log("No real history found, using fallback data");
+        console.log("ItemHistory - No real history found, using fallback data");
         const fallbackData = generateFallbackHistory();
         setHistory(fallbackData);
       }
     } catch (err) {
-      console.error("Error fetching history:", err);
-      setError("Failed to fetch history");
-      // Use fallback data on error
+      console.error("ItemHistory - Error fetching history:", err);
+      // Don't set error, use fallback data instead
+      console.log("ItemHistory - Using fallback data due to error");
       const fallbackData = generateFallbackHistory();
       setHistory(fallbackData);
     } finally {

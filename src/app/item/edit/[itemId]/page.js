@@ -29,6 +29,7 @@ import {
   CloudUpload as CloudUploadIcon,
   Search as SearchIcon,
   ArrowBack as ArrowBackIcon,
+  Add as AddIcon,
 } from "@mui/icons-material";
 import Alert from "@mui/material/Alert";
 import apiService from "../../../../services/axiosService";
@@ -200,99 +201,123 @@ const EditItemForm = () => {
   const fetchItemDetails = async () => {
     try {
       setLoading(true);
-      console.log("Fetching item details for ID:", itemId);
+      console.log("EDIT PAGE - Fetching item details for ID:", itemId);
+      console.log("EDIT PAGE - Organization ID:", organization_id);
       
-      // Try multiple endpoint patterns
       let response = null;
       
-      // Pattern 1: Try with plural "items"
-      try {
-        response = await apiService({
-          method: "GET",
-          url: `/api/v1/items/${itemId}`,
-          params: { organization_id },
-        });
-        console.log("Pattern 1 success:", response.data);
+              // Try getitems endpoint first (more reliable)
+        try {
+          console.log("EDIT PAGE - Trying getitems with item_id filter:", itemId);
+          const admin_id = localStorage.getItem("admin_id") || organization_id;
+          response = await apiService({
+            method: "GET",
+            url: `/api/v1/item/getitems`,
+            params: { 
+              organization_id,
+              admin_id: admin_id,
+              item_id: itemId 
+            },
+          });
+        console.log("EDIT PAGE - getitems endpoint response:", response.data);
+        
+        // Extract the specific item from the list
+        if (response?.data?.data && Array.isArray(response.data.data)) {
+          console.log("EDIT PAGE - Items in response:", response.data.data.length);
+          const itemFromList = response.data.data.find(item => {
+            const itemIdFromItem = item._id || item.item_id || item.id;
+            const matches = itemIdFromItem === itemId || itemIdFromItem === itemId.toString();
+            console.log("EDIT PAGE - Checking item:", itemIdFromItem, "against:", itemId, "matches:", matches);
+            return matches;
+          });
+          if (itemFromList) {
+            console.log("EDIT PAGE - Found item from getitems list:", itemFromList);
+            response = { data: { data: itemFromList } };
+          } else {
+            console.log("EDIT PAGE - Item not found in getitems response");
+          }
+        } else {
+          console.log("EDIT PAGE - No data array in getitems response");
+        }
       } catch (err) {
-        console.log("Pattern 1 failed:", err.message);
+        console.log("EDIT PAGE - getitems endpoint failed:", err.message);
       }
       
-      // Pattern 2: Try with query parameter instead of path parameter
-      if (!response) {
+      // Fallback: Try singleitems endpoint
+      if (!response || !response.data) {
         try {
+          const admin_id = localStorage.getItem("admin_id") || organization_id;
           response = await apiService({
             method: "GET",
-            url: `/api/v1/item/individual`,
+            url: `/api/v1/item/singleitems/${itemId}`,
             params: { 
               organization_id,
-              item_id: itemId 
+              admin_id: admin_id
             },
           });
-          console.log("Pattern 2 success:", response.data);
+          console.log("EDIT PAGE - singleitems endpoint success:", response.data);
         } catch (err) {
-          console.log("Pattern 2 failed:", err.message);
+          console.log("EDIT PAGE - singleitems endpoint failed:", err.message);
         }
       }
       
-      // Pattern 3: Try with different endpoint structure
-      if (!response) {
+      // Fallback: Try with different endpoint patterns
+      if (!response || !response.data) {
         try {
-          response = await apiService({
-            method: "GET",
-            url: `/api/v1/item/get-individual-item`,
-            params: { 
-              organization_id,
-              item_id: itemId 
-            },
-          });
-          console.log("Pattern 3 success:", response.data);
-        } catch (err) {
-          console.log("Pattern 3 failed:", err.message);
-        }
-      }
-      
-      // Pattern 4: Try with item ID in path
-      if (!response) {
-        try {
+          const admin_id = localStorage.getItem("admin_id") || organization_id;
           response = await apiService({
             method: "GET",
             url: `/api/v1/item/${itemId}`,
-            params: { organization_id },
-          });
-          console.log("Pattern 4 success:", response.data);
-        } catch (err) {
-          console.log("Pattern 4 failed:", err.message);
-        }
-      }
-      
-      // Pattern 5: Try with different endpoint structure
-      if (!response) {
-        try {
-          response = await apiService({
-            method: "GET",
-            url: `/api/v1/items/get/${itemId}`,
-            params: { organization_id },
-          });
-          console.log("Pattern 5 success:", response.data);
-        } catch (err) {
-          console.log("Pattern 5 failed:", err.message);
-        }
-      }
-      
-      // Pattern 6: Try with query parameter structure
-      if (!response) {
-        try {
-          response = await apiService({
-            method: "GET",
-            url: `/api/v1/items/details`,
             params: { 
               organization_id,
-              id: itemId 
+              admin_id: admin_id
             },
           });
-          console.log("Pattern 6 success:", response.data);
+          console.log("EDIT PAGE - item/{id} endpoint success:", response.data);
         } catch (err) {
-          console.log("Pattern 6 failed:", err.message);
+          console.log("EDIT PAGE - item/{id} endpoint failed:", err.message);
+        }
+      }
+      
+      if (!response || !response.data) {
+        try {
+          response = await apiService({
+            method: "GET",
+            url: `/api/v1/items/${itemId}`,
+            params: { organization_id },
+          });
+          console.log("EDIT PAGE - items/{id} endpoint success:", response.data);
+        } catch (err) {
+          console.log("EDIT PAGE - items/{id} endpoint failed:", err.message);
+        }
+      }
+      
+      // Final fallback: Try to get item from the items list without filtering
+      if (!response || !response.data) {
+        try {
+          const allItemsResponse = await apiService({
+            method: "GET",
+            url: `/api/v1/item/getitems`,
+            params: { 
+              organization_id,
+              page: 1,
+              limit: 100
+            },
+          });
+          console.log("EDIT PAGE - All items response:", allItemsResponse.data);
+          
+          if (allItemsResponse?.data?.data && Array.isArray(allItemsResponse.data.data)) {
+            const itemFromAllList = allItemsResponse.data.data.find(item => {
+              const itemId = item._id || item.item_id || item.id;
+              return itemId === itemId || itemId === itemId.toString();
+            });
+            if (itemFromAllList) {
+              console.log("EDIT PAGE - Found item from all items list:", itemFromAllList);
+              response = { data: { data: itemFromAllList } };
+            }
+          }
+        } catch (err) {
+          console.log("EDIT PAGE - All items fallback failed:", err.message);
         }
       }
       
@@ -370,10 +395,11 @@ const EditItemForm = () => {
       
       // Extract item data from response
       const item = response.data?.data || response.data || response;
-      console.log("Extracted item data:", item);
+      console.log("EDIT PAGE - Extracted item data:", item);
+      console.log("EDIT PAGE - Item keys:", Object.keys(item || {}));
       
       // Map the API response to form values based on creation structure
-      setInitialValues({
+      const mappedValues = {
         // Basic Information - based on creation format
         name: item.name || item.item_name || "",
         type: item.item_type || item.type || "goods",
@@ -405,9 +431,10 @@ const EditItemForm = () => {
         valuationMethod: item.valuation_method || "",
         openingStock: item.opening_stock || "",
         openingStockRate: item.opening_stock_rate || "",
-      });
+      };
       
-      console.log("Set initial values:", initialValues);
+      console.log("EDIT PAGE - Mapped form values:", mappedValues);
+      setInitialValues(mappedValues);
     } catch (error) {
       console.error("Error fetching item details:", error);
       showMessage("Error loading item details", "error");
@@ -455,10 +482,10 @@ const EditItemForm = () => {
     try {
       console.log("Submitting form values:", values);
       
-      // Format the data according to your model
+      // Format the data according to your backend model
       const formattedData = {
-        item_id: values.sku || itemId,
-        organization_id: `${organization_id}`,
+        item_id: itemId, // Use the actual item ID from URL
+        admin_id: localStorage.getItem("admin_id") || organization_id,
         name: values.name,
         item_name: values.name,
         unit: values.unit,
@@ -497,78 +524,48 @@ const EditItemForm = () => {
 
       console.log("Formatted data for update:", formattedData);
 
-      // Try multiple endpoint patterns for update
-      let response = null;
+      // Use the correct endpoint based on your backend route: router.put("/item/:id", ...)
+      console.log("EDIT PAGE - Attempting update with data:", formattedData);
+      console.log("EDIT PAGE - Item ID:", itemId);
+      console.log("EDIT PAGE - Organization ID:", organization_id);
       
-      // Pattern 1: Try with plural "items"
+      // Use the item_id from the form data if available, otherwise use the URL parameter
+      const updateItemId = formattedData.item_id || itemId;
+      console.log("EDIT PAGE - Using item ID for update:", updateItemId);
+      
       try {
-        response = await apiService({
+        // Get admin_id from localStorage or use organization_id as fallback
+        const admin_id = localStorage.getItem("admin_id") || organization_id;
+        
+        const response = await apiService({
           method: "PUT",
-          url: `/api/v1/items/${itemId}`,
+          url: `/api/v1/item/${updateItemId}`,
           data: formattedData,
-          params: { organization_id },
+          params: { 
+            organization_id,
+            admin_id: admin_id
+          },
         });
-        console.log("Update pattern 1 success:", response.data);
+        
+        console.log("EDIT PAGE - Update successful:", response.data);
+        
+        if (response.data.status) {
+          showMessage("Item updated successfully!", "success");
+          router.push(`/item/${updateItemId}`);
+        } else {
+          showMessage(response.data.message || "Failed to update item", "error");
+        }
       } catch (err) {
-        console.log("Update pattern 1 failed:", err.message);
-      }
-      
-      // Pattern 2: Try with query parameter
-      if (!response) {
-        try {
-          response = await apiService({
-            method: "PUT",
-            url: `/api/v1/item/update`,
-            data: formattedData,
-            params: { 
-              organization_id,
-              item_id: itemId 
-            },
-          });
-          console.log("Update pattern 2 success:", response.data);
-        } catch (err) {
-          console.log("Update pattern 2 failed:", err.message);
-        }
-      }
-      
-      // Pattern 3: Try original pattern
-      if (!response) {
-        try {
-          response = await apiService({
-            method: "PUT",
-            url: `/api/v1/item/${itemId}`,
-            data: formattedData,
-            params: { organization_id },
-          });
-          console.log("Update pattern 3 success:", response.data);
-        } catch (err) {
-          console.log("Update pattern 3 failed:", err.message);
-        }
-      }
-      
-      // Pattern 4: Try with POST method (some APIs use POST for updates)
-      if (!response) {
-        try {
-          response = await apiService({
-            method: "POST",
-            url: `/api/v1/item/update`,
-            data: formattedData,
-            params: { 
-              organization_id,
-              item_id: itemId 
-            },
-          });
-          console.log("Update pattern 4 success:", response.data);
-        } catch (err) {
-          console.log("Update pattern 4 failed:", err.message);
-        }
-      }
-
-      if (response) {
-        showMessage("Item updated successfully", "success");
-        router.push(`/item/${itemId}`);
-      } else {
-        showMessage("Failed to update item - no working API endpoint found", "error");
+        console.error("EDIT PAGE - Update error details:", {
+          message: err.message,
+          response: err.response?.data,
+          status: err.response?.status,
+          statusText: err.response?.statusText
+        });
+        
+        // Show specific error message
+        const errorMessage = err.response?.data?.message || err.message || "Failed to update item";
+        showMessage(errorMessage, "error");
       }
     } catch (error) {
       console.error("Error updating item:", error);
@@ -586,10 +583,151 @@ const EditItemForm = () => {
     router.push(`/item/${itemId}`);
   };
 
+  // Create a test item for testing purposes
+  const createTestItem = async () => {
+    try {
+      const testItemData = {
+        item_id: `test-${Date.now()}`,
+        organization_id: organization_id,
+        name: "Test Item",
+        item_name: "Test Item",
+        unit: "pcs",
+        status: "active",
+        description: "Test item for editing",
+        rate: 100,
+        rate_formatted: "100",
+        tax_id: "",
+        purchase_account_id: "cost-of-goods-sold",
+        purchase_account_name: "Cost of Goods Sold",
+        account_id: "sales",
+        account_name: "Sales",
+        purchase_description: "Test purchase description",
+        purchase_rate: 80,
+        purchase_rate_formatted: "80",
+        can_be_sold: true,
+        can_be_purchased: true,
+        track_inventory: false,
+        item_type: "goods",
+        item_type_formatted: "Goods",
+        is_taxable: true,
+        sku: `SKU-${Date.now()}`,
+        hsn_or_sac: "12345678",
+        tags: [],
+      };
+
+      const response = await apiService({
+        method: "POST",
+        url: "/api/v1/items/newitems",
+        data: testItemData,
+      });
+
+      console.log("Test item created:", response.data);
+      showMessage("Test item created successfully!", "success");
+      
+      // Navigate to the new item's edit page
+      const newItemId = response.data.data?._id || response.data.data?.item_id;
+      if (newItemId) {
+        router.push(`/item/edit/${newItemId}`);
+      }
+    } catch (error) {
+      console.error("Error creating test item:", error);
+      showMessage("Failed to create test item", "error");
+    }
+  };
+
   if (loading) {
     return (
       <Box display="flex" justifyContent="center" alignItems="center" minHeight="400px">
         <CircularProgress />
+      </Box>
+    );
+  }
+
+  // If no item data is found, show option to create test item
+  if (!initialValues.name) {
+    return (
+      <Box sx={{ p: 3, maxWidth: 800, mx: "auto" }}>
+        <Typography variant="h5" component="h1" sx={{ mb: 3 }}>
+          Item Not Found
+        </Typography>
+        <Typography variant="body1" sx={{ mb: 2 }}>
+          The item with ID "{itemId}" was not found in the database.
+        </Typography>
+        
+        {/* Show available items */}
+        <Box sx={{ mb: 3 }}>
+          <Typography variant="h6" sx={{ mb: 2 }}>
+            Available Items in Database:
+          </Typography>
+          <Button
+            variant="outlined"
+            onClick={async () => {
+              try {
+                const response = await apiService({
+                  method: "GET",
+                  url: `/api/v1/item/getitems`,
+                  params: { 
+                    organization_id,
+                    page: 1,
+                    limit: 10
+                  },
+                });
+                console.log("Available items:", response.data.data);
+                showMessage(`Found ${response.data.data?.length || 0} items`, "info");
+                
+                // Show first few items in console
+                if (response.data.data?.length > 0) {
+                  console.log("First 3 items:", response.data.data.slice(0, 3));
+                  console.log("Item IDs:", response.data.data.slice(0, 3).map(item => ({
+                    name: item.item_name || item.name,
+                    _id: item._id,
+                    item_id: item.item_id,
+                    id: item.id
+                  })));
+                  
+                  // Show clickable links to edit existing items
+                  const firstItem = response.data.data[0];
+                  const firstItemId = firstItem._id || firstItem.item_id || firstItem.id;
+                  if (firstItemId) {
+                    console.log(`To test editing, go to: http://localhost:3000/item/edit/${firstItemId}`);
+                    showMessage(`Click here to edit first item: ${firstItem.item_name || firstItem.name}`, "info");
+                  }
+                } else {
+                  console.log("No items found in database");
+                  showMessage("No items found. Create a test item first.", "warning");
+                }
+              } catch (err) {
+                console.error("Error fetching items:", err);
+                showMessage("Error fetching items", "error");
+              }
+            }}
+            sx={{ mb: 2 }}
+          >
+            Check Available Items
+          </Button>
+        </Box>
+        
+        <Box sx={{ display: "flex", gap: 2 }}>
+          <Button
+            variant="contained"
+            onClick={createTestItem}
+            startIcon={<AddIcon />}
+          >
+            Create Test Item
+          </Button>
+          <Button
+            variant="outlined"
+            onClick={() => router.push("/item")}
+          >
+            Back to Items List
+          </Button>
+          <Button
+            variant="outlined"
+            onClick={() => router.push("/common/newitem")}
+          >
+            Create New Item
+          </Button>
+        </Box>
       </Box>
     );
   }
@@ -608,6 +746,8 @@ const EditItemForm = () => {
           <CloseIcon />
         </Button>
       </Box>
+      
+
 
       <Paper sx={{ p: 3 }}>
         <Formik

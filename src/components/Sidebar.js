@@ -294,7 +294,11 @@ const Sidebar = ({ collapsed, toggleSidebar }) => {
       "/reports/profitandloss",
       "/reports/balancesheet",
       "/reports/journalreport"
-      
+    ],
+    "/items/itemtable": [
+      "/item",
+      "/items/itemtable",
+      "/common/newitem"
     ],
   };
 
