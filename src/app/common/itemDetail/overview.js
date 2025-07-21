@@ -42,11 +42,20 @@ const ItemOverview = ({ data: propData, itemId, organizationId, forceRefresh = f
 
   // Use prop data if provided, otherwise fetch from API
   useEffect(() => {
-    if (propData && !forceRefresh) {
+    console.log("ItemOverview - propData:", propData);
+    console.log("ItemOverview - itemId:", itemId);
+    console.log("ItemOverview - organizationId:", organizationId);
+    
+    // If propData is provided, use it directly
+    if (propData) {
+      console.log("ItemOverview - Using propData:", propData);
       setData(propData);
       setLoading(false);
+      setError(null);
+      return;
     }
 
+    // Only fetch from API if propData is not provided
     if (!itemId || !organizationId) {
       setLoading(false);
       setError("Missing item ID or organization ID");
@@ -60,42 +69,56 @@ const ItemOverview = ({ data: propData, itemId, organizationId, forceRefresh = f
       try {
         let response = null;
         
-        // Try the correct API endpoint based on the provided routes
+        // Try the getitems endpoint first (more reliable)
         try {
           response = await apiService({
             method: "GET",
-            url: `/api/v1/item/singleitems/${itemId}`,
-            params: { organization_id: organizationId },
+            url: `/api/v1/item/getitems`,
+            params: { 
+              organization_id: organizationId,
+              item_id: itemId 
+            },
           });
+          console.log("ItemOverview - getitems response:", response);
+          
+          // Extract the specific item from the list
+          if (response?.data?.data && Array.isArray(response.data.data)) {
+            const itemFromList = response.data.data.find(item => {
+              const itemId = item._id || item.item_id || item.id;
+              return itemId === itemId || itemId === itemId.toString();
+            });
+            if (itemFromList) {
+              console.log("ItemOverview - Found item from getitems list:", itemFromList);
+              response = { data: { data: itemFromList } };
+            }
+          }
         } catch (err) {
-          console.log("Primary API endpoint failed:", err);
+          console.log("ItemOverview - getitems API failed:", err);
         }
         
-        // Fallback to getitems endpoint if singleitems fails
-        if (!response) {
+        // Fallback to singleitems endpoint if getitems fails
+        if (!response || !response.data?.data) {
           try {
             response = await apiService({
               method: "GET",
-              url: `/api/v1/item/getitems`,
-              params: { 
-                organization_id: organizationId,
-                item_id: itemId 
-              },
+              url: `/api/v1/item/singleitems/${itemId}`,
+              params: { organization_id: organizationId },
             });
+            console.log("ItemOverview - singleitems response:", response);
           } catch (err) {
-            console.log("Fallback API endpoint failed:", err);
+            console.log("ItemOverview - singleitems API failed:", err);
           }
         }
 
         if (response && response.data) {
           const itemData = response.data.data || response.data;
-          console.log("Fetched item data:", itemData);
+          console.log("ItemOverview - Final item data:", itemData);
           setData(itemData);
         } else {
           throw new Error("No data received from API");
         }
       } catch (err) {
-        console.error("Error fetching item details:", err);
+        console.error("ItemOverview - Error fetching item details:", err);
         setError("Failed to load item details");
       } finally {
         setLoading(false);
@@ -103,7 +126,7 @@ const ItemOverview = ({ data: propData, itemId, organizationId, forceRefresh = f
     };
 
     fetchItemDetails();
-  }, [itemId, organizationId, forceRefresh]); // Added forceRefresh to dependencies
+  }, [propData, itemId, organizationId, forceRefresh]); // Added propData to dependencies
 
   const formatCurrency = (value) =>
     value != null && value !== "-" && value !== ""
