@@ -974,7 +974,39 @@ const ItemsTable = () => {
   const [sortColumn, setSortColumn] = useState("customer_name");
   const [sortOrder, setSortOrder] = useState("D");
   const handleRowClick = (item) => {
-    router.push(`/item/${item.id}`);
+    console.log("ITEMS TABLE - Row clicked - Full item data:", item);
+    console.log("ITEMS TABLE - All item keys:", Object.keys(item));
+    
+    // Try different possible ID fields - check all possible variations
+    const possibleIdFields = ['_id', 'item_id', 'id', 'itemId', 'ItemId'];
+    let itemId = null;
+    
+    for (const field of possibleIdFields) {
+      if (item[field]) {
+        itemId = item[field];
+        console.log(`ITEMS TABLE - Found ID in field '${field}':`, itemId);
+        break;
+      }
+    }
+    
+    console.log("ITEMS TABLE - Final extracted itemId:", itemId);
+    
+    if (itemId) {
+      console.log("ITEMS TABLE - Navigating to item:", itemId, "from item data:", item);
+      router.push(`/item/${itemId}`);
+    } else {
+      console.error("ITEMS TABLE - No ID found in item:", item);
+      console.log("ITEMS TABLE - All item fields:", Object.keys(item));
+      
+      // Temporary fallback: use item name as ID for testing
+      const fallbackId = item.item_name || item.name || item.ItemName || item.itemName;
+      if (fallbackId) {
+        console.log("ITEMS TABLE - Using fallback ID (item name):", fallbackId);
+        router.push(`/item/${fallbackId}`);
+      } else {
+        showMessage("Error: Item ID not found", "error");
+      }
+    }
   };
 
   const handleSelectAll = () => {
@@ -1048,27 +1080,35 @@ const ItemsTable = () => {
     setSortOrder(sortOrd);
     fetchItemsList(filterBy, sortCol, sortOrd);
   };
-  const fetchItemsList = async (filterValue) => {
+  const fetchItemsList = async (filterValue, sortCol = null, sortOrd = null) => {
     try {
       const organization_id = localStorage.getItem("organization_id");
+      const params = {
+        page: page.current,
+        limit: limit.current,
+      };
+      
+      // Add sorting parameters if provided
+      if (sortCol && sortOrd) {
+        params.sort_column = sortCol;
+        params.sort_order = sortOrd;
+      }
+      
       const response = await apiService({
         method: "GET",
-        params: {
-          page: page.current,
-          limit: limit.current,
-        },
+        params,
         url: `api/v1/item/getitems?organization_id=${organization_id}`,
         file: false,
       });
 
-      const data = response.data.data;
+      const data = response.data?.data || [];
       if (filterValue === "Status.All" && data.length === 0) {
         setWelcomPg(true);
       }
 
-      setItemsList(response.data.data || []);
-      setTotalCount(response.data.total_items || 0);
-      setHasMore(response.data.page_context.has_more_page); // Make sure this key exists in API response
+      setItemsList(data);
+      setTotalCount(response.data?.total_items || 0);
+      setHasMore(response.data?.page_context?.has_more_page || false); // Add optional chaining to prevent undefined error
     } catch (error) {
       console.error("Error fetching items:", error);
       showMessage("Error fetching items", "error");

@@ -35,17 +35,16 @@ const sections = [
   },
 ];
 
-const ItemOverview = ({ data: propData, itemId, organizationId }) => {
+const ItemOverview = ({ data: propData, itemId, organizationId, forceRefresh = false }) => {
   const [data, setData] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
   // Use prop data if provided, otherwise fetch from API
   useEffect(() => {
-    if (propData) {
+    if (propData && !forceRefresh) {
       setData(propData);
       setLoading(false);
-      return;
     }
 
     if (!itemId || !organizationId) {
@@ -61,44 +60,30 @@ const ItemOverview = ({ data: propData, itemId, organizationId }) => {
       try {
         let response = null;
         
-        // Try multiple API endpoint patterns like other parts of the app
+        // Try the correct API endpoint based on the provided routes
         try {
           response = await apiService({
             method: "GET",
-            url: `/api/v1/items/${itemId}`,
+            url: `/api/v1/item/singleitems/${itemId}`,
             params: { organization_id: organizationId },
           });
         } catch (err) {
-          console.log("Pattern 1 failed, trying pattern 2...");
+          console.log("Primary API endpoint failed:", err);
         }
         
+        // Fallback to getitems endpoint if singleitems fails
         if (!response) {
           try {
             response = await apiService({
               method: "GET",
-              url: `/api/v1/item/individual`,
+              url: `/api/v1/item/getitems`,
               params: { 
-                organization_id: organizationId, 
+                organization_id: organizationId,
                 item_id: itemId 
               },
             });
           } catch (err) {
-            console.log("Pattern 2 failed, trying pattern 3...");
-          }
-        }
-        
-        if (!response) {
-          try {
-            response = await apiService({
-              method: "GET",
-              url: `/api/v1/item/get-individual-item`,
-              params: { 
-                organization_id: organizationId, 
-                item_id: itemId 
-              },
-            });
-          } catch (err) {
-            console.log("Pattern 3 failed");
+            console.log("Fallback API endpoint failed:", err);
           }
         }
 
@@ -118,7 +103,7 @@ const ItemOverview = ({ data: propData, itemId, organizationId }) => {
     };
 
     fetchItemDetails();
-  }, [propData, itemId, organizationId]);
+  }, [itemId, organizationId, forceRefresh]); // Added forceRefresh to dependencies
 
   const formatCurrency = (value) =>
     value != null && value !== "-" && value !== ""

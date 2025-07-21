@@ -1301,7 +1301,14 @@ export default function CustomizedTable({
   sortColumn,
   sortOrder,
   handleSort,
+  getStatusColor,
+  getStatusText,
+  handleStatusChange,
 }) {
+  console.log("=== CUSTOMIZED TABLE RENDERED ===");
+  console.log("CustomizedTable - onRowClick prop:", onRowClick);
+  console.log("CustomizedTable - staticData length:", staticData?.length);
+  console.log("CustomizedTable - staticData:", staticData);
 
   const [hoveredRow, setHoveredRow] = useState(null);
   const [actionAnchorEl, setActionAnchorEl] = useState(null);
@@ -1937,17 +1944,21 @@ export default function CustomizedTable({
                 </TableRow>
               ) : !loading && staticData.length > 0 ? (
                 <>
+                  {(() => {
+                    console.log("staticData:", staticData);
+                    return null;
+                  })()}
                   {(columnList.length > 0 || columns.length > 0) &&
                     staticData.map((row) => (
-                      <TableRow
-                        key={row._id}
-                        sx={{
-                          height: 40,
-                          "&:hover": { backgroundColor: "#f9f9fb" },
-                        }}
-                        onMouseEnter={() => setHoveredRow(row._id)}
-                        onMouseLeave={() => setHoveredRow(null)}
-                      >
+                                              <TableRow
+                          key={row._id || row.id || row.item_id || Math.random()}
+                          sx={{
+                            height: 40,
+                            "&:hover": { backgroundColor: "#f9f9fb" },
+                          }}
+                          onMouseEnter={() => setHoveredRow(row._id)}
+                          onMouseLeave={() => setHoveredRow(null)}
+                        >
                         {/* Fixed checkbox column */}
 
                         <TableCell
@@ -2025,7 +2036,9 @@ export default function CustomizedTable({
                                       col.value === "salesorder_number" ||
                                       col.value === "deliverychallan_number" ||
                                       col.value === "recurrence_name"
-                                    ? getColor(col.value, row[col.value])
+                                    ? (getStatusColor && value === "vendor_payment" && col.value === "status_formatted" 
+                                        ? getStatusColor(row[col.value]) 
+                                        : getColor(col.value, row[col.value]))
                                     : "inherit",
                                 textTransform:
                                   col.value === "order_status_formatted" ||
@@ -2060,7 +2073,17 @@ export default function CustomizedTable({
                                 overflow: "hidden",
                                 textOverflow: "ellipsis", // Show ellipsis for text that overflows
                               }}
-                              onClick={() => onRowClick(row)}
+                              onClick={() => {
+                                console.log("CUSTOMIZED TABLE - Row clicked - row data:", row);
+                                console.log("CUSTOMIZED TABLE - Row keys:", Object.keys(row || {}));
+                                console.log("CUSTOMIZED TABLE - onRowClick function:", onRowClick);
+                                if (row && onRowClick) {
+                                  console.log("CUSTOMIZED TABLE - Calling onRowClick with row:", row);
+                                  onRowClick(row);
+                                } else {
+                                  console.error("CUSTOMIZED TABLE - Row is undefined or onRowClick is not a function!");
+                                }
+                              }}
                             >
                               {col.value === "invoiced_status_formatted" &&
                               value === "salesorder" ? (
@@ -2172,7 +2195,8 @@ export default function CustomizedTable({
                             (value === "invoice" ||
                               value === "customer" ||
                               value === "vendor" ||
-                              value === "recurring_invoice") && (
+                              value === "recurring_invoice" ||
+                              value === "vendor_payment") && (
                               <>
                                 <IconButton
                                   onClick={(e) => handleActionClick(e, row._id)}

@@ -58,6 +58,8 @@ export const fetchItemTransactions = async (itemId, organizationId, filterBy = "
 export const fetchItemHistory = async (itemId, organizationId) => {
   const allHistory = [];
   
+  console.log("fetchItemHistory - itemId:", itemId, "organizationId:", organizationId);
+  
   // Try multiple API endpoints for item history
   const historyEndpoints = [
     {
@@ -88,12 +90,15 @@ export const fetchItemHistory = async (itemId, organizationId) => {
   
   for (const endpoint of historyEndpoints) {
     try {
+      console.log(`fetchItemHistory - Trying ${endpoint.name}:`, endpoint.url);
       const response = await apiService({
         method: "GET",
         url: endpoint.url,
         params: endpoint.params,
         customBaseUrl: endpoint.baseUrl,
       });
+      
+      console.log(`fetchItemHistory - ${endpoint.name} response:`, response);
       
       if (response && response.data) {
         const historyData = response.data.history || response.data.activities || 
@@ -107,17 +112,25 @@ export const fetchItemHistory = async (itemId, organizationId) => {
             details: item.details || item.description || item.message || item.comment || "No details available"
           }));
           allHistory.push(...transformedHistory);
+          console.log(`fetchItemHistory - Added ${transformedHistory.length} items from ${endpoint.name}`);
         }
       }
     } catch (err) {
-      console.log(`Failed to fetch ${endpoint.name}:`, err);
+      console.log(`fetchItemHistory - Failed to fetch ${endpoint.name}:`, err);
+      // Don't throw error, continue with other endpoints
     }
   }
   
   // Also fetch document-related history
-  const documentHistory = await fetchDocumentHistory(itemId, organizationId);
-  allHistory.push(...documentHistory);
+  try {
+    const documentHistory = await fetchDocumentHistory(itemId, organizationId);
+    allHistory.push(...documentHistory);
+    console.log("fetchItemHistory - Added document history:", documentHistory.length);
+  } catch (err) {
+    console.log("fetchItemHistory - Failed to fetch document history:", err);
+  }
   
+  console.log("fetchItemHistory - Total history items:", allHistory.length);
   return allHistory;
 };
 

@@ -177,14 +177,39 @@ const ItemsTable = () => {
   const [welcomePg, setWelcomPg] = useState(false);
 
   const handleRowClick = (item) => {
-    // Check for different possible ID fields - prioritize _id as it's the primary identifier
-    const itemId = item._id || item.item_id || item.id || item.itemId;
+    // Debug: Log the entire item to see its structure
+    console.log("MAIN PAGE - Row clicked - Full item data:", item);
+    console.log("MAIN PAGE - All item keys:", Object.keys(item));
+    
+    // Try different possible ID fields - check all possible variations
+    const possibleIdFields = ['_id', 'item_id', 'id', 'itemId', 'ItemId'];
+    let itemId = null;
+    
+    for (const field of possibleIdFields) {
+      if (item[field]) {
+        itemId = item[field];
+        console.log(`MAIN PAGE - Found ID in field '${field}':`, itemId);
+        break;
+      }
+    }
+    
+    console.log("MAIN PAGE - Final extracted itemId:", itemId);
+    
     if (itemId) {
-      console.log("Navigating to item:", itemId, "from item data:", item);
+      console.log("MAIN PAGE - Navigating to item:", itemId, "from item data:", item);
       router.push(`/item/${itemId}`);
     } else {
-      console.error("No ID found in item:", item);
-      showMessage("Error: Item ID not found", "error");
+      console.error("MAIN PAGE - No ID found in item:", item);
+      console.log("MAIN PAGE - All item fields:", Object.keys(item));
+      
+      // Temporary fallback: use item name as ID for testing
+      const fallbackId = item.item_name || item.name || item.ItemName || item.itemName;
+      if (fallbackId) {
+        console.log("MAIN PAGE - Using fallback ID (item name):", fallbackId);
+        router.push(`/item/${fallbackId}`);
+      } else {
+        showMessage("Error: Item ID not found", "error");
+      }
     }
   };
 
@@ -252,12 +277,20 @@ const ItemsTable = () => {
   };
 
   useEffect(() => {
+    console.log("Initial load - fetching items with filterBy:", filterBy);
     fetchItemsList(filterBy);
   }, []);
 
   const fetchItemsList = async (filterValue) => {
     try {
       const organization_id = localStorage.getItem("organization_id");
+      console.log("Fetching items with organization_id:", organization_id);
+      
+      if (!organization_id) {
+        console.error("No organization_id found!");
+        showMessage("Error: Organization ID not found", "error");
+        return;
+      }
       
       // Build query parameters based on filter
       let queryParams = `organization_id=${organization_id}&page=1&limit=50&sortBy=createdAt&order=desc`;
@@ -267,6 +300,8 @@ const ItemsTable = () => {
         const status = filterValue.replace("Status.", "");
         queryParams += `&status=${status.toLowerCase()}`;
       }
+      
+      console.log("API URL:", `api/v1/item/getitems?${queryParams}`);
       
       const response = await apiService({
         method: "GET",
@@ -285,6 +320,27 @@ const ItemsTable = () => {
           item_id: data[0].item_id,
           itemId: data[0].itemId
         });
+        console.log("All item IDs for debugging:", data.map(item => ({
+          name: item.item_name || item.name,
+          _id: item._id,
+          id: item.id,
+          item_id: item.item_id
+        })));
+        
+        // Test: Log what happens when we try to extract ID from first item
+        const testItem = data[0];
+        const possibleIdFields = ['_id', 'item_id', 'id', 'itemId', 'ItemId'];
+        let foundId = null;
+        for (const field of possibleIdFields) {
+          if (testItem[field]) {
+            foundId = testItem[field];
+            console.log(`Found ID in field '${field}':`, foundId);
+            break;
+          }
+        }
+        if (!foundId) {
+          console.log("No ID found in any field for first item");
+        }
       }
 
       if (filterValue === "Status.All" && data.length === 0) {
@@ -768,23 +824,44 @@ const ItemsTable = () => {
         <Divider />
         {/*Full-width Table*/}
         {!welcomePg ? (
-          <CustomizedTable
-            columns={columns}
-            staticData={itemsList}
-            selected={selected}
-            handleSelectAll={handleSelectAll}
-            handleSelectRow={handleSelectRow}
-            allSelected={allSelected}
-            settingsAnchorEl={settingsAnchorEl}
-            handleSettingsClick={handleSettingsClick}
-            handleSettingsClose={handleSettingsClose}
-            selectedMenuItem={selectedMenuItem}
-            onRowClick={handleRowClick}
-            setSelectedMenuItem={setSelectedMenuItem}
-            handleOpenSearchDialog={handleOpenSearchDialog}
-            selectedType={selectedType}
-            value="item"
-          />
+          <>
+            {/* Temporary test button */}
+            {itemsList.length > 0 && (
+              <Box sx={{ p: 2, borderBottom: "1px solid #eee" }}>
+                <Typography variant="body2" color="text.secondary" sx={{ mb: 1 }}>
+                  Test: Click to simulate row click with first item
+                </Typography>
+                <Button 
+                  variant="outlined" 
+                  size="small"
+                  onClick={() => {
+                    console.log("Test: Simulating row click with first item:", itemsList[0]);
+                    handleRowClick(itemsList[0]);
+                  }}
+                >
+                  Test Row Click
+                </Button>
+              </Box>
+            )}
+            <CustomizedTable
+              columns={columns}
+              staticData={itemsList}
+              selected={selected}
+              handleSelectAll={handleSelectAll}
+              handleSelectRow={handleSelectRow}
+              allSelected={allSelected}
+              settingsAnchorEl={settingsAnchorEl}
+              handleSettingsClick={handleSettingsClick}
+              handleSettingsClose={handleSettingsClose}
+              selectedMenuItem={selectedMenuItem}
+              onRowClick={handleRowClick}
+              setSelectedMenuItem={setSelectedMenuItem}
+              handleOpenSearchDialog={handleOpenSearchDialog}
+              selectedType={selectedType}
+              value="item"
+            />
+            {console.log("MAIN PAGE - Rendering CustomizedTable with onRowClick:", handleRowClick)}
+          </>
         ) : (
           <Typography variant="h6" sx={{ textAlign: "center", my: 4 }}>
             No items found. Click the New button to create one.
