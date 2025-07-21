@@ -123,8 +123,8 @@ export const fetchItemHistory = async (itemId, organizationId) => {
   
   // Also fetch document-related history
   try {
-    const documentHistory = await fetchDocumentHistory(itemId, organizationId);
-    allHistory.push(...documentHistory);
+  const documentHistory = await fetchDocumentHistory(itemId, organizationId);
+  allHistory.push(...documentHistory);
     console.log("fetchItemHistory - Added document history:", documentHistory.length);
   } catch (err) {
     console.log("fetchItemHistory - Failed to fetch document history:", err);

@@ -15,15 +15,13 @@ import {
 } from "@mui/material";
 import {
   MoreVert,
-  Edit,
   Delete,
-  Download,
-  Share,
-  Eye,
   Package,
   TrendingUp,
   Clock,
   Copy,
+  Edit as EditIcon,
+  Close as CloseIcon,
 } from "lucide-react";
 import { useRouter } from "next/navigation";
 import ItemOverview from "../common/itemDetail/overview";
@@ -126,72 +124,22 @@ const ItemViewComponent = ({ data, callViewAPI, organizationData }) => {
   }
 
   return (
-    <Box sx={{ height: "100vh", overflow: "hidden", display: "flex", flexDirection: "column" }}>
+    <Box sx={{ height: "100vh", overflow: "auto", display: "flex", flexDirection: "column" }}>
       {/* Header */}
       <Paper sx={{ p: 3, borderBottom: 1, borderColor: "divider" }}>
-        <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start" }}>
-          <Box sx={{ flex: 1 }}>
-            <Typography variant="h4" sx={{ fontWeight: 600, mb: 1 }}>
-              {data.item_name || data.name || "Item Details"}
-            </Typography>
-            <Box sx={{ display: "flex", alignItems: "center", gap: 2, mb: 2 }}>
-              <Chip
-                label={data.status_formatted || data.status || "Active"}
-                color={getStatusColor(data.status)}
-                size="small"
-              />
-              <Typography variant="body2" color="text.secondary">
-                Item Code: {data.item_code || data.code || "N/A"}
-              </Typography>
-              <Typography variant="body2" color="text.secondary">
-                Category: {data.category_name || data.category || "N/A"}
-              </Typography>
-            </Box>
-            <Typography variant="body2" color="text.secondary">
-              {data.description || "No description available"}
-            </Typography>
-          </Box>
-          
-          <Box sx={{ display: "flex", gap: 1 }}>
-            <Button
-              variant="outlined"
-              startIcon={<Edit size={16} />}
-              onClick={handleEdit}
-              size="small"
-            >
-              Edit
-            </Button>
-            <IconButton onClick={handleMenuClick}>
-              <MoreVert />
-            </IconButton>
-            <Menu
-              anchorEl={menuAnchorEl}
-              open={Boolean(menuAnchorEl)}
-              onClose={handleMenuClose}
-              PaperProps={{
-                sx: {
-                  width: 200,
-                  boxShadow: "0px 4px 10px rgba(0,0,0,0.1)",
-                  borderRadius: "8px",
-                },
-              }}
-            >
-              <MenuItem onClick={handleClone}>
-                <Copy size={16} style={{ marginRight: 8 }} />
-                Clone Item
-              </MenuItem>
-              <MenuItem onClick={handleMarkAsInactive}>
-                <Copy size={16} style={{ marginRight: 8 }} />
-                Mark as Inactive
-              </MenuItem>
-           
-              <Divider />
-              <MenuItem onClick={handleDelete} sx={{ color: "error.main" }}>
-                <Delete size={16} style={{ marginRight: 8 }} />
-                Delete
-              </MenuItem>
-            </Menu>
-          </Box>
+        <Box sx={{ display: "flex", alignItems: "center", px: 4, py: 3, borderBottom: "1px solid #eee" }}>
+          <Typography variant="h5" sx={{ fontWeight: 600, flex: 1, color: "#222" }} noWrap>
+            {data?.item_name || data?.name || ""}
+          </Typography>
+          <IconButton onClick={handleEdit}><EditIcon /></IconButton>
+          <IconButton onClick={handleMenuClick}><MoreVert /></IconButton>
+          <Menu anchorEl={menuAnchorEl} open={Boolean(menuAnchorEl)} onClose={handleMenuClose} PaperProps={{ sx: { width: 200, boxShadow: "0px 4px 10px rgba(0,0,0,0.1)", borderRadius: "8px" } }}>
+            <MenuItem onClick={() => { handleMenuClose(); handleClone(); }}>Clone Item</MenuItem>
+            <MenuItem onClick={() => { handleMenuClose(); handleMarkAsInactive(); }}>Mark as Inactive</MenuItem>
+            <Divider />
+            <MenuItem onClick={() => { handleMenuClose(); handleDelete(); }} sx={{ color: "error.main" }}>Delete</MenuItem>
+          </Menu>
+          <IconButton onClick={() => router.push("/item")}> <CloseIcon /> </IconButton>
         </Box>
       </Paper>
 
