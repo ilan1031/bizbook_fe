@@ -825,24 +825,7 @@ const ItemsTable = () => {
         {/*Full-width Table*/}
         {!welcomePg ? (
           <>
-            {/* Temporary test button */}
-            {itemsList.length > 0 && (
-              <Box sx={{ p: 2, borderBottom: "1px solid #eee" }}>
-                <Typography variant="body2" color="text.secondary" sx={{ mb: 1 }}>
-                  Test: Click to simulate row click with first item
-                </Typography>
-                <Button 
-                  variant="outlined" 
-                  size="small"
-                  onClick={() => {
-                    console.log("Test: Simulating row click with first item:", itemsList[0]);
-                    handleRowClick(itemsList[0]);
-                  }}
-                >
-                  Test Row Click
-                </Button>
-              </Box>
-            )}
+           
             <CustomizedTable
               columns={columns}
               staticData={itemsList}
