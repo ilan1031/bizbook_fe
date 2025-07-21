@@ -183,7 +183,7 @@ const ItemOverview = ({ data: propData, itemId, organizationId, forceRefresh = f
   }
 
   return (
-    <Box sx={{ p: 0, pt: 3, pr: 6 }}>
+    <Box sx={{ p: 0, pt: 3, pr: 6,ml:2}}>
       {sections.map((section, idx) => {
         const fieldsWithData = section.fields.filter(
           (field) => getFieldValue(field, data) !== null

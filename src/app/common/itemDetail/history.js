@@ -103,7 +103,7 @@ const ItemHistory = ({ itemId, organizationId }) => {
   };
 
   return (
-    <Box sx={{ p: 0, pt: 3, pr: 6 }}>
+    <Box sx={{ p: 0, pt: 3, pr: 6 ,ml:2}}>
       <Paper>
         {loading ? (
           <Box sx={{ display: "flex", justifyContent: "center", p: 4 }}>

@@ -40,6 +40,7 @@ import SettingsIcon from "@mui/icons-material/Settings";
 import ItemOverview from "../../common/itemDetail/overview";
 import ItemTransactions from "../../common/itemDetail/transactions";
 import ItemHistory from "../../common/itemDetail/history";
+import ItemViewComponent from "../ItemViewComponent";
 
 const ITEM_LIST_LIMIT = 50;
 
@@ -643,78 +644,9 @@ const ItemSplitView = () => {
           )}
         </Box>
       </Box>
-
-      {/* Right Panel */}
-      <Box sx={{ flex: 1, display: "flex", flexDirection: "column", minWidth: 0 }}>
-        {/* Top Bar */}
-        <Box sx={{ display: "flex", alignItems: "center", px: 4, py: 3, borderBottom: "1px solid #eee" }}>
-          <Typography variant="h5" sx={{ fontWeight: 600, flex: 1, color: "#222" }} noWrap>
-            {item?.item_name || item?.name || ""}
-          </Typography>
-          <IconButton onClick={() => router.push(`/item/edit/${selectedId}`)}><EditIcon /></IconButton>
-          <IconButton onClick={handleRightMenuOpen}><MoreVertIcon /></IconButton>
-          <Menu anchorEl={rightMenuAnchor}
-           open={Boolean(rightMenuAnchor)} 
-           onClose={handleRightMenuClose} 
-           PaperProps={{ sx: { width: 200, boxShadow: "0px 4px 10px rgba(0,0,0,0.1)", borderRadius: "8px" } }}>
-            <MenuItem 
-            onClick={() => { handleRightMenuClose(); 
-              /* Implement clone logic here */ }}>
-                Clone Item
-                </MenuItem>
-            <MenuItem onClick={() => { handleRightMenuClose();
-               /* Implement mark as inactive logic here */ }}>
-                Mark as Inactive
-                </MenuItem>
-            <Divider />
-            <MenuItem onClick={() => { handleRightMenuClose();
-               /* Implement delete logic here */ }}
-                sx={{ color: "error.main" }}>
-                  Delete
-                  </MenuItem>
-          </Menu>
-          <IconButton 
-          onClick={() => router.push("/item")}>
-             <CloseIcon />
-           </IconButton>
-        </Box>
-        {/* Tabs */}
-        <Box sx={{ px: 4, borderBottom: "1px solid #eee" }}>
-          <Tabs value={tab} onChange={handleTabChange} sx={{ minHeight: 36 }} TabIndicatorProps={{ sx: { height: 2, bgcolor: "#222" } }}>
-            <Tab label="Overview" sx={{ fontWeight: 500, fontSize: 13, minWidth: 80, color: "#222", py: 0.5, minHeight: 32 }} />
-            <Tab label="Transactions" sx={{ fontWeight: 500, fontSize: 13, minWidth: 80, color: "#222", py: 0.5, minHeight: 32 }} />
-            <Tab label="History" sx={{ fontWeight: 500, fontSize: 13, minWidth: 80, color: "#222", py: 0.5, minHeight: 32 }} />
-          </Tabs>
-        </Box>
-        {/* Tab Content */}
-        <Box sx={{ flex: 1, overflowY: "auto", px: 4, py: 3 }}>
-          {console.log("Debug - loading:", loading, "item:", item, "tab:", tab, "selectedId:", selectedId)}
-          {loading ? (
-            <Box sx={{ display: "flex", justifyContent: "center", mt: 4 }}><CircularProgress size={32} /></Box>
-          ) : !item ? (
-            <Typography color="text.secondary">No item data found.</Typography>
-          ) : tab === 0 ? (
-            // --- Overview Tab ---
-            <ItemOverview 
-              data={item} 
-              itemId={selectedId}
-              organizationId={localStorage.getItem("organization_id")}
-              onEdit={() => router.push(`/item/edit/${selectedId}`)}
-            />
-          ) : tab === 1 ? (
-            // --- Transactions Tab ---
-            <ItemTransactions 
-              itemId={selectedId} 
-              organizationId={localStorage.getItem("organization_id")}
-            />
-          ) : (
-            // --- History Tab ---
-            <ItemHistory 
-              itemId={selectedId} 
-              organizationId={localStorage.getItem("organization_id")}
-            />
-          )}
-        </Box>
+      {/* Right Panel: ItemViewComponent */}
+      <Box sx={{ flex: 1, minWidth: 0 }}>
+        <ItemViewComponent itemId={selectedId} />
       </Box>
     </Box>
   );
