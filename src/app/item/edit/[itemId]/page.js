@@ -207,11 +207,11 @@ const EditItemForm = () => {
       let response = null;
       
               // Try getitems endpoint first (more reliable)
-        try {
+      try {
           console.log("EDIT PAGE - Trying getitems with item_id filter:", itemId);
           const admin_id = localStorage.getItem("admin_id") || organization_id;
-          response = await apiService({
-            method: "GET",
+        response = await apiService({
+          method: "GET",
             url: `/api/v1/item/getitems`,
             params: { 
               organization_id,
@@ -538,14 +538,14 @@ const EditItemForm = () => {
         const admin_id = localStorage.getItem("admin_id") || organization_id;
         
         const response = await apiService({
-          method: "PUT",
+            method: "PUT",
           url: `/api/v1/item/${updateItemId}`,
-          data: formattedData,
-          params: { 
-            organization_id,
+            data: formattedData,
+            params: { 
+              organization_id,
             admin_id: admin_id
-          },
-        });
+            },
+          });
         
         console.log("EDIT PAGE - Update successful:", response.data);
         
@@ -555,7 +555,7 @@ const EditItemForm = () => {
         } else {
           showMessage(response.data.message || "Failed to update item", "error");
         }
-      } catch (err) {
+        } catch (err) {
         console.error("EDIT PAGE - Update error details:", {
           message: err.message,
           response: err.response?.data,

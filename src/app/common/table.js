@@ -1950,15 +1950,15 @@ export default function CustomizedTable({
                   })()}
                   {(columnList.length > 0 || columns.length > 0) &&
                     staticData.map((row) => (
-                                              <TableRow
+                      <TableRow
                           key={row._id || row.id || row.item_id || Math.random()}
-                          sx={{
-                            height: 40,
-                            "&:hover": { backgroundColor: "#f9f9fb" },
-                          }}
-                          onMouseEnter={() => setHoveredRow(row._id)}
-                          onMouseLeave={() => setHoveredRow(null)}
-                        >
+                        sx={{
+                          height: 40,
+                          "&:hover": { backgroundColor: "#f9f9fb" },
+                        }}
+                        onMouseEnter={() => setHoveredRow(row._id)}
+                        onMouseLeave={() => setHoveredRow(null)}
+                      >
                         {/* Fixed checkbox column */}
 
                         <TableCell

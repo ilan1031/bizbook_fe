@@ -298,8 +298,8 @@ const ItemSplitView = () => {
   const handleSelectItem = (id) => {
     console.log("Selecting item with ID:", id);
     if (id && id !== selectedId) {
-      setSelectedId(id);
-      router.push(`/item/${id}`);
+    setSelectedId(id);
+    router.push(`/item/${id}`);
     }
   };
 
@@ -612,30 +612,30 @@ const ItemSplitView = () => {
                 {filteredItems.map((itm) => {
                   const itemId = itm._id || itm.item_id || itm.id;
                   return (
-                    <tr
+                  <tr
                       key={itemId}
-                      style={{
+                    style={{
                         background: itemId === selectedId || itemId === selectedId?.toString() ? "#f5f7fa" : "#fff",
-                        cursor: "pointer",
-                      }}
+                      cursor: "pointer",
+                    }}
                                             onClick={() => handleSelectItem(itemId)}
-                    >
-                      <td style={{ width: 36, padding: 0, textAlign: "center" }}>
-                        <Checkbox
-                          checked={false}
-                          sx={{ p: 0.5 }}
-                          tabIndex={-1}
-                          disableRipple
-                          inputProps={{ "aria-label": "select item" }}
-                        />
-                      </td>
-                      <td style={{ padding: "10px 0 10px 0", fontWeight: 500, fontSize: 15, color: "#222" }}>
-                        {itm.item_name || itm.name}
-                      </td>
-                      <td style={{ padding: "10px 16px 10px 0", textAlign: "right", fontWeight: 500, fontSize: 15, color: "#222" }}>
-                        ₹{Number(itm.rate || itm.rate_formatted || 0).toLocaleString("en-IN", { minimumFractionDigits: 2 })}
-                      </td>
-                    </tr>
+                  >
+                    <td style={{ width: 36, padding: 0, textAlign: "center" }}>
+                      <Checkbox
+                        checked={false}
+                        sx={{ p: 0.5 }}
+                        tabIndex={-1}
+                        disableRipple
+                        inputProps={{ "aria-label": "select item" }}
+                      />
+                    </td>
+                    <td style={{ padding: "10px 0 10px 0", fontWeight: 500, fontSize: 15, color: "#222" }}>
+                      {itm.item_name || itm.name}
+                    </td>
+                    <td style={{ padding: "10px 16px 10px 0", textAlign: "right", fontWeight: 500, fontSize: 15, color: "#222" }}>
+                      ₹{Number(itm.rate || itm.rate_formatted || 0).toLocaleString("en-IN", { minimumFractionDigits: 2 })}
+                    </td>
+                  </tr>
                   );
                 })}
               </tbody>
@@ -653,11 +653,30 @@ const ItemSplitView = () => {
           </Typography>
           <IconButton onClick={() => router.push(`/item/edit/${selectedId}`)}><EditIcon /></IconButton>
           <IconButton onClick={handleRightMenuOpen}><MoreVertIcon /></IconButton>
-          <Menu anchorEl={rightMenuAnchor} open={Boolean(rightMenuAnchor)} onClose={handleRightMenuClose}>
-            <MenuItem onClick={() => router.push(`/item/edit/${selectedId}`)}>Edit</MenuItem>
-            <MenuItem disabled>Delete</MenuItem>
+          <Menu anchorEl={rightMenuAnchor}
+           open={Boolean(rightMenuAnchor)} 
+           onClose={handleRightMenuClose} 
+           PaperProps={{ sx: { width: 200, boxShadow: "0px 4px 10px rgba(0,0,0,0.1)", borderRadius: "8px" } }}>
+            <MenuItem 
+            onClick={() => { handleRightMenuClose(); 
+              /* Implement clone logic here */ }}>
+                Clone Item
+                </MenuItem>
+            <MenuItem onClick={() => { handleRightMenuClose();
+               /* Implement mark as inactive logic here */ }}>
+                Mark as Inactive
+                </MenuItem>
+            <Divider />
+            <MenuItem onClick={() => { handleRightMenuClose();
+               /* Implement delete logic here */ }}
+                sx={{ color: "error.main" }}>
+                  Delete
+                  </MenuItem>
           </Menu>
-          <IconButton onClick={() => router.push("/item")}> <CloseIcon /> </IconButton>
+          <IconButton 
+          onClick={() => router.push("/item")}>
+             <CloseIcon />
+           </IconButton>
         </Box>
         {/* Tabs */}
         <Box sx={{ px: 4, borderBottom: "1px solid #eee" }}>
