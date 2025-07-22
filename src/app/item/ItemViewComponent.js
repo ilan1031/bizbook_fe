@@ -105,7 +105,7 @@ const ItemViewComponent = ({ itemId: propItemId }) => {
       const organization_id = localStorage.getItem("organization_id");
       const response = await apiService({
         method: "DELETE",
-        url: `/api/v1/item/${deleteId}`,
+        url: `/api/v1/items/${deleteId}`, // Corrected endpoint
         params: { organization_id, admin_id },
       });
       if (response.data?.status) {
@@ -115,7 +115,7 @@ const ItemViewComponent = ({ itemId: propItemId }) => {
         showMessage(response.data?.message || "Failed to delete item.", "error");
       }
     } catch (err) {
-      showMessage("Failed to delete item.", "error");
+      showMessage(err.response?.data?.message || "Failed to delete item.", "error");
     }
   };
 

@@ -1,5 +1,5 @@
 "use client";
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Formik, Form, Field } from "formik";
 import * as Yup from "yup";
 import {
@@ -31,7 +31,7 @@ import {
 import Alert from "@mui/material/Alert";
 import apiService from "../../../services/axiosService";
 import { useSnackbar } from "../../../components/SnackbarProvider";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import CloseIcon from "@mui/icons-material/Close";
 
 const unitOptions = [
@@ -162,6 +162,58 @@ const NewItemForm = () => {
   const organization_id = localStorage.getItem("organization_id");
   const checkType = localStorage.getItem("addItem");
   const router = useRouter();
+  const searchParams = useSearchParams();
+
+  // State for initial values
+  const [initialValues, setInitialValues] = useState({
+    type: "goods",
+    name: "",
+    sku: "",
+    unit: "",
+    hsnCode: "",
+    taxPreference: "taxable",
+    salesInfo: true,
+    sellingPrice: "",
+    salesAccount: "sales",
+    salesDescription: "",
+    purchaseInfo: true,
+    costPrice: "",
+    purchaseAccount: "cost-of-goods-sold",
+    purchaseDescription: "",
+    preferredVendor: "",
+    gstRate: "12",
+    igstRate: "5",
+    trackInventory: false,
+    inventoryAccount: "",
+    valuationMethod: "",
+    openingStock: "",
+    openingStockRate: "",
+  });
+
+  // CLONE LOGIC
+  useEffect(() => {
+    const cloneId = searchParams.get("clone");
+    if (cloneId) {
+      apiService({
+        method: "GET",
+        url: `/api/v1/items/${cloneId}`,
+      })
+        .then((res) => {
+          const item = res.data;
+          setInitialValues((prev) => ({
+            ...prev,
+            // Prefill fields from the item, but reset name and sku
+            ...item,
+            name: "",
+            sku: "",
+          }));
+        })
+        .catch(() => {
+          showMessage("Failed to load item for cloning", "error");
+        });
+    }
+  }, [searchParams, showMessage]);
+
   const handleFormSubmit = async (values, { setSubmitting, resetForm }) => {
     try {
       // Format the data according to your model
@@ -262,30 +314,8 @@ const NewItemForm = () => {
         
 
         <Formik
-          initialValues={{
-            type: "goods",
-            name: "",
-            sku: "",
-            unit: "",
-            hsnCode: "",
-            taxPreference: "taxable",
-            salesInfo: true,
-            sellingPrice: "",
-            salesAccount: "sales",
-            salesDescription: "",
-            purchaseInfo: true,
-            costPrice: "",
-            purchaseAccount: "cost-of-goods-sold",
-            purchaseDescription: "",
-            preferredVendor: "",
-            gstRate: "12",
-            igstRate: "5",
-            trackInventory: false,
-            inventoryAccount: "",
-            valuationMethod: "",
-            openingStock: "",
-            openingStockRate: "",
-          }}
+          enableReinitialize
+          initialValues={initialValues}
           validationSchema={NewItemSchema}
           onSubmit={handleFormSubmit}
         >
