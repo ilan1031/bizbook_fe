@@ -9,7 +9,6 @@ import {
   TableContainer,
   TableHead,
   TableRow,
-  Paper,
   CircularProgress,
   Alert,
 } from "@mui/material";
@@ -57,80 +56,119 @@ const ItemHistory = ({ itemId, organizationId }) => {
   };
 
   const generateFallbackHistory = () => {
-    return [
-      { 
-        timestamp: new Date(Date.now() - 2 * 60 * 60 * 1000), // 2 hours ago
-        action: "Marked as Active", 
-        user: "SHREENEVIKHA N SNSIHUB",
-        details: "Item status was changed to Active"
-      },
-      { 
-        timestamp: new Date(Date.now() - 4 * 60 * 60 * 1000), // 4 hours ago
-        action: "Marked as Inactive", 
-        user: "SHREENEVIKHA N SNSIHUB",
-        details: "Item status was changed to Inactive"
-      },
-      { 
-        timestamp: new Date(Date.now() - 24 * 60 * 60 * 1000), // 1 day ago
-        action: "Created", 
-        user: "SHREENEVIKHA N SNSIHUB",
-        details: "Item was created in the system"
-      },
-      { 
-        timestamp: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000), // 2 days ago
-        action: "Price Updated", 
-        user: "SHREENEVIKHA N SNSIHUB",
-        details: "Item selling price was updated to ₹500.00"
-      },
-      { 
-        timestamp: new Date(Date.now() - 3 * 24 * 60 * 60 * 1000), // 3 days ago
-        action: "Stock Updated", 
-        user: "SHREENEVIKHA N SNSIHUB",
-        details: "Item opening stock was set to 100 units"
-      }
-    ];
+    
   };
 
   return (
-    <Box sx={{ p: 0, pt: 3, pr: 6 ,ml:2}}>
-      <Paper>
-        {loading ? (
-          <Box sx={{ display: "flex", justifyContent: "center", p: 4 }}>
-            <CircularProgress />
-          </Box>
-        ) : error ? (
-          <Box sx={{ p: 3 }}><Alert severity="error">{error}</Alert></Box>
-        ) : history.length === 0 ? (
-          <Box sx={{ p: 3, textAlign: "center" }}>
-            <Typography color="text.secondary">
-              No comments found for this item.
-            </Typography>
-          </Box>
-        ) : (
-          <TableContainer>
-            <Table>
-              <TableHead>
-                <TableRow>
-                  <TableCell sx={{ fontWeight: 600, fontSize: 13, color: "#888" }}>DATE</TableCell>
-                  <TableCell sx={{ fontWeight: 600, fontSize: 13, color: "#888" }}>COMMENT</TableCell>
-                  <TableCell sx={{ fontWeight: 600, fontSize: 13, color: "#888" }}>BY</TableCell>
+    <Box sx={{ p: 0, pt: 3, pr: 9, ml: 2 }}>
+      {loading ? (
+        <Box sx={{ display: "flex", justifyContent: "center", p: 2 }}>
+          <CircularProgress />
+        </Box>
+      ) : error ? (
+        <Box sx={{ p: 3 }}>
+          <Alert severity="error">{error}</Alert>
+        </Box>
+      ) : history.length === 0 ? (
+        <Box sx={{ p: 2, textAlign: "center" }}>
+          <Typography color="text.secondary">
+            No comments found for this item.
+          </Typography>
+        </Box>
+      ) : (
+        <TableContainer sx={{ backgroundColor: 'transparent' }}>
+          <Table sx={{ backgroundColor: 'transparent' }}>
+            <TableHead>
+              <TableRow>
+                <TableCell 
+                  sx={{ 
+                    fontWeight: 600, 
+                    fontSize: '12px', 
+                    color: '#999',
+                    textTransform: 'uppercase',
+                    letterSpacing: '0.5px',
+                    backgroundColor: 'transparent',
+                    border: 'none',
+                    borderBottom: '1px solid #eee',
+                    pb: 2
+                  }}
+                >
+                  DATE
+                </TableCell>
+                <TableCell 
+                  sx={{ 
+                    fontWeight: 600, 
+                    fontSize: '12px', 
+                    color: '#999',
+                    textTransform: 'uppercase',
+                    letterSpacing: '0.5px',
+                    backgroundColor: 'transparent',
+                    border: 'none',
+                    borderBottom: '1px solid #eee',
+                    pb: 2
+                  
+                  }}
+                >
+                  DETAILS
+                </TableCell>
+              </TableRow>
+            </TableHead>
+            <TableBody>
+              {history.map((row, idx) => (
+                <TableRow 
+                  key={idx} 
+                  hover
+                  sx={{
+                    '&:hover': {
+                      backgroundColor: 'rgba(0, 0, 0, 0.02)'
+                    }
+                  }}
+                >
+                  <TableCell 
+                    sx={{ 
+                      fontSize: '13px',
+                      color: '#666',
+                      backgroundColor: 'transparent',
+                      border: 'none',
+                      borderBottom: '1px solid #f5f5f5',
+                      py: 2,
+                      fontWeight: 500
+                    }}
+                  >
+                    {row.date_formatted || row.date || "-"}
+                  </TableCell>
+                  <TableCell 
+                    sx={{ 
+                      fontSize: '13px',
+                      color: '#333',
+                      backgroundColor: 'transparent',
+                      border: 'none',
+                      borderBottom: '1px solid #f5f5f5',
+                      py: 2
+                    }}
+                  >
+                    <Box>
+                      <Box component="span" sx={{ fontWeight: 'bold', color: '#333' }}>
+                        {/* Format description to show action like "marked as active" instead of "Item updated. Changes: status: inactive → active" */}
+                        {row.description?.includes('status:') && row.description?.includes('→') 
+                          ? `marked as ${row.description.split('→')[1]?.trim()}` 
+                          : row.description}
+                      </Box>
+                      {(row.commented_by || row.commented_by_id) && (
+                        <Box component="span" sx={{ color: '#888', ml: 1, fontStyle: 'italic' }}>
+                          - {row.commented_by || row.commented_by_id}
+                        </Box>
+                      )}
+                    </Box>
+                  </TableCell>
                 </TableRow>
-              </TableHead>
-              <TableBody>
-                {history.map((row, idx) => (
-                  <TableRow key={idx} hover>
-                    <TableCell sx={{ fontSize: 15 }}>{row.date_formatted || row.date || "-"}</TableCell>
-                    <TableCell sx={{ fontSize: 15 }}>{row.description}</TableCell>
-                    <TableCell sx={{ fontSize: 15 }}>{row.commented_by || row.commented_by_id || "-"}</TableCell>
-                  </TableRow>
-                ))}
-              </TableBody>
-            </Table>
-          </TableContainer>
-        )}
-      </Paper>
+              ))}
+            </TableBody>
+          </Table>
+        </TableContainer>
+      )}
     </Box>
   );
 };
 
-export default ItemHistory; 
+export default ItemHistory;
