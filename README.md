@@ -1,43 +1,95 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://github.com/vercel/next.js/tree/canary/packages/create-next-app).
+
+# BIZBOOKS-FRONTEND
+
+BIZBOOKS-FRONTEND is a modern web application for business accounting, built with Next.js and React. It provides modules for managing accounts, items, sales, purchases, reports, imports/exports, and more, with a rich UI and robust features.
+
+## Table of Contents
+- [Tech Stack](#tech-stack)
+- [Features](#features)
+- [Folder Structure](#folder-structure)
+- [Getting Started](#getting-started)
+- [Environment Setup](#environment-setup)
+- [Usage](#usage)
+- [Deployment](#deployment)
+- [Contributing](#contributing)
+- [License](#license)
+
+## Tech Stack
+- **Framework:** Next.js, React
+- **UI Libraries:** MUI (Material UI), Ant Design, Bootstrap, FontAwesome, Lucide, Iconify
+- **State & Forms:** Formik, Yup
+- **Date/Time:** date-fns, dayjs, moment
+- **Data Handling:** Axios, PapaParse, xlsx, country-list, country-state-city
+- **PDF/Export:** html2pdf.js, pdfmake, jspdf, jspdf-autotable
+- **Other:** Draft.js, Slate, JWT-decode, Razorpay
+- **Linting/TypeScript:** ESLint, TypeScript
+
+## Features
+- Sidebar, Navbar, Footer, Snackbar notifications
+- AuthGuard for protected routes
+- Import/Export modules (CSV, XLSX, PDF)
+- Email template system (`public/email-template.html`)
+- Chart of Accounts, Item management, Sales, Purchase, Reports
+- Tally integration, Organization management
+- Responsive design with custom global styles
+
+## Folder Structure
+- `src/app/` - Main app pages and modules
+- `src/components/` - Reusable UI components (Sidebar, Navbar, Footer, SnackbarProvider, etc.)
+- `src/services/` - API, Auth, Axios, Config, ImportService
+- `src/utils/` - Utility functions (api, auth, csvParser, formatters, etc.)
+- `src/context/` - Context providers (ImportContext)
+- `src/styles/` - Global CSS styles
+- `public/` - Static assets and email templates
 
 ## Getting Started
+Clone the repo and install dependencies:
 
-First, run the development server:
+```bash
+git clone <repo-url>
+cd bizbooks-frontend
+npm install
+# or
+yarn install
+```
+
+Run the development server:
 
 ```bash
 npm run dev
 # or
 yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Open [http://localhost:3000](http://localhost:3000) in your browser.
 
-You can start editing the page by modifying `app/page.js`. The page auto-updates as you edit the file.
+Build for production:
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+```bash
+npm run build
+npm start
+```
 
-## Learn More
+Lint the code:
 
-To learn more about Next.js, take a look at the following resources:
+```bash
+npm run lint
+```
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+## Environment Setup
+- **TypeScript:** Configured via `tsconfig.json`.
+- **ESLint:** Configured via `eslint.config.mjs` (uses Next.js core-web-vitals rules).
+- **Global Styles:** See `src/styles/globals.css`.
+- **Font Optimization:** Uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts).
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+## Usage
+- Main layout is in `src/app/layout.js` (includes Sidebar, Navbar, Footer, SnackbarProvider, AuthGuard).
+- Import and use components from `src/components/` as needed.
+- API and utility functions are in `src/services/` and `src/utils/`.
+- Email templates are in `public/email-template.html`.
 
-## Deploy on Vercel
+## Deployment
+Deploy easily on [Vercel](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme).
+See [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
-
-
-#bootstrap-icons
-npm install bootstrap-icons
-npm install bootstrap
-npm install @fortawesome/fontawesome-svg-core @fortawesome/free-solid-svg-icons @fortawesome/react-fontawesome
 
