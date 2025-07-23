@@ -65,61 +65,26 @@ const ItemOverview = ({ data: propData, itemId, organizationId, forceRefresh = f
     const fetchItemDetails = async () => {
       setLoading(true);
       setError(null);
-      
       try {
-        let response = null;
-        
-        // Try the getitems endpoint first (more reliable)
-        try {
-          response = await apiService({
-            method: "GET",
-            url: `/api/v1/item/getitems`,
-            params: { 
-              organization_id: organizationId,
-              item_id: itemId 
-            },
-          });
-          console.log("ItemOverview - getitems response:", response);
-          
-          // Extract the specific item from the list
-          if (response?.data?.data && Array.isArray(response.data.data)) {
-            const itemFromList = response.data.data.find(item => {
-              const itemId = item._id || item.item_id || item.id;
-              return itemId === itemId || itemId === itemId.toString();
-            });
-            if (itemFromList) {
-              console.log("ItemOverview - Found item from getitems list:", itemFromList);
-              response = { data: { data: itemFromList } };
-            }
-          }
-        } catch (err) {
-          console.log("ItemOverview - getitems API failed:", err);
-        }
-        
-        // Fallback to singleitems endpoint if getitems fails
-        if (!response || !response.data?.data) {
-          try {
-            response = await apiService({
-              method: "GET",
-              url: `/api/v1/item/singleitems/${itemId}`,
-              params: { organization_id: organizationId },
-            });
-            console.log("ItemOverview - singleitems response:", response);
-          } catch (err) {
-            console.log("ItemOverview - singleitems API failed:", err);
-          }
-        }
-
-        if (response && response.data) {
-          const itemData = response.data.data || response.data;
-          console.log("ItemOverview - Final item data:", itemData);
-          setData(itemData);
+        console.log("ItemOverview - Fetching from /item/singleitems/", itemId);
+        const response = await apiService({
+          method: "GET",
+          url: `/api/v1/item/singleitems/${itemId}`,
+          params: { organization_id: organizationId },
+        });
+        console.log("ItemOverview - API response:", response);
+        if (response && response.data && response.data.data && response.data.data.item_details) {
+          setData(response.data.data.item_details);
+          console.log("ItemOverview - Set data to item_details:", response.data.data.item_details);
         } else {
-          throw new Error("No data received from API");
+          setData(null);
+          setError("No item details found in response");
+          console.log("ItemOverview - No item_details in response:", response);
         }
       } catch (err) {
-        console.error("ItemOverview - Error fetching item details:", err);
         setError("Failed to load item details");
+        setData(null);
+        console.error("ItemOverview - Error fetching item details:", err);
       } finally {
         setLoading(false);
       }

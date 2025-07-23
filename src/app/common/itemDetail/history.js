@@ -14,6 +14,7 @@ import {
   Alert,
 } from "@mui/material";
 import { fetchItemHistory, formatDateTime } from "../../../utils/api";
+import apiService from "../../../services/axiosService";
 
 const ItemHistory = ({ itemId, organizationId }) => {
   const [loading, setLoading] = useState(false);
@@ -27,41 +28,29 @@ const ItemHistory = ({ itemId, organizationId }) => {
   }, [itemId, organizationId]);
 
   const fetchHistory = async () => {
-    if (!itemId || !organizationId) {
-      setError("Missing item ID or organization ID");
-      return;
-    }
-
     setLoading(true);
     setError(null);
-    
     try {
-      console.log("ItemHistory - Fetching history for itemId:", itemId, "organizationId:", organizationId);
-      
-      // Use the utility function to fetch real history data
-      const allHistory = await fetchItemHistory(itemId, organizationId);
-      
-      console.log("ItemHistory - Received history data:", allHistory);
-      
-      if (allHistory && allHistory.length > 0) {
-        // Sort by date (newest first)
-        const sortedHistory = allHistory.sort((a, b) => 
-          new Date(b.timestamp) - new Date(a.timestamp)
-        );
-        console.log("ItemHistory - Setting sorted history:", sortedHistory);
-        setHistory(sortedHistory);
+      console.log("ItemHistory - Fetching from /item/singleitems/", itemId);
+      const response = await apiService({
+        method: "GET",
+        url: `/api/v1/item/singleitems/${itemId}`,
+        params: { organization_id: organizationId },
+      });
+      console.log("ItemHistory - API response:", response);
+      if (response && response.data && response.data.data && response.data.data.item_details) {
+        const comments = response.data.data.item_details.comments || [];
+        setHistory(comments);
+        console.log("ItemHistory - Set history to comments:", comments);
       } else {
-        // If no real data found, use fallback
-        console.log("ItemHistory - No real history found, using fallback data");
-        const fallbackData = generateFallbackHistory();
-        setHistory(fallbackData);
+        setHistory([]);
+        setError("No comments found in response");
+        console.log("ItemHistory - No comments in response:", response);
       }
     } catch (err) {
-      console.error("ItemHistory - Error fetching history:", err);
-      // Don't set error, use fallback data instead
-      console.log("ItemHistory - Using fallback data due to error");
-      const fallbackData = generateFallbackHistory();
-      setHistory(fallbackData);
+      setError("Failed to load history");
+      setHistory([]);
+      console.error("ItemHistory - Error fetching comments:", err);
     } finally {
       setLoading(false);
     }
@@ -114,7 +103,7 @@ const ItemHistory = ({ itemId, organizationId }) => {
         ) : history.length === 0 ? (
           <Box sx={{ p: 3, textAlign: "center" }}>
             <Typography color="text.secondary">
-              No history found for this item.
+              No comments found for this item.
             </Typography>
           </Box>
         ) : (
@@ -123,33 +112,18 @@ const ItemHistory = ({ itemId, organizationId }) => {
               <TableHead>
                 <TableRow>
                   <TableCell sx={{ fontWeight: 600, fontSize: 13, color: "#888" }}>DATE</TableCell>
-                  <TableCell sx={{ fontWeight: 600, fontSize: 13, color: "#888" }}>DETAILS</TableCell>
+                  <TableCell sx={{ fontWeight: 600, fontSize: 13, color: "#888" }}>COMMENT</TableCell>
+                  <TableCell sx={{ fontWeight: 600, fontSize: 13, color: "#888" }}>BY</TableCell>
                 </TableRow>
               </TableHead>
               <TableBody>
-                {history.map((row, idx) => {
-                  // Split details into action and user if possible
-                  let action = row.action;
-                  let user = row.user;
-                  let details = row.details;
-                  
-                  return (
-                    <TableRow key={idx} hover>
-                      <TableCell sx={{ fontSize: 15 }}>
-                        {formatDateTime(row.timestamp)}
-                      </TableCell>
-                      <TableCell sx={{ fontSize: 15 }}>
-                        <span style={{ fontWeight: 600 }}>{action}</span>
-                        {details && (
-                          <span style={{ color: "#666", marginLeft: 8 }}> - {details}</span>
-                        )}
-                        {user && (
-                          <span style={{ fontStyle: "italic", color: "#888", marginLeft: 4 }}> by {user}</span>
-                        )}
-                      </TableCell>
-                    </TableRow>
-                  );
-                })}
+                {history.map((row, idx) => (
+                  <TableRow key={idx} hover>
+                    <TableCell sx={{ fontSize: 15 }}>{row.date_formatted || row.date || "-"}</TableCell>
+                    <TableCell sx={{ fontSize: 15 }}>{row.description}</TableCell>
+                    <TableCell sx={{ fontSize: 15 }}>{row.commented_by || row.commented_by_id || "-"}</TableCell>
+                  </TableRow>
+                ))}
               </TableBody>
             </Table>
           </TableContainer>
