@@ -1,0 +1,695 @@
+Folder PATH listing for volume New Volume
+Volume serial number is DE5B-3BB6
+D:.
+|   project-structure.txt
+|   
++---app
+|   |   layout.js
+|   |   theme.js
+|   |   
+|   +---accountant
+|   |   \---chartOfAccounts
+|   |       |   page.js
+|   |       |   
+|   |       +---create
+|   |       |       page.js
+|   |       |       
+|   |       \---[slug]
+|   |               COAviewComponent.js
+|   |               page.js
+|   |               
+|   +---bot
+|   |       page.js
+|   |       
+|   +---common
+|   |   |   BillingAddressForm.js
+|   |   |   ContactPersonPopup.js
+|   |   |   ContactSideTable.jsx
+|   |   |   CustomerDropDown.js
+|   |   |   customFilterMenu.js
+|   |   |   DropdownComponent.js
+|   |   |   EmailTemp.js
+|   |   |   filterDropDown.jsx
+|   |   |   FormatCurrency.js
+|   |   |   ItemView.js
+|   |   |   SalesSideTable.js
+|   |   |   searchModal.jsx
+|   |   |   ShippingAddressForm.js
+|   |   |   table.js
+|   |   |   tcsModal.js
+|   |   |   userManagementInterface.jsx
+|   |   |   
+|   |   +---activate
+|   |   |       page.js
+|   |   |       
+|   |   +---Addbulkitems
+|   |   |       AddBulkItems.js
+|   |   |       AddItemsInBulkDialog.js
+|   |   |       
+|   |   +---address
+|   |   |       Address.js
+|   |   |       
+|   |   +---bankdetails
+|   |   |       BankDetails.js
+|   |   |       
+|   |   +---btn
+|   |   |       Button.js
+|   |   |       
+|   |   +---commentAndHistory
+|   |   |       CommentsDrawer.js
+|   |   |       
+|   |   +---contactperson
+|   |   |       contactPersonList.js
+|   |   |       ContactPersonTable.js
+|   |   |       
+|   |   +---CreateItemTable
+|   |   |   |   page.js
+|   |   |   |   
+|   |   |   \---newitem
+|   |   |           page.js
+|   |   |           
+|   |   +---customerEmail
+|   |   |       page.js
+|   |   |       
+|   |   +---customerpopup
+|   |   |       page.js
+|   |   |       
+|   |   +---customizeautogeneration
+|   |   |       page.js
+|   |   |       
+|   |   +---emailcommunication
+|   |   |       EmailCommunications.js
+|   |   |       
+|   |   +---export
+|   |   |       ExportModal.js
+|   |   |       
+|   |   +---fav
+|   |   |       FavoriteFilters.js
+|   |   |       
+|   |   +---formsearch
+|   |   |       SearchComponent.js
+|   |   |       
+|   |   +---gstIN
+|   |   |       TaxInformationManager.js
+|   |   |       
+|   |   +---gstTreatment
+|   |   |       TaxPreferencesPopover.js
+|   |   |       
+|   |   +---helpAndSupport
+|   |   |       HelpAndSupport.jsx
+|   |   |       
+|   |   +---itemDetail
+|   |   |       history.js
+|   |   |       ItemSideTable.js
+|   |   |       overview.js
+|   |   |       transactions.js
+|   |   |       
+|   |   +---itemtablemore
+|   |   |       OptionsList.js
+|   |   |       
+|   |   +---menuleftside
+|   |   |       DropdownMenu.js
+|   |   |       
+|   |   +---menurightside
+|   |   |       DropdownMenu.js
+|   |   |       
+|   |   +---newitem
+|   |   |       page.js
+|   |   |       
+|   |   +---newproject
+|   |   |       ProjectSelector.js
+|   |   |       
+|   |   +---otherdetailscustomer
+|   |   |       OtherDetailsCustomer.js
+|   |   |       
+|   |   +---otherdetailsvendor
+|   |   |   |   OtherDetailsVendor.js
+|   |   |   |   
+|   |   |   \---configurePaymentTerms
+|   |   |           PaymentTermsConfig.js
+|   |   |           
+|   |   +---payment
+|   |   |       PaymentForm.js
+|   |   |       
+|   |   +---salespersondropdown
+|   |   |       ProjectSelector.js
+|   |   |       
+|   |   +---ship_bill_address
+|   |   |       AddressManagement.js
+|   |   |       
+|   |   +---Tax
+|   |   |       TcsModal.js
+|   |   |       TCStax.js
+|   |   |       
+|   |   +---tcs
+|   |   |       TCSModal.js
+|   |   |       
+|   |   +---totalPayabale
+|   |   |       page.js
+|   |   |       
+|   |   +---totalReceivables
+|   |   |       page.js
+|   |   |       
+|   |   +---vendorEmail
+|   |   |       EmailPage.js
+|   |   |       
+|   |   +---vendorItemTable
+|   |   |       Invoice.js
+|   |   |       
+|   |   +---view
+|   |   |       comments.js
+|   |   |       customerEmail.js
+|   |   |       mails.js
+|   |   |       overview.js
+|   |   |       statements.js
+|   |   |       transactions.js
+|   |   |       view.js
+|   |   |       
+|   |   \---viewRecurringInv
+|   |           nextinvoice.js
+|   |           overview.js
+|   |           recentactivities.js
+|   |           view.js
+|   |           
+|   +---home
+|   |       DownloadPDFPayables.js
+|   |       DownloadPDFReceivable.js
+|   |       page.js
+|   |       
+|   +---import
+|   |   |   page.js
+|   |   |   
+|   |   +---import2
+|   |   |       page.js
+|   |   |       
+|   |   +---import3
+|   |   |       page.js
+|   |   |       
+|   |   \---import4
+|   |           page.js
+|   |           
+|   +---import-files
+|   |   |   page.js
+|   |   |   
+|   |   \---import-pages
+|   |       +---Configure
+|   |       |       Configure.js
+|   |       |       
+|   |       +---MapFields
+|   |       |       MapFields.js
+|   |       |       
+|   |       \---Preview
+|   |               Preview.js
+|   |               
+|   +---importzoho
+|   |   |   import.js
+|   |   |   ImportConfigureStep.js
+|   |   |   ImportContainer.js
+|   |   |   ImportMapFieldsStep.js
+|   |   |   ImportPreviewStep.js
+|   |   |   
+|   |   \---imports
+|   |           page.js
+|   |           
+|   +---item
+|   |   |   ItemViewComponent.js
+|   |   |   page.js
+|   |   |   
+|   |   +---edit
+|   |   |   \---[itemId]
+|   |   |           page.js
+|   |   |           
+|   |   \---[itemId]
+|   |           page.js
+|   |           
+|   +---items
+|   |   |   Items.js
+|   |   |   
+|   |   \---itemtable
+|   |           page.js
+|   |           
+|   +---organisation
+|   |   |   OTPVerificationModal.js
+|   |   |   page.js
+|   |   |   
+|   |   +---login
+|   |   |       page.js
+|   |   |       
+|   |   +---organisationsetuppage
+|   |   |       page.js
+|   |   |       
+|   |   \---welcomepopup
+|   |           page.js
+|   |           
+|   +---organization-list
+|   |       page.js
+|   |       
+|   +---purchase
+|   |   |   SideBarList.js
+|   |   |   
+|   |   +---bills
+|   |   |   |   BillViewComponent.js
+|   |   |   |   page.js
+|   |   |   |   
+|   |   |   +---create
+|   |   |   |       BillBottom.js
+|   |   |   |       BillDetails.js
+|   |   |   |       BillTop.js
+|   |   |   |       page.js
+|   |   |   |       VendorSelection.js
+|   |   |   |       
+|   |   |   +---homepage
+|   |   |   |       page.js
+|   |   |   |       
+|   |   |   \---[slug]
+|   |   |           page.js
+|   |   |           
+|   |   +---expense
+|   |   |   |   page.js
+|   |   |   |   
+|   |   |   +---homepage
+|   |   |   |       page.js
+|   |   |   |       
+|   |   |   +---newexpense
+|   |   |   |   |   page.js
+|   |   |   |   |   
+|   |   |   |   +---recordExpense
+|   |   |   |   |       CustomerSelection.js
+|   |   |   |   |       page.js
+|   |   |   |   |       TableExpenses.js
+|   |   |   |   |       VendorSelect.js
+|   |   |   |   |       
+|   |   |   |   \---recordMileage
+|   |   |   |       |   page.js
+|   |   |   |       |   
+|   |   |   |       \---setMileage
+|   |   |   |               MileagePreferencesPage.js
+|   |   |   |               
+|   |   |   \---[slug]
+|   |   |           ExpenseViewComponent.js
+|   |   |           page.js
+|   |   |           
+|   |   +---paymentmade
+|   |   |   |   page.js
+|   |   |   |   
+|   |   |   +---create
+|   |   |   |   |   page.js
+|   |   |   |   |   
+|   |   |   |   +---billPayment
+|   |   |   |   |   \---paymentMade
+|   |   |   |   |           page.js
+|   |   |   |   |           
+|   |   |   |   \---vendorAdvance
+|   |   |   |           page.js
+|   |   |   |           
+|   |   |   +---edit
+|   |   |   |       page.js
+|   |   |   |       
+|   |   |   +---homepage
+|   |   |   |       page.js
+|   |   |   |       
+|   |   |   +---layout
+|   |   |   |   \---billPayment
+|   |   |   |       \---paymentMade
+|   |   |   |               page.js
+|   |   |   |               
+|   |   |   \---[slug]
+|   |   |       |   page.js
+|   |   |       |   PaymentViewComponent.js
+|   |   |       |   
+|   |   |       \---email
+|   |   |               page.js
+|   |   |               
+|   |   +---purchaseorder
+|   |   |   |   page.js
+|   |   |   |   PurchaseOrderViewComponent.js
+|   |   |   |   
+|   |   |   +---create
+|   |   |   |       page.js
+|   |   |   |       
+|   |   |   +---customerField
+|   |   |   |       CustomerSelector.js
+|   |   |   |       
+|   |   |   +---edit
+|   |   |   |   \---[slug]
+|   |   |   |           page.jsx
+|   |   |   |           
+|   |   |   +---homepage
+|   |   |   |       page.js
+|   |   |   |       
+|   |   |   +---vendorField
+|   |   |   |       VendorSelector.js
+|   |   |   |       
+|   |   |   \---[slug]
+|   |   |       |   page.js
+|   |   |       |   
+|   |   |       \---email
+|   |   |               page.js
+|   |   |               
+|   |   +---recurringbills
+|   |   |   |   page.js
+|   |   |   |   
+|   |   |   +---homepage
+|   |   |   |       page.js
+|   |   |   |       
+|   |   |   +---newRecurringBill
+|   |   |   |       itemTable.js
+|   |   |   |       page.js
+|   |   |   |       TableAndTotal.js
+|   |   |   |       
+|   |   |   +---view
+|   |   |   |       history.js
+|   |   |   |       nextBill.js
+|   |   |   |       overview.js
+|   |   |   |       view.js
+|   |   |   |       
+|   |   |   \---[slug]
+|   |   |           page.js
+|   |   |           
+|   |   +---recurringexpenses
+|   |   |   |   page.js
+|   |   |   |   
+|   |   |   +---createrecurringexpense
+|   |   |   |       page.jsx
+|   |   |   |       
+|   |   |   +---homepage
+|   |   |   |       page.js
+|   |   |   |       
+|   |   |   \---[slug]
+|   |   |           page.js
+|   |   |           RecurringExpenseViewComponent.js
+|   |   |           
+|   |   +---vendor
+|   |   |   |   page.js
+|   |   |   |   
+|   |   |   +---createvendor
+|   |   |   |       page.js
+|   |   |   |       
+|   |   |   +---edit
+|   |   |   |   \---[slug]
+|   |   |   |           page.js
+|   |   |   |           
+|   |   |   +---homepage
+|   |   |   |       page.js
+|   |   |   |       
+|   |   |   \---[slug]
+|   |   |           page.js
+|   |   |           
+|   |   \---vendorcredits
+|   |       \---homepage
+|   |               page.js
+|   |               
+|   +---reports
+|   |   +---journalreport
+|   |   |       page.js
+|   |   |       
+|   |   \---profitandloss
+|   |           page.js
+|   |           ProfitandLossIndividual.js
+|   |           
+|   +---sales
+|   |   |   itemTable.js
+|   |   |   
+|   |   +---creditNotes
+|   |   |   |   page.js
+|   |   |   |   
+|   |   |   +---homepage
+|   |   |   |       page.js
+|   |   |   |       
+|   |   |   \---new
+|   |   |           page.js
+|   |   |           
+|   |   +---customer
+|   |   |   |   page.js
+|   |   |   |   
+|   |   |   +---create
+|   |   |   |       page.js
+|   |   |   |       
+|   |   |   +---edit
+|   |   |   |   \---[slug]
+|   |   |   |           page.js
+|   |   |   |           
+|   |   |   +---homepage
+|   |   |   |       page.js
+|   |   |   |       
+|   |   |   \---[slug]
+|   |   |           page.js
+|   |   |           
+|   |   +---deliveryChallan
+|   |   |   |   DeliverychallanViewComponent.js
+|   |   |   |   page.js
+|   |   |   |   welcomePage.js
+|   |   |   |   
+|   |   |   +---edit
+|   |   |   |   \---[slug]
+|   |   |   |           page.js
+|   |   |   |           
+|   |   |   +---homepage
+|   |   |   |       page.js
+|   |   |   |       
+|   |   |   +---new
+|   |   |   |       page.js
+|   |   |   |       
+|   |   |   \---[slug]
+|   |   |           page.js
+|   |   |           
+|   |   +---invoices
+|   |   |   |   delete.js
+|   |   |   |   InvoiceViewComponent.js
+|   |   |   |   page.js
+|   |   |   |   
+|   |   |   +---edit
+|   |   |   |   \---[slug]
+|   |   |   |           page.js
+|   |   |   |           
+|   |   |   +---homepage
+|   |   |   |       page.js
+|   |   |   |       
+|   |   |   +---new
+|   |   |   |       page.js
+|   |   |   |       
+|   |   |   \---[slug]
+|   |   |       |   page.js
+|   |   |       |   
+|   |   |       \---email
+|   |   |               page.js
+|   |   |               
+|   |   +---paymentsReceived
+|   |   |   |   page.js
+|   |   |   |   
+|   |   |   +---homepage
+|   |   |   |       page.js
+|   |   |   |       
+|   |   |   +---newPaymentReceived
+|   |   |   |   |   page.js
+|   |   |   |   |   
+|   |   |   |   +---customerAdvance
+|   |   |   |   |       page.js
+|   |   |   |   |       
+|   |   |   |   \---invoicePayment
+|   |   |   |           page.js
+|   |   |   |           
+|   |   |   \---[slug]
+|   |   |       |   page.js
+|   |   |       |   Refund.js
+|   |   |       |   ViewComponent.js
+|   |   |       |   
+|   |   |       \---email
+|   |   |               page.js
+|   |   |               
+|   |   +---quotes
+|   |   |   |   page.js
+|   |   |   |   quoteViewComponent.js
+|   |   |   |   
+|   |   |   +---edit
+|   |   |   |   \---[slug]
+|   |   |   |           page.js
+|   |   |   |           
+|   |   |   +---homepage
+|   |   |   |       page.js
+|   |   |   |       
+|   |   |   +---new
+|   |   |   |       page.js
+|   |   |   |       
+|   |   |   \---[slug]
+|   |   |       |   page.js
+|   |   |       |   
+|   |   |       \---email
+|   |   |               page.js
+|   |   |               
+|   |   +---recurringInvoice
+|   |   |   |   page.js
+|   |   |   |   
+|   |   |   +---edit
+|   |   |   |   \---[slug]
+|   |   |   |           page.js
+|   |   |   |           
+|   |   |   +---homepage
+|   |   |   |       page.js
+|   |   |   |       
+|   |   |   +---new
+|   |   |   |       page.js
+|   |   |   |       
+|   |   |   \---[slug]
+|   |   |           page.js
+|   |   |           
+|   |   \---salesOrder
+|   |       |   page.js
+|   |       |   viewComponent.js
+|   |       |   
+|   |       +---edit
+|   |       |   \---[slug]
+|   |       |           page.js
+|   |       |           
+|   |       +---homepage
+|   |       |       page.js
+|   |       |       
+|   |       +---new
+|   |       |       page.js
+|   |       |       
+|   |       \---[slug]
+|   |           |   page.js
+|   |           |   
+|   |           \---email
+|   |                   page.js
+|   |                   
+|   \---tally
+|       |   favicon.ico
+|       |   globals.css
+|       |   layout.tsx
+|       |   page.js
+|       |   page.module.css
+|       |   
+|       +---confirm
+|       |       page.js
+|       |       
+|       +---creation
+|       |   |   page.js
+|       |   |   
+|       |   \---components
+|       |           CompanyInfoPanel.js
+|       |           FunctionKeyPanel.js
+|       |           GatewayMenu.js
+|       |           MasterCreationDialog.js
+|       |           TallyUi.js
+|       |           VoucherDialog.js
+|       |           
+|       +---preview
+|       |   |   page.js
+|       |   |   
+|       |   \---components
+|       |           button.js
+|       |           footer.js
+|       |           header.js
+|       |           ruler.js
+|       |           table.js
+|       |           
+|       +---ship
+|       |   |   page.js
+|       |   |   
+|       |   \---components
+|       |           e-invoice.js
+|       |           invoicedetails.js
+|       |           invoiceform.js
+|       |           mainpage.js
+|       |           
+|       +---state
+|       |   |   page.js
+|       |   |   
+|       |   \---components
+|       |           constants.js
+|       |           detailrow.js
+|       |           dropdown.js
+|       |           footer.js
+|       |           header.js
+|       |           mainpage.js
+|       |           partydetails.js
+|       |           
+|       \---voucher
+|           |   AccountingVoucherCreation.js
+|           |   page.js
+|           |   useLocalStorage.js
+|           |   
+|           \---components
+|                   AcceptDialog.js
+|                   DispatchDetails.js
+|                   EInvoice.js
+|                   Form.js
+|                   FunctionKeys.js
+|                   Header.js
+|                   ItemList.js
+|                   Narration.js
+|                   OrderDetails.js
+|                   PartyDetails.js
+|                   SalesSidebar.js
+|                   Sidebar.js
+|                   voucherpersist.js
+|                   
++---assets
+|   |   accountingbg.jpg
+|   |   bills-workflow.png
+|   |   creditnote.png
+|   |   deliverychallan.png
+|   |   expenses-welcome.png
+|   |   expenses-workflow.png
+|   |   invoice-workflow-home.png
+|   |   payment-received.png
+|   |   paymentmade-workflow.png
+|   |   purchase-order-workflow.png
+|   |   quotes-workflow-home.png
+|   |   recurring-bills-workflow.png
+|   |   recurringexpense-workflow.png
+|   |   recurringInvoice.png
+|   |   recurring_expenese_2-removebg-preview.png
+|   |   recurring_expense_1-removebg-preview.png
+|   |   recurring_expense_3-removebg-preview.png
+|   |   salesorder.png
+|   |   vendor-credits-workflow.png
+|   |   vendor-workflow-home.png
+|   |   
+|   +---icons
+|   |       gilter-icon.png
+|   |       settings.png
+|   |       warning-img.png
+|   |       
+|   \---paymentmade
+|           hsbc_bank.png
+|           sbi-logo.png
+|           standard_chated_bank.png
+|           yes_bank.png
+|           
++---compo
+|       footer.js
+|       navbar.js
+|       
++---components
+|       AccountForm.js
+|       AnimatedBarChart.js
+|       CreateAccountModal.js
+|       DotLoader.js
+|       Footer.js
+|       Navbar.js
+|       Sidebar.js
+|       SnackbarProvider.js
+|       
++---context
+|       ImportContext.js
+|       
++---services
+|       auth.js
+|       AuthGuard.js
+|       axiosService.js
+|       config.js
+|       constant.js
+|       ImportService.js
+|       
++---styles
+|       globals.css
+|       
+\---utils
+        api.js
+        auth.js
+        csvParser.js
+        formatters.js
+        utils.js
+        
