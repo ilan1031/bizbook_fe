@@ -200,100 +200,32 @@ const ItemSplitView = () => {
 
   // Fetch selected item details
   useEffect(() => {
-    if (!selectedId || selectedId === 'undefined') {
-      console.log("No selectedId available, skipping item fetch");
+    if (!selectedId) {
+      setItem(null);
       return;
     }
-    
-    // Check if we already have the item data
-    const existingItem = items.find(itm => {
-      const itemId = itm._id || itm.item_id || itm.id;
-      return itemId === selectedId || itemId === selectedId.toString();
-    });
-    
-    if (existingItem) {
-      console.log("Using existing item data:", existingItem);
-      setItem(existingItem);
-      return;
-    }
-    
-    console.log("Fetching item details for selectedId:", selectedId);
-    setLoading(true);
     const fetchItem = async () => {
+      setLoading(true);
       try {
         const organization_id = localStorage.getItem("organization_id");
-        console.log("Organization ID:", organization_id);
-        console.log("Selected ID type:", typeof selectedId);
-        console.log("Selected ID value:", selectedId);
-        let response = null;
-        
-        // Try the getitems endpoint with item_id filter first
-        try {
-          response = await apiService({
-            method: "GET",
-            url: `/api/v1/item/getitems`,
-            params: { 
-              organization_id, 
-              item_id: selectedId 
-            },
-          });
-          console.log("API /api/v1/item/getitems response:", response);
-          
-          // Extract the specific item from the list
-          if (response?.data?.data && Array.isArray(response.data.data)) {
-            const itemFromList = response.data.data.find(item => {
-              const itemId = item._id || item.item_id || item.id;
-              return itemId === selectedId || itemId === selectedId.toString();
-            });
-            if (itemFromList) {
-              console.log("Found item from getitems list:", itemFromList);
-              response = { data: { data: itemFromList } };
-            }
-          }
-        } catch (err) {
-          console.log("Primary API endpoint failed:", err);
-        }
-        
-        // Fallback to singleitems endpoint if getitems fails
-        if (!response || !response.data?.data) {
-          try {
-            response = await apiService({
-              method: "GET",
-              url: `/api/v1/item/singleitems/${selectedId}`,
-              params: { organization_id },
-            });
-            console.log("API /api/v1/item/singleitems response:", response);
-          } catch (err) {
-            console.log("Fallback API endpoint failed:", err);
-          }
-        }
-        
-        console.log("Final item API response:", response);
-        let itemData = response?.data?.data || null;
-        
-        // If API call failed, try to get item from the items list
-        if (!itemData && items.length > 0) {
-          const itemFromList = items.find(itm => {
-            const itemId = itm._id || itm.item_id || itm.id;
-            return itemId === selectedId || itemId === selectedId.toString();
-          });
-          if (itemFromList) {
-            console.log("Using item data from list as fallback:", itemFromList);
-            itemData = itemFromList;
-          }
-        }
-        
-        console.log("Setting item data:", itemData);
+        const response = await apiService({
+          method: "GET",
+          url: `/api/v1/item/singleitems/${selectedId}`, // selectedId is item_id
+          params: { organization_id },
+        });
+        // Extract item_details and estimates
+        const itemData = response?.data?.data?.item_details || null;
+        const estimatesData = response?.data?.data?.estimates || [];
         setItem(itemData);
+        // setEstimates(estimatesData); // if you want to use estimates
       } catch (err) {
-        console.error("Error fetching item details:", err);
         setItem(null);
       } finally {
         setLoading(false);
       }
     };
     fetchItem();
-  }, [selectedId]); // Remove items dependency to prevent re-renders
+  }, [selectedId]);
 
   // Handle item selection
   const handleSelectItem = (id) => {
@@ -611,12 +543,12 @@ const ItemSplitView = () => {
             <Box component="table" sx={{ width: "100%", borderCollapse: "collapse" }}>
               <tbody>
                 {filteredItems.map((itm) => {
-                  const itemId = itm._id || itm.item_id || itm.id;
+                  const itemId = itm.item_id; // Always use item_id
                   return (
                   <tr
                       key={itemId}
                     style={{
-                        background: itemId === selectedId || itemId === selectedId?.toString() ? "#f5f7fa" : "#fff",
+                        background: itemId === selectedId ? "#f5f7fa" : "#fff",
                       cursor: "pointer",
                     }}
                                             onClick={() => handleSelectItem(itemId)}
@@ -646,7 +578,7 @@ const ItemSplitView = () => {
       </Box>
       {/* Right Panel: ItemViewComponent */}
       <Box sx={{ flex: 1, minWidth: 0 }}>
-        <ItemViewComponent itemId={selectedId} />
+        <ItemViewComponent itemId={selectedId} item={item} />
       </Box>
     </Box>
   );
