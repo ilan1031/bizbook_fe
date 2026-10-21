@@ -477,7 +477,7 @@ export default function InvoiceItemTable({ formik }) {
               }}
             />
           )}
-          renderOption={(props, option) => {
+          renderOption={({ key, ...props }, option) => {
             if (option.id === "add_new") {
               return (
                 <MenuItem {...props} key="add_new">
@@ -499,7 +499,7 @@ export default function InvoiceItemTable({ formik }) {
               );
             }
             return (
-              <MenuItem {...props} key={option.id}>
+              <MenuItem {...props} key={option.id ?? option.item_id ?? key}>
                 <Box sx={{ width: "100%" }}>
                   <Typography
                     variant="subtitle1"

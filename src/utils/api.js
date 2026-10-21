@@ -15,6 +15,7 @@ export const fetchItemTransactions = async (itemId, organizationId, filterBy = "
         url: docType.endpoint,
         params: {
           organization_id: organizationId,
+          org_id: organizationId,
           page: 1,
           limit: 100,
           filter: status === "All" ? undefined : status.toLowerCase(),
@@ -60,33 +61,9 @@ export const fetchItemHistory = async (itemId, organizationId) => {
   
   console.log("fetchItemHistory - itemId:", itemId, "organizationId:", organizationId);
   
-  // Try multiple API endpoints for item history
-  const historyEndpoints = [
-    {
-      name: "Item History",
-      url: `/api/v1/item/${itemId}/history`,
-      params: { organization_id: organizationId },
-      baseUrl: config.SO_Base_url
-    },
-    {
-      name: "Item Activities",
-      url: `/api/v1/item/activities`,
-      params: { 
-        organization_id: organizationId,
-        item_id: itemId 
-      },
-      baseUrl: config.SO_Base_url
-    },
-    {
-      name: "Item Audit Log",
-      url: `/api/v1/item/audit-log`,
-      params: { 
-        organization_id: organizationId,
-        item_id: itemId 
-      },
-      baseUrl: config.SO_Base_url
-    }
-  ];
+  // There is no item history API yet; history comes from the documents
+  // that use the item (below).
+  const historyEndpoints = [];
   
   for (const endpoint of historyEndpoints) {
     try {
@@ -141,7 +118,7 @@ const fetchDocumentHistory = async (itemId, organizationId) => {
     { name: "Quotes", endpoint: "/api/v1/estimates", dataKey: "estimates" },
     { name: "Sales Orders", endpoint: "/api/v1/salesorders", dataKey: "salesorders" },
     { name: "Invoices", endpoint: "/api/v1/invoices", dataKey: "invoices" },
-    { name: "Bills", endpoint: "/api/v1/bills", dataKey: "bills" }
+    { name: "Bills", endpoint: "/api/v1/bills/get-bills", dataKey: "bills" }
   ];
   
   for (const docType of documentTypes) {
@@ -151,6 +128,7 @@ const fetchDocumentHistory = async (itemId, organizationId) => {
         url: docType.endpoint,
         params: {
           organization_id: organizationId,
+          org_id: organizationId,
           page: 1,
           limit: 50
         },
@@ -232,17 +210,11 @@ const getDocumentTypesByFilter = (filter) => {
         params: {}
       }];
     case "Credit Notes":
-      return [{
-        name: "Credit Notes",
-        endpoint: "/api/v1/credit-notes",
-        dataKey: "creditnotes",
-        baseUrl: config.SO_Base_url,
-        params: {}
-      }];
+      return []; // credit notes have no API yet
     case "Recurring Invoices":
       return [{
         name: "Recurring Invoices",
-        endpoint: "/api/v1/recurring-invoices",
+        endpoint: "/api/v1/RecurringInvoices/getall",
         dataKey: "recurringinvoices",
         baseUrl: config.SO_Base_url,
         params: {}
@@ -250,7 +222,7 @@ const getDocumentTypesByFilter = (filter) => {
     case "Bills":
       return [{
         name: "Bills",
-        endpoint: "/api/v1/bills",
+        endpoint: "/api/v1/bills/get-bills",
         dataKey: "bills",
         baseUrl: config.PO_Base_url,
         params: {}
@@ -258,7 +230,7 @@ const getDocumentTypesByFilter = (filter) => {
     case "Purchase Orders":
       return [{
         name: "Purchase Orders",
-        endpoint: "/api/v1/purchase-orders",
+        endpoint: "/api/v1/purchaseorder/purchaseorders",
         dataKey: "purchaseorders",
         baseUrl: config.PO_Base_url,
         params: {}
@@ -288,7 +260,7 @@ const getDocumentTypesByFilter = (filter) => {
         },
         {
           name: "Bills",
-          endpoint: "/api/v1/bills",
+          endpoint: "/api/v1/bills/get-bills",
           dataKey: "bills",
           baseUrl: config.PO_Base_url,
           params: {}

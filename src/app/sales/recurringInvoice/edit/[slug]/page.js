@@ -350,15 +350,19 @@ const InvoiceCreationPage = () => {
           try {
             const salespersonResponse = await apiService({
               method: "GET",
-              url: `/api/v1/salesperson/${invoiceData.salesperson_id}`,
+              url: `/api/v1/salesperson/getsalesperson`,
               params: {
                 organization_id: organization_id,
+                limit: 1000,
               },
               file: false,
             });
 
-            const { data: salespersonData } = salespersonResponse.data;
-            setSelectedSalesperson(salespersonData);
+            const people = salespersonResponse.data?.data || [];
+            const salespersonData = people.find(
+              (p) => p.salesperson_id === invoiceData.salesperson_id || p._id === invoiceData.salesperson_id
+            );
+            if (salespersonData) setSelectedSalesperson(salespersonData);
           } catch (error) {
             console.error("Error fetching salesperson data:", error);
           }
@@ -2595,9 +2599,9 @@ const InvoiceCreationPage = () => {
                           }}
                         />
                       )}
-                      renderOption={(props, option) => (
+                      renderOption={({ key, ...props }, option) => (
                         <li
-                          {...props}
+                          key={key} {...props}
                           style={{ fontSize: "13px", padding: "6px 12px" }}
                         >
                           [{option.code}] - {option.name}
@@ -3165,7 +3169,7 @@ const InvoiceCreationPage = () => {
               value={formik.values.terms}
               onChange={formik.handleChange}
               onBlur={formik.handleBlur}
-              error={formik.touched.terms && Boolean(formik.errors.terms)}
+              aria-invalid={formik.touched.terms && Boolean(formik.errors.terms)}
               minRows={3}
               placeholder="Enter the terms and conditions of your business to be displayed in your transaction"
               style={{ ...commonTextareaInputStyle }}

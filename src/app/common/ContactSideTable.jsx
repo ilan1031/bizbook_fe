@@ -199,7 +199,13 @@ export default function userManagementInterface({
                   </TableCell>
                 </TableRow>
               )}
-              {loading && <DotLoader />}
+              {loading && (
+                <TableRow>
+                  <TableCell colSpan={10} sx={{ border: 0 }}>
+                    <DotLoader />
+                  </TableCell>
+                </TableRow>
+              )}
             </TableBody>
           </Table>
         </TableContainer>

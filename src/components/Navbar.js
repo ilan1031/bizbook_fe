@@ -71,7 +71,18 @@ const Navbar = () => {
   useEffect(() => {
     let userName = localStorage.getItem("user_name");
     userName ? setUserName(userName) : setUserName("");
+    getOrg();
   }, []);
+  // The org button shows the organisation being worked in, not the user.
+  const currentOrgId = typeof window !== "undefined" ? localStorage.getItem("organization_id") : null;
+  const currentOrgName =
+    (Array.isArray(orgData) && orgData.find((o) => String(o.organization_id) === String(currentOrgId))?.org_name) ||
+    userName;
+  const switchOrg = (orgId) => {
+    if (String(orgId) === String(currentOrgId)) return setOpen(false);
+    localStorage.setItem("organization_id", orgId);
+    window.location.href = "/home";
+  };
   const getOrg = async () => {
     try {
       let params = {
@@ -187,7 +198,7 @@ const Navbar = () => {
                 fontWeight: "800",
               }}
             >
-              {userName.length > 10 ? `${userName.slice(0, 10)}...` : userName}{" "}
+              {currentOrgName.length > 18 ? `${currentOrgName.slice(0, 18)}...` : currentOrgName}{" "}
               <ArrowDropDown />
             </Button>
             {/* <Popper
@@ -234,11 +245,12 @@ const Navbar = () => {
                 <Typography variant="subtitle2" color="#64748b" mb={1}>
                   My Organizations
                 </Typography>
-                {orgData.length &&
+                {orgData.length > 0 &&
                   orgData.map((data) => {
                     return (
-                      <>
+                      <React.Fragment key={data.organization_id}>
                         <Box
+                          onClick={() => switchOrg(data.organization_id)}
                           display="flex"
                           alignItems="center"
                           p={1}
@@ -296,7 +308,7 @@ const Navbar = () => {
                     />
                   </Box> */}
                         </Box>
-                      </>
+                      </React.Fragment>
                     );
                   })}
               </Box>

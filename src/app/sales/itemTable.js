@@ -1561,8 +1561,8 @@ export default function InvoiceItemTable({formik}) {
   const [isChallan,setIsChallan] = useState(false);
   const options = [...filteredItems, { id: "add_new", name: "Add New Item" }];
   const pathname = usePathname();
-  // TDS options
-  const tdsOptions = [
+  // TDS options: built-in rates plus the company's own (see TaxModal)
+  const baseTdsOptions = [
     { id: 'commission_brokerage', name: 'Commission or Brokerage', rate: 2, section: 'Section 194 H' },
     { id: 'commission_brokerage_reduced', name: 'Commission or Brokerage (Reduced)', rate: 3.75, section: 'Section 194 H' },
     { id: 'dividend', name: 'Dividend', rate: 10, section: 'Section 194' },
@@ -1579,9 +1579,33 @@ export default function InvoiceItemTable({formik}) {
     { id: 'rent_reduced', name: 'Rent on land or furniture etc (Reduced)', rate: 7.5, section: 'Section 194 I' },
     { id: 'technical', name: 'Technical Fees', rate: 2, section: 'Section 194 C' }
   ];
-  const tcsOptions = [
+  const baseTcsOptions = [
     { id: 'sample', name: 'sample', rate: 20, nature: '206C(6CA)' }
   ];
+  const [customRates, setCustomRates] = useState({ TDS: [], TCS: [] });
+  const loadCustomRates = async () => {
+    const organization_id = localStorage.getItem("organization_id");
+    if (!organization_id) return;
+    try {
+      const [tds, tcs] = await Promise.all(
+        ["tds", "tcs"].map((t) =>
+          apiService({ method: "GET", url: `/api/v1/tax/${t}/details?organization_id=${organization_id}` })
+        )
+      );
+      const toOption = (r) => ({ id: r._id, name: r.name, rate: r.rate, section: r.section, nature: r.nature });
+      setCustomRates({
+        TDS: (tds.data?.message || []).map(toOption),
+        TCS: (tcs.data?.message || []).map(toOption),
+      });
+    } catch (error) {
+      // The built-in rates still work without the company's own.
+    }
+  };
+  useEffect(() => {
+    loadCustomRates();
+  }, []);
+  const tdsOptions = [...baseTdsOptions, ...customRates.TDS];
+  const tcsOptions = [...baseTcsOptions, ...customRates.TCS];
 
   const getPathEntity = () => {
     const pathSegments = pathname.split("/");
@@ -1924,7 +1948,7 @@ export default function InvoiceItemTable({formik}) {
               }}
             />
           )}
-          renderOption={(props, option) => {
+          renderOption={({ key, ...props }, option) => {
             if (option.id === "add_new") {
               return (
                 <MenuItem {...props} key="add_new">
@@ -1946,7 +1970,7 @@ export default function InvoiceItemTable({formik}) {
               );
             }
             return (
-              <MenuItem {...props} key={option.id}>
+              <MenuItem {...props} key={option.id ?? option.item_id ?? key}>
                 <Box sx={{ width: "100%" }}>
                   <Typography variant="subtitle1" sx={{ fontWeight: "medium", color: "inherit" }}>
                     {option.name}
@@ -2948,13 +2972,19 @@ export default function InvoiceItemTable({formik}) {
 
 <Dialog
   open={openTaxModal}
-  onClose={() => setOpenTaxModal(false)}
+  onClose={() => {
+    setOpenTaxModal(false);
+    loadCustomRates();
+  }}
   maxWidth="md"
   fullWidth
 >
   <DialogContent>
     <TaxModal
-      onClose={() => setOpenTaxModal(false)}
+      onClose={() => {
+        setOpenTaxModal(false);
+        loadCustomRates();
+      }}
       taxType={formik.values.tax_type}
     />
   </DialogContent>
@@ -3478,7 +3508,7 @@ export default function InvoiceItemTable({formik}) {
 //               );
 //             }
 //             return (
-//               <MenuItem {...props} key={option.id}>
+//               <MenuItem {...props} key={option.id ?? option.item_id ?? key}>
 //                 <Box sx={{ width: "100%" }}>
 //                   <Typography
 //                     variant="subtitle1"

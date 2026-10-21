@@ -53,7 +53,6 @@ const SUBMENU_ITEMS = {
     { path: "/sales/invoices", label: "Invoices" },
     { path: "/sales/paymentsReceived", label: "Payments Received" },
     { path: "/sales/recurringInvoice", label: "Recurring Invoices" },
-    { path: "/sales/creditNotes", label: "Credit Notes" },
   ],
   purchase: [
     { path: "/purchase/vendor", label: "Vendors" },
@@ -63,7 +62,6 @@ const SUBMENU_ITEMS = {
     { path: "/purchase/bills", label: "Bills" },
     { path: "/purchase/paymentmade", label: "Payment Made" },
     { path: "/purchase/recurringbills", label: "Recurring Bills" },
-    { path: "/purchase/vendorcredits/homepage", label: "Vendor Credits" },
   ],
   timeTracking: [
     { path: "/time/timesheets", label: "Timesheets" },
@@ -899,23 +897,14 @@ const Sidebar = ({ collapsed, toggleSidebar }) => {
         >
           {renderMenuItem("/home", "Home", HomeOutlinedIcon)}
           {renderMenuItem("/items/itemtable", "Items", Inventory2OutlinedIcon)}
-          {renderMenuItem("/banking", "Banking", AccountBalanceOutlinedIcon)}
           {renderMenuItem("/sales", "Sales", ShoppingCartOutlinedIcon)}
           {renderMenuItem("/purchase", "Purchase", ShoppingBagOutlinedIcon)}
-          {renderMenuItem("/time", "Time Tracking", AccessTimeOutlinedIcon)}
           {renderMenuItem(
             "/accountant",
             "Accountant",
             PersonOutlineOutlinedIcon
           )}
           {renderMenuItem("/reports", "Reports", AssessmentOutlinedIcon)}
-          {renderMenuItem("/documents", "Documents", DescriptionOutlinedIcon)}
-          {renderMenuItem("/payroll", "Payroll", PaymentsOutlinedIcon)}
-          {renderMenuItem(
-            "/configure",
-            "Configure Features list",
-            SettingsOutlinedIcon
-          )}
           {perms?.isSuperadmin &&
             renderMenuItem("/admin/users", "Users & Access", AdminPanelSettingsOutlinedIcon)}
 

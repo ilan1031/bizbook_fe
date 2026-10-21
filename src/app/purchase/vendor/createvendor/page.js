@@ -345,7 +345,7 @@ const VendorForm = () => {
       (gst_treatment, schema) => {
         if (formik.values.gst_treatment !== "") {
           return fieldVisibility[gst_treatment]?.includes("place_of_contact")
-            ? schema.required("Place of contact is required")
+            ? schema.required("Place of supply is required")
             : schema.notRequired();
         }
         return schema.notRequired();
@@ -380,7 +380,7 @@ const VendorForm = () => {
       (gst_treatment, schema) => {
         if (formik.values.gst_treatment !== "") {
           return fieldVisibility[gst_treatment]?.includes("place_of_contact")
-            ? schema.required("Place of contact is required")
+            ? schema.required("Place of supply is required")
             : schema.notRequired();
         }
         return schema.notRequired();
@@ -790,36 +790,8 @@ const VendorForm = () => {
     formik.values.mobile,
   ]);
 
-  // Load custom fields and reporting tags on component mount
-  useEffect(() => {
-    const fetchCustomData = async () => {
-      try {
-        // Fetch custom fields
-        const customFieldsResponse = await apiService({
-          method: "GET",
-          url: `/api/v1/custom-fields?entity_type=vendor&organization_id=${organization_id}`,
-        });
-
-        if (customFieldsResponse.data) {
-          setCustomFieldsData(customFieldsResponse.data);
-        }
-
-        // Fetch reporting tags
-        const reportingTagsResponse = await apiService({
-          method: "GET",
-          url: `/api/v1/reporting-tags?organization_id=${organization_id}`,
-        });
-
-        if (reportingTagsResponse.data) {
-          setReportingTags(reportingTagsResponse.data);
-        }
-      } catch (error) {
-        console.error("Error fetching custom data:", error);
-      }
-    };
-
-    fetchCustomData();
-  }, [organization_id]);
+  // Custom fields and reporting tags have no API yet; their tabs use the
+  // defaults above.
 
   return (
     <Container maxWidth="md" sx={{ mt: 2, px: 2, ml: 1 }}>

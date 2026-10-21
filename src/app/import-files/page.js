@@ -148,6 +148,19 @@ const UploadPreview = () => {
         updateExisting: updateExisting,
         skipErrors: skipErrors,
       };
+      // Import endpoint and the list to open afterwards, per file type.
+      const IMPORT_TARGETS = {
+        bills: { endpoint: "import-bills", list: "/purchase/bills" },
+        purchase: { endpoint: "purchase-order", list: "/purchase/purchaseorder" },
+        "purchase-order": { endpoint: "purchase-order", list: "/purchase/purchaseorder" },
+        quote: { endpoint: "quote", list: "/sales/quotes" },
+      };
+      const target = IMPORT_TARGETS[fileType];
+      if (!target) {
+        showMessage("Importing this kind of record isn't available yet.", "warning");
+        setImportInProgress(false);
+        return;
+      }
       let org_id = localStorage.getItem("organization_id");
       let baseURL = config.PO_Base_url;
       if (fileType === "customers") {
@@ -157,7 +170,7 @@ const UploadPreview = () => {
       }
       // Call your API service
       const params = {
-        url: `api/v1/import/${fileType}?org_id=${org_id}`,
+        url: `api/v1/import/${target.endpoint}?org_id=${org_id}`,
         method: "POST",
         data: importData.data,
         customBaseUrl: baseURL,
@@ -166,15 +179,7 @@ const UploadPreview = () => {
       const response = await apiService(params);
       if (response.statusCode == 200) {
         showMessage(response.data.message, "success");
-        if (fileType === "bills") {
-          router.push("purchase/bills");
-        } else if (fileType === "purchase-order") {
-          router.push("purchase/purchaseorder");
-        } else if (fileType === "customers") {
-          router.push("sales/customer");
-        } else if (fileType === "quote") {
-          router.push("sales/quotes");
-        }
+        router.push(target.list);
         setImportSuccess(true);
         setImportInProgress(false);
       }

@@ -1942,7 +1942,7 @@ const QuoteCreationPage = () => {
                               }}
                             />
                           )}
-                          renderOption={(props, option, { selected }) => {
+                          renderOption={({ key, ...props }, option, { selected }) => {
                             const hoverStyles = {
                               backgroundColor:
                                 theme.palette.hover?.background || "#408dfb",
@@ -1952,7 +1952,7 @@ const QuoteCreationPage = () => {
 
                             return (
                               <li
-                                {...props}
+                                key={key} {...props}
                                 style={{
                                   fontSize: "13px",
                                   padding: "6px 12px",

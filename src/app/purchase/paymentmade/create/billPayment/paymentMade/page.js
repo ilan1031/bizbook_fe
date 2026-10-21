@@ -1944,10 +1944,9 @@ const CreateBillPayment = () => {
 
                         {/* Display grouped options */}
                         {Object.keys(groupedOptions).length > 0 ? (
-                          Object.entries(groupedOptions).map(
-                            ([group, items]) => (
-                              <React.Fragment key={group}>
-                                <ListSubheader
+                          Object.entries(groupedOptions).flatMap(
+                            ([group, items]) => [
+                                <ListSubheader key={`group-${group}`}
                                   sx={{
                                     fontSize: "13px",
                                     color: "gray",
@@ -1957,8 +1956,8 @@ const CreateBillPayment = () => {
                                   }}
                                 >
                                   {group}
-                                </ListSubheader>
-                                {items.map((item) => (
+                                </ListSubheader>,
+                                ...items.map((item) => (
                                   <MenuItem
                                     key={item.label}
                                     value={item.label}
@@ -1987,9 +1986,8 @@ const CreateBillPayment = () => {
                                   >
                                     {item.label}
                                   </MenuItem>
-                                ))}
-                              </React.Fragment>
-                            )
+                                )),
+                            ]
                           )
                         ) : (
                           <MenuItem

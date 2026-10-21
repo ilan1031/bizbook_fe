@@ -2177,9 +2177,9 @@ const InvoiceCreationPage = () => {
                         }}
                       />
                     )}
-                    renderOption={(props, option, { selected }) => (
+                    renderOption={({ key, ...props }, option, { selected }) => (
                       <li
-                        {...props}
+                        key={key} {...props}
                         style={{
                           fontSize: "13px",
                           padding: "6px 12px",
@@ -2810,7 +2810,7 @@ const InvoiceCreationPage = () => {
               value={formik.values.terms}
               onChange={formik.handleChange}
               onBlur={formik.handleBlur}
-              error={formik.touched.terms && Boolean(formik.errors.terms)}
+              aria-invalid={formik.touched.terms && Boolean(formik.errors.terms)}
               minRows={3}
               placeholder="Enter the terms and conditions of your business to be displayed in your transaction"
               style={{ ...commonTextareaInputStyle }}

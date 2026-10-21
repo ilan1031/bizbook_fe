@@ -186,7 +186,7 @@ const CustomerForm = () => {
       (gst_treatment, schema) => {
         if (formik.values.gst_treatment !== "") {
           return fieldVisibility[gst_treatment]?.includes("place_of_contact")
-            ? schema.required("Place of contact is required")
+            ? schema.required("Place of supply is required")
             : schema.notRequired();
         }
         return schema.notRequired();

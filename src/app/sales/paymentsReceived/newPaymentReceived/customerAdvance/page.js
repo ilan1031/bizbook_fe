@@ -2087,9 +2087,8 @@ const CustomerAdvance = () => {
 
                     {/* Display grouped options */}
                     {Object.keys(groupedOptions).length > 0 ? (
-                      Object.entries(groupedOptions).map(([group, items]) => (
-                        <React.Fragment key={group}>
-                          <ListSubheader
+                      Object.entries(groupedOptions).flatMap(([group, items]) => [
+                          <ListSubheader key={`group-${group}`}
                             sx={{
                               fontSize: "13px",
                               color: "gray",
@@ -2099,8 +2098,8 @@ const CustomerAdvance = () => {
                             }}
                           >
                             {group}
-                          </ListSubheader>
-                          {items.map((item) => (
+                          </ListSubheader>,
+                          ...items.map((item) => (
                             <MenuItem
                               key={item.label}
                               value={item.label}
@@ -2128,9 +2127,8 @@ const CustomerAdvance = () => {
                             >
                               {item.label}
                             </MenuItem>
-                          ))}
-                        </React.Fragment>
-                      ))
+                          )),
+                      ])
                     ) : (
                       <MenuItem
                         disabled

@@ -681,6 +681,7 @@ const CreateInvoicePayment = () => {
     "Cheque",
     "Credit Card",
     "UPI",
+    "Razorpay (online)",
   ];
   const allTdsOptions = [
     "Advance Tax",
@@ -1460,8 +1461,10 @@ const CreateInvoicePayment = () => {
           return;
         }
 
-        // Check if Razorpay is loaded
-        if (!window.Razorpay) {
+        // Only online payments go through the Razorpay checkout; cash, bank
+        // transfer, cheque, UPI etc. are recorded as soon as they're saved.
+        const isOnline = /^(razorpay|online)/i.test(values.payment_mode || "");
+        if (isOnline && !window.Razorpay) {
           showMessage(
             "Payment gateway is loading. Please try again.",
             "warning"
@@ -1480,7 +1483,16 @@ const CreateInvoicePayment = () => {
         const orderResponse = await apiService(orderParams);
 
         if (orderResponse.statusCode !== 200) {
-          throw new Error("Failed to create Razorpay order");
+          throw new Error("Failed to record the payment");
+        }
+
+        if (!orderResponse.data?.online) {
+          showMessage(orderResponse.data?.message || "Payment recorded successfully", "success");
+          router.push(`/sales/paymentsReceived`);
+          resetForm();
+          setSelectedCustomer(null);
+          setSubmitting(false);
+          return;
         }
 
         console.log("Order created:", orderResponse);
@@ -1571,7 +1583,6 @@ const CreateInvoicePayment = () => {
           },
           modal: {
             ondismiss: () => {
-              alert("Payment modal closed", orderResponse.data.payment_id);
               showMessage("Payment cancelled by user", "warning");
               setSubmitting(false);
             },
@@ -2613,10 +2624,9 @@ const CreateInvoicePayment = () => {
 
                           {/* Display grouped options */}
                           {Object.keys(groupedOptions).length > 0 ? (
-                            Object.entries(groupedOptions).map(
-                              ([group, items]) => (
-                                <React.Fragment key={group}>
-                                  <ListSubheader
+                            Object.entries(groupedOptions).flatMap(
+                              ([group, items]) => [
+                                  <ListSubheader key={`group-${group}`}
                                     sx={{
                                       fontSize: "13px",
                                       color: "gray",
@@ -2626,8 +2636,8 @@ const CreateInvoicePayment = () => {
                                     }}
                                   >
                                     {group}
-                                  </ListSubheader>
-                                  {items.map((item) => (
+                                  </ListSubheader>,
+                                  ...items.map((item) => (
                                     <MenuItem
                                       key={item.label}
                                       value={item.label}
@@ -2658,9 +2668,8 @@ const CreateInvoicePayment = () => {
                                     >
                                       {item.label}
                                     </MenuItem>
-                                  ))}
-                                </React.Fragment>
-                              )
+                                  )),
+                              ]
                             )
                           ) : (
                             <MenuItem

@@ -474,42 +474,10 @@ const SalesView = ({ data, organizationData, callViewAPI, loading }) => {
     setInvoiceAnchorPosition(null);
   };
 
-  const handleEmailItem = async (row) => {
-    try {
-      const organization_id = localStorage.getItem("organization_id");
-      if (!organization_id) {
-        showMessage("Organization ID not found", "error");
-        return;
-      }
-
-      const response = await apiService({
-        method: "POST",
-        url: `/api/v1/invoices/email/${row.invoice_id}?organization_id=${organization_id}`,
-        customBaseUrl: config.SO_Base_url,
-        data: { invoice_id: row.invoice_id },
-      });
-
-      if (response.data.status) {
-        showMessage(
-          response.data.message || "Invoice emailed successfully!",
-          "success"
-        );
-      } else {
-        showMessage(
-          response.data.message || "Failed to email invoice",
-          "error"
-        );
-      }
-    } catch (error) {
-      console.error("Error emailing invoice:", error);
-      showMessage(
-        error.response?.data?.message ||
-          "Failed to email invoice. Please try again.",
-        "error"
-      );
-    } finally {
-      handleInvoiceMenuClose();
-    }
+  // Opens the invoice email screen, where the user reviews and sends it.
+  const handleEmailItem = (row) => {
+    handleInvoiceMenuClose();
+    router.push(`/sales/invoices/${row.invoice_id}/email`);
   };
 
   const handlePdfItem = async (row) => {

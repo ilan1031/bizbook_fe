@@ -97,6 +97,16 @@ const Dashboard = () => {
   const [donutPercentage, setDonutPercentage] = useState(0);
   const [legendOpacity, setLegendOpacity] = useState(0);
   const [userName, setUserName] = useState("");
+  const [orgName, setOrgName] = useState("");
+  useEffect(() => {
+    const orgId = localStorage.getItem("organization_id");
+    apiService({ method: "POST", url: "api/v1/org/get-organisation" })
+      .then((res) => {
+        const list = Array.isArray(res.data?.data) ? res.data.data : [];
+        setOrgName(list.find((o) => String(o.organization_id) === String(orgId))?.org_name || "");
+      })
+      .catch(() => {});
+  }, []);
   const handleChange = (event, newValue) => {
     setValue(newValue);
   };
@@ -201,137 +211,63 @@ const Dashboard = () => {
       clearTimeout(timeout);
     };
   }, []);
-  // Fetch bills data from API
+  // Profit & loss card: this financial year (from 1 April) from the P&L report.
+  const [pnl, setPnl] = useState({ income: 0, cogs: 0, expenses: 0, net: 0, loading: true });
   useEffect(() => {
-    const fetchBillsData = async () => {
-      // Skip sections this user may not view (the server would refuse them).
-      if (!perms?.can("bills", "view")) {
-        setBillsData({ total: 0, current: 0, overdue: 0, loading: false });
-        return;
-      }
-      try {
-        const organisation_id = localStorage.getItem("organization_id") || "1"; // Fallback value
-
-        const response = await apiService({
-          method: "GET",
-          url: `api/v1/bills/get-bills?org_id=${organisation_id}`,
-          customBaseUrl: config.PO_Base_url,
-        });
-        // Based on your response structure
-        const bills = response.data.data; // Access the 'data' array inside the response
-
-        // Calculate totals based on API response
-        let totalAmount = 0;
-        let totalAmountPaid = 0; // Sum of all "amount" fields
-
-        if (Array.isArray(bills) && bills.length > 0) {
-          bills.forEach((bill) => {
-            const totals = parseFloat(bill.totals || 0);
-            const amount = parseFloat(bill.amount || 0);
-
-            // Exclude "DRAFT" status from calculations
-            if (bill.status_type !== "DRAFT") {
-              // Add to total amount (sum of all "totals")
-              totalAmount += totals;
-
-              // Add to total amount paid (sum of all "amount")
-              totalAmountPaid += amount;
-            }
-          });
-        }
-
-        // Calculate based on your logic:
-        // total = sum of all "totals"
-        // current = total - totalAmountPaid (totals - amount)
-        // overdue = total - current
-        const currentAmount = totalAmount - totalAmountPaid;
-        const overdueAmount = totalAmount - currentAmount;
-
-        setBillsData({
-          total: totalAmount,
-          current: currentAmount,
-          overdue: overdueAmount,
+    if (!perms?.me) return;
+    if (!perms.can("profitAndLoss", "view")) {
+      setPnl({ income: 0, cogs: 0, expenses: 0, net: 0, loading: false, hidden: true });
+      return;
+    }
+    const now = new Date();
+    const fyStartYear = now.getMonth() >= 3 ? now.getFullYear() : now.getFullYear() - 1;
+    const pad = (n) => String(n).padStart(2, "0");
+    const from = `${fyStartYear}-04-01`;
+    const to = `${now.getFullYear()}-${pad(now.getMonth() + 1)}-${pad(now.getDate())}`;
+    apiService({
+      method: "GET",
+      url: `api/v1/reports/profit-loss/bill-invoice?organization_id=${localStorage.getItem("organization_id")}&from=${from}&to=${to}`,
+    })
+      .then((res) => {
+        const sm = res.data?.data?.summary || {};
+        setPnl({
+          income: Number(sm.operatingIncome) || 0,
+          cogs: Number(sm.costOfGoodsSold) || 0,
+          expenses: Number(sm.operatingExpenses) || 0,
+          net: Number(sm.netProfitLoss) || 0,
           loading: false,
         });
-      } catch (error) {
-        console.error("Error fetching bills data:", error);
-        setBillsData({
-          total: 0,
-          current: 0,
-          overdue: 0,
-          loading: false,
-        });
-      }
-    };
-
-    fetchBillsData();
+      })
+      .catch(() => setPnl({ income: 0, cogs: 0, expenses: 0, net: 0, loading: false }));
   }, [perms?.me]);
-  // useEffect for fetching invoice data
-  useEffect(() => {
-    const fetchInvoicesData = async () => {
-      // Skip sections this user may not view (the server would refuse them).
-      if (!perms?.can("invoices", "view")) {
-        setInvoicesData({total: 0, current: 0, overdue: 0, loading: false,});
-        return;
-      }
-      try {
-        const organisation_id =
-          localStorage.getItem("organization_id") || "100000";
 
+  // Receivables and payables cards: totals of unpaid invoices and bills,
+  // split into current and overdue, computed by the server over all records.
+  useEffect(() => {
+    const empty = { total: 0, current: 0, overdue: 0, loading: false };
+    const canInvoices = perms?.can("invoices", "view");
+    const canBills = perms?.can("bills", "view");
+    if (!perms?.me || (!canInvoices && !canBills)) {
+      setInvoicesData(empty);
+      setBillsData(empty);
+      return;
+    }
+    const fetchSummary = async () => {
+      try {
+        const orgId = localStorage.getItem("organization_id");
         const response = await apiService({
           method: "GET",
-          url: `api/v1/invoices?organization_id=${organisation_id}`,
-          customBaseUrl: config.PO_Base_url,
+          url: `api/v1/kpi/summary?org_id=${orgId}`,
         });
-
-        const invoices = response.data.invoices || response.data;
-
-        let totalAmount = 0;
-        let totalAmountPaid = 0; // Sum of all paid amounts
-
-        if (Array.isArray(invoices) && invoices.length > 0) {
-          invoices.forEach((invoice) => {
-            const total = parseFloat(invoice.total || 0);
-            const paidAmount = parseFloat(
-              invoice.balance || invoice.amount_paid || 0
-            ); // Adjust field name as per your API response
-
-            // Exclude "draft" from calculations
-            if (invoice.status !== "draft") {
-              // Add to total amount (sum of all "total")
-              totalAmount += total;
-
-              // Add to total amount paid
-              totalAmountPaid += paidAmount;
-            }
-          });
-        }
-
-        // Calculate based on mathematical logic:
-        // total = sum of all "total" (excluding drafts)
-        // current = total - totalAmountPaid (total - paid amount)
-        // overdue = total - current
-        const currentAmount = totalAmount - totalAmountPaid;
-        const overdueAmount = totalAmount - currentAmount;
-
-        setInvoicesData({
-          total: totalAmount,
-          current: currentAmount,
-          overdue: overdueAmount,
-          loading: false,
-        });
+        const { receivables, payables } = response.data?.data || {};
+        setInvoicesData(canInvoices && receivables ? { ...receivables, loading: false } : empty);
+        setBillsData(canBills && payables ? { ...payables, loading: false } : empty);
       } catch (error) {
-        console.error("Error fetching invoices data:", error);
-        setInvoicesData({
-          total: 0,
-          current: 0,
-          overdue: 0,
-          loading: false,
-        });
+        setInvoicesData(empty);
+        setBillsData(empty);
       }
     };
-
-    fetchInvoicesData();
+    fetchSummary();
   }, [perms?.me]);
 
   // useEffect for fetching expense data
@@ -480,7 +416,7 @@ const Dashboard = () => {
     return gradientString;
   };
 
-  const profitLoss = invoicesData.total - billsData.total - totalExpenses;
+  const profitLoss = pnl.net;
 
   return (
     <Box>
@@ -520,7 +456,7 @@ const Dashboard = () => {
                   variant="body2"
                   sx={{ fontSize: "13px", color: "#666" }}
                 >
-                  {userName}
+                  {orgName}
                 </Typography>
               </Box>
             </Box>
@@ -625,7 +561,7 @@ const Dashboard = () => {
                 }}
                 onClick={() => router.push("/common/totalReceivables")}
               >
-                Total Invoice Amount {formatCurrency(invoicesData.total)}
+                Total Unpaid Invoices {formatCurrency(invoicesData.total)}
               </Typography>
               <LinearProgress
                 variant="determinate"
@@ -659,8 +595,7 @@ const Dashboard = () => {
                     fontWeight: "medium",
                   }}
                 >
-                  {/* CURRENT */}
-                  RECEIVED
+                  CURRENT
                 </Typography>
                 <Typography variant="h6" sx={{ mt: 1, fontWeight: "medium" }}>
                   {formatCurrency(invoicesData.current)}
@@ -748,7 +683,7 @@ const Dashboard = () => {
                     sx={{ fontSize: "14px", mb: 1, cursor: "pointer" }}
                     onClick={() => router.push("/common/totalPayabale")}
                   >
-                    Total Bill Amount {formatCurrency(billsData.total)}
+                    Total Unpaid Bills {formatCurrency(billsData.total)}
                   </Typography>
                   <LinearProgress
                     variant="determinate"
@@ -784,8 +719,7 @@ const Dashboard = () => {
                     fontWeight: "medium",
                   }}
                 >
-                  {/* CURRENT */}
-                  PAID
+                  CURRENT
                 </Typography>
                 <Typography variant="h6" sx={{ mt: 1, fontWeight: "medium" }}>
                   {billsData.loading ? (
@@ -844,7 +778,7 @@ const Dashboard = () => {
                 variant="h6"
                 sx={{ fontSize: "18px", fontWeight: "medium", py: 1.3 }}
               >
-                Profit & Loss
+                Profit & Loss <span style={{ fontSize: 12, color: "#64748b" }}>(this financial year)</span>
               </Typography>
             </Box>
 
@@ -860,10 +794,10 @@ const Dashboard = () => {
                 }}
               >
                 <Typography sx={{ fontSize: "15px" }}>
-                  Total Receivables
+                  Income
                 </Typography>
                 <Typography sx={{ fontSize: "15px", color: "#42a5f5" }}>
-                  {formatCurrency(invoicesData.total)}
+                  {formatCurrency(pnl.income)}
                 </Typography>
               </Box>
 
@@ -876,10 +810,10 @@ const Dashboard = () => {
                 }}
               >
                 <Typography sx={{ fontSize: "15px" }}>
-                  Total Payables
+                  Cost of Goods Sold
                 </Typography>
                 <Typography sx={{ fontSize: "15px", color: "#f44336" }}>
-                  {formatCurrency(billsData.total)}
+                  {formatCurrency(pnl.cogs)}
                 </Typography>
               </Box>
 
@@ -891,9 +825,9 @@ const Dashboard = () => {
                   justifyContent: "space-between",
                 }}
               >
-                <Typography sx={{ fontSize: "15px" }}>Total Expense</Typography>
+                <Typography sx={{ fontSize: "15px" }}>Expenses</Typography>
                 <Typography sx={{ fontSize: "15px", color: "#f44336" }}>
-                  {formatCurrency(totalExpenses)}
+                  {formatCurrency(pnl.expenses)}
                 </Typography>
               </Box>
 

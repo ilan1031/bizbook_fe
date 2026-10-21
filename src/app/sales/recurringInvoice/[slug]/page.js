@@ -554,14 +554,15 @@ const RecurringInvoice = () => {
     try {
       const response = await apiService({
         method: "DELETE",
-        url: `/api/v1/RecurringInvoices/${id}`,
+        url: `/api/v1/RecurringInvoices/individual/delete`,
         params: {
           organization_id: organization_id,
+          recurring_invoice_id: id,
         },
         customBaseUrl: config.SO_Base_url,
       });
 
-      if (response.data && response.data.status) {
+      if (response.data) {
         showMessage("Recurring invoice deleted successfully", "success");
         router.push("/sales/recurringInvoice");
       } else {
@@ -582,33 +583,8 @@ const RecurringInvoice = () => {
     router.push(`/sales/recurringInvoice/edit/${id}`);
   };
 
-  const handleClone = async (id) => {
-    try {
-      const response = await apiService({
-        method: "POST",
-        url: `/api/v1/RecurringInvoices/clone/${id}`,
-        params: {
-          organization_id: organization_id,
-        },
-        customBaseUrl: config.SO_Base_url,
-      });
-
-      if (response.data && response.data.data) {
-        const newInvoiceId = response.data.data.recurringinvoice_id;
-        showMessage("Recurring invoice cloned successfully", "success");
-        router.push(`/sales/recurringInvoice/${newInvoiceId}`);
-      } else {
-        throw new Error(
-          response.data?.message || "Failed to clone recurring invoice"
-        );
-      }
-    } catch (error) {
-      console.error("Error cloning recurring invoice:", error);
-      showMessage(
-        error.response?.data?.message || "Failed to clone recurring invoice",
-        "error"
-      );
-    }
+  const handleClone = (id) => {
+    router.push(`/sales/recurringInvoice/new?clone_id=${id}`);
   };
 
   const handleDeleteClick = (id) => {

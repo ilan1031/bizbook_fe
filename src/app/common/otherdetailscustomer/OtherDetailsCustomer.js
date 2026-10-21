@@ -13,6 +13,7 @@ import {
   MenuItem,
   Paper,
   Select,
+  FormHelperText,
   TextField,
   Tooltip,
   Typography,
@@ -377,7 +378,7 @@ const OtherDetailsCustomer = ({ formik }) => {
               </Typography>
             </Grid>
             <Grid item xs={12} sm={8} ml={20} mt={-5}>
-              <FormControl Width size="small" sx={{ ...commonStyles }}>
+              <FormControl size="small" sx={{ ...commonStyles }}>
                 <Select
                   displayEmpty
                   value={formik.values.gst_treatment || ""}
@@ -386,9 +387,6 @@ const OtherDetailsCustomer = ({ formik }) => {
                   error={
                     formik.touched.gst_treatment &&
                     Boolean(formik.errors.gst_treatment)
-                  }
-                  helperText={
-                    formik.touched.gst_treatment && formik.errors.gst_treatment
                   }
                   IconComponent={ArrowDropDownIcon}
                   renderValue={(selected) =>
@@ -513,6 +511,9 @@ const OtherDetailsCustomer = ({ formik }) => {
                     </MenuItem>
                   )}
                 </Select>
+                {formik.touched.gst_treatment && formik.errors.gst_treatment && (
+                  <FormHelperText error>{formik.errors.gst_treatment}</FormHelperText>
+                )}
               </FormControl>
             </Grid>
 
@@ -645,7 +646,7 @@ const OtherDetailsCustomer = ({ formik }) => {
                   </Typography>
                 </Grid>
                 <Grid item xs={12} sm={8} ml={20} mt={-5}>
-                  <FormControl Width size="small" sx={{ ...commonStyles }}>
+                  <FormControl size="small" sx={{ ...commonStyles }}>
                     <Autocomplete
                       options={INDIAN_STATES}
                       size="small"
@@ -688,9 +689,9 @@ const OtherDetailsCustomer = ({ formik }) => {
                           }}
                         />
                       )}
-                      renderOption={(props, option) => (
+                      renderOption={({ key, ...props }, option) => (
                         <MenuItem
-                          {...props}
+                          key={key} {...props}
                           sx={{
                             fontSize: "13px",
                             padding: "6px 12px",

@@ -1718,9 +1718,9 @@ const fetchDataFixed = async () => {
                               }}
                             />
                           )}
-                          renderOption={(props, option, { selected }) => (
+                          renderOption={({ key, ...props }, option, { selected }) => (
                             <li
-                              {...props}
+                              key={key} {...props}
                               style={{
                                 fontSize: "13px",
                                 padding: "6px 12px",

@@ -1372,9 +1372,9 @@ const DeliveryChallanCreationPage = () => {
                               }}
                             />
                           )}
-                          renderOption={(props, option) => (
+                          renderOption={({ key, ...props }, option) => (
                             <li
-                              {...props}
+                              key={key} {...props}
                               style={{ fontSize: "13px", padding: "6px 12px" }}
                             >
                               [{option.code}] - {option.name}

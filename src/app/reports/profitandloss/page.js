@@ -1325,7 +1325,8 @@ const ProfitAndLoss = () => {
   const [dateValue, setDateValue] = useState("This Month");
   const [dateAnchorEl, setDateAnchorEl] = useState(null);
   const dateMenuOpen = Boolean(dateAnchorEl);
-  const [reportBasis, setReportBasis] = useState("Cash");
+  // The report is built from posted journals, i.e. accrual basis.
+  const [reportBasis, setReportBasis] = useState("Accrual");
   const [reportBasisAnchorEl, setReportBasisAnchorEl] = useState(null);
   const reportBasisMenuOpen = Boolean(reportBasisAnchorEl);
   const [profitLossData, setProfitLossData] = useState({});
@@ -1436,7 +1437,9 @@ const ProfitAndLoss = () => {
     });
 
     fetchOrganization();
-    // Remove auto-load data on mount - only load after Run Report is clicked
+    // Show this month straight away (fetchProfitLossData falls back to the
+    // current month while the date state is still being set).
+    fetchProfitLossData();
   }, []);
 
   // Remove auto-refresh when date filters change
@@ -2128,6 +2131,7 @@ const ProfitAndLoss = () => {
               </MenuItem>
 
               <MenuItem
+                disabled // cash-basis reporting isn't implemented yet
                 onClick={() => {
                   setReportBasis("Cash");
                   handleClose();

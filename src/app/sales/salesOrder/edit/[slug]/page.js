@@ -1332,9 +1332,9 @@ const SalesOrderCreation = () => {
                           }}
                         />
                       )}
-                      renderOption={(props, option) => (
+                      renderOption={({ key, ...props }, option) => (
                         <li
-                          {...props}
+                          key={key} {...props}
                           style={{ fontSize: "13px", padding: "6px 12px" }}
                         >
                           [{option.code}] - {option.name}
@@ -2094,7 +2094,7 @@ const SalesOrderCreation = () => {
                 value={formik.values.terms}
                 onChange={formik.handleChange}
                 onBlur={formik.handleBlur}
-                error={formik.touched.terms && Boolean(formik.errors.terms)}
+                aria-invalid={formik.touched.terms && Boolean(formik.errors.terms)}
                 minRows={3}
                 placeholder="Enter the terms and conditions of your business to be displayed in your transaction"
                 style={{ ...commonTextareaInputStyle }}
