@@ -24,6 +24,7 @@ import {
   Paper,
   styled,
   TextField,
+  FormHelperText,
 } from "@mui/material";
 import InfoOutlinedIcon from "@mui/icons-material/InfoOutlined";
 import EmailIcon from "@mui/icons-material/Email";
@@ -312,8 +313,7 @@ const VendorForm = () => {
     // Other fields are optional
     company_name: Yup.string().required("Company name is required"),
     email: Yup.string()
-      .email("Invalid email address")
-      .required("Email is required"),
+      .email("Invalid email address"), // optional, like customers
 
     phone: Yup.string().matches(
       /^\d{10}$/,
@@ -1124,9 +1124,6 @@ const VendorForm = () => {
                       formik.touched.contact_name &&
                       Boolean(formik.errors.contact_name)
                     }
-                    helperText={
-                      formik.touched.contact_name && formik.errors.contact_name
-                    }
                     IconComponent={KeyboardArrowDownIcon}
                     sx={{ fontSize: "13px" }}
                     renderValue={(selected) => {
@@ -1161,6 +1158,9 @@ const VendorForm = () => {
                       </MenuItem>
                     ))}
                   </StyledSelect>
+                  {formik.touched.contact_name && formik.errors.contact_name && (
+                    <FormHelperText error>{formik.errors.contact_name}</FormHelperText>
+                  )}
                 </FormControl>
               </Grid>
             </Grid>

@@ -53,6 +53,7 @@ const SUBMENU_ITEMS = {
     { path: "/sales/invoices", label: "Invoices" },
     { path: "/sales/paymentsReceived", label: "Payments Received" },
     { path: "/sales/recurringInvoice", label: "Recurring Invoices" },
+    { path: "/sales/creditNotes", label: "Credit Notes" },
   ],
   purchase: [
     { path: "/purchase/vendor", label: "Vendors" },
@@ -62,6 +63,7 @@ const SUBMENU_ITEMS = {
     { path: "/purchase/bills", label: "Bills" },
     { path: "/purchase/paymentmade", label: "Payment Made" },
     { path: "/purchase/recurringbills", label: "Recurring Bills" },
+    { path: "/purchase/vendorcredits", label: "Vendor Credits" },
   ],
   timeTracking: [
     { path: "/time/timesheets", label: "Timesheets" },
@@ -282,7 +284,7 @@ const Sidebar = ({ collapsed, toggleSidebar }) => {
     },
     vendorCredits: {
       keys: "Alt+Shift+C",
-      path: "/purchase/vendorcredits/homepage",
+      path: "/purchase/vendorcredits",
       label: "Vendor Credits",
     },
 
@@ -333,7 +335,7 @@ const Sidebar = ({ collapsed, toggleSidebar }) => {
       "/purchase/bills",
       "/purchase/paymentmade",
       "/purchase/recurringbills",
-      "/purchase/vendorcredits/homepage",
+      "/purchase/vendorcredits",
     ],
     "/time": ["/time/timesheets", "/time/projects"],
     "/accountant": ["/accountant/chart", "/accountant/journals"],
@@ -463,6 +465,8 @@ const Sidebar = ({ collapsed, toggleSidebar }) => {
       "/sales/deliveryChallan": "/sales/deliveryChallan/new",
       "/sales/quotes": "/sales/quotes/new",
       "/purchase/recurringbills": "/purchase/recurringbills/newRecurringBill",
+      "/sales/creditNotes": "/sales/creditNotes/new",
+      "/purchase/vendorcredits": "/purchase/vendorcredits/new",
     };
 
     if (creationPaths[path]) {
