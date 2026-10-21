@@ -1,6 +1,7 @@
 "use client";
 import React, { useState } from "react";
 import {
+  Alert,
   Box,
   Button,
   Checkbox,
@@ -32,6 +33,7 @@ import { useFormik } from "formik";
 export default function ZohoSignupPage() {
   const { showMessage } = useSnackbar();
   const [errors, setErrors] = useState({});
+  const [notice, setNotice] = useState(null); // { severity, text }
   const router = useRouter();
 
   // Define Yup Validation Schema
@@ -48,8 +50,9 @@ export default function ZohoSignupPage() {
     password: Yup.string()
       .required("Password is required.")
       .matches(
-        /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d).{8,}$/,
-        "Password must be at least 8 characters long and include an uppercase letter, a lowercase letter, and a number."
+        // Same rule as the server.
+        /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[^A-Za-z0-9]).{8,}$/,
+        "Password must be at least 8 characters long and include an uppercase letter, a lowercase letter, a number and a special character."
       ),
     agreeToTerms: Yup.boolean().oneOf(
       [true],
@@ -75,27 +78,26 @@ export default function ZohoSignupPage() {
     },
     validationSchema: validationSchema,
     onSubmit: async (values, { resetForm }) => {
+      setNotice(null);
       try {
         const response = await apiService({
           method: "POST",
           url: "/api/v1/user/user-register",
           data: values,
         });
-        if (response.statusCode == 200) {
-          localStorage.setItem("user_name", response.data.data.company_name);
-          localStorage.setItem("token", response.data.token);
-          showMessage(response.data.message, "success");
-          router.push("/organisation/organisationsetuppage?register=true");
-          resetForm();
-        }
-      } catch (validationErrors) {
-        const newErrors = {};
-        if (validationErrors.inner) {
-          validationErrors.inner.forEach((error) => {
-            newErrors[error.path] = error.message;
-          });
-        }
-        setErrors(newErrors);
+        // New accounts can't sign in until an administrator approves them.
+        setNotice({
+          severity: "success",
+          text:
+            response.data?.message ||
+            "Account created. An administrator needs to approve it before you can sign in.",
+        });
+        resetForm();
+      } catch (error) {
+        setNotice({
+          severity: "error",
+          text: error?.message || "Couldn't create your account. Please try again.",
+        });
       }
     },
   });
@@ -406,10 +408,20 @@ export default function ZohoSignupPage() {
             >
               Let&apos;s get started.
             </Typography>
+            {notice && (
+              <Alert severity={notice.severity} sx={{ mb: 2, width: "100%" }}>
+                {notice.text}
+              </Alert>
+            )}
+            {notice?.severity === "success" && (
+              <Button variant="outlined" onClick={handleSignUp} sx={{ textTransform: "none" }}>
+                Go to sign in
+              </Button>
+            )}
             <Box
               component="form"
               onSubmit={formik.handleSubmit}
-              sx={{ width: "100%" }}
+              sx={{ width: "100%", display: notice?.severity === "success" ? "none" : "block" }}
             >
               <TextField
                 fullWidth
@@ -602,34 +614,7 @@ export default function ZohoSignupPage() {
                 <Divider />
               </Box>
               <Box sx={{ mt: 2, textAlign: "center" }}>
-                <Grid container spacing={1} justifyContent="center">
-                  <Grid item>
-                    <Button
-                      variant="outlined"
-                      sx={{ minWidth: 0, p: 1, borderRadius: 1 }}
-                    >
-                      <GoogleIcon color="error" />
-                    </Button>
-                  </Grid>
-
-                  <Grid item>
-                    <Button
-                      variant="outlined"
-                      sx={{ minWidth: 0, p: 1, borderRadius: 1 }}
-                    >
-                      <LinkedInIcon color="primary" />
-                    </Button>
-                  </Grid>
-                  <Grid item>
-                    <Button
-                      variant="outlined"
-                      sx={{ minWidth: 0, p: 1, borderRadius: 1 }}
-                    >
-                      <TwitterIcon sx={{ color: "#1DA1F2" }} />
-                    </Button>
-                  </Grid>
-                </Grid>
-                <Typography variant="body2" mt={3}>
+                <Typography variant="body2" mt={1}>
                   Already have an account?{" "}
                   <Link
                     href="#"

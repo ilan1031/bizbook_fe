@@ -1,3 +1,5 @@
-const CommonAPIURL = "http://localhost:4000/api/v1/";
+import config from "./config";
 
-export default { CommonAPIURL }
+const CommonAPIURL = `${config.apiBaseUrl}api/v1/`;
+
+export default { CommonAPIURL };

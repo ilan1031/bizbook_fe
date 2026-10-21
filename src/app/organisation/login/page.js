@@ -457,8 +457,9 @@
 //   );
 // }
 "use client";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import {
+  Alert,
   Box,
   Button,
   TextField,
@@ -532,34 +533,86 @@ export default function ZohoApp() {
     setErrors((prevErrors) => ({ ...prevErrors, [name]: "" }));
   };
 
+  const [notice, setNotice] = useState(null); // { severity, text }
+  const [otpStep, setOtpStep] = useState(null); // { session, mobileHint }
+  const [otpCode, setOtpCode] = useState("");
+  const [submitting, setSubmitting] = useState(false);
+
+  // Explain why the user was signed out (set by the API client).
+  useEffect(() => {
+    const reason = new URLSearchParams(window.location.search).get("reason");
+    const reasons = {
+      ACCOUNT_INACTIVE: "Your account has been deactivated. Contact your administrator.",
+      ACCOUNT_PENDING: "Your account is waiting for administrator approval.",
+      IP_NOT_ALLOWED: "This device is no longer approved for your account. Please sign in again.",
+      SESSION_EXPIRED: "Your session has ended. Please sign in again.",
+    };
+    if (reason && reasons[reason]) setNotice({ severity: "warning", text: reasons[reason] });
+  }, []);
+
+  const finishLogin = (data) => {
+    localStorage.setItem("user_name", data.user?.comp_name || data.user?.email || "");
+    localStorage.setItem("token", data.token);
+    if (data.ORG_ID) localStorage.setItem("organization_id", data.ORG_ID);
+    else localStorage.removeItem("organization_id");
+    showMessage(data.message || "Signed in", "success");
+    // First sign-in: the user still has to create their company.
+    router.push(data.needs_org_setup ? "/organisation/organisationsetuppage" : "/home");
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
+    setNotice(null);
     try {
-      // Validate form data using Yup
       await validationSchema.validate(formData, { abortEarly: false });
+    } catch (validationErrors) {
+      const newErrors = {};
+      (validationErrors.inner || []).forEach((error) => {
+        newErrors[error.path] = error.message;
+      });
+      setErrors(newErrors);
+      return;
+    }
+    setSubmitting(true);
+    try {
       const response = await apiService({
         method: "POST",
         url: "/api/v1/user/user-login",
         data: formData,
       });
-      if (response.statusCode == 200) {
-        // sessionStorage.setItem("user_name", response.data.data.company_name);
-        localStorage.setItem("user_name", response.data.user.comp_name);
-        localStorage.setItem("token", response.data.token);
-        localStorage.setItem("organization_id", response.data.ORG_ID);
-        showMessage(response.data.message, "success");
-        router.push("/home");
+      if (response.data?.otp_required) {
+        setOtpStep({ session: response.data.otp_session, mobileHint: response.data.mobile_hint });
+        setOtpCode("");
+      } else {
+        finishLogin(response.data);
       }
-      // If validation passes, redirect to /home
-    } catch (validationErrors) {
-      // Handle validation errors
-      const newErrors = {};
-      if (validationErrors.inner) {
-        validationErrors.inner.forEach((error) => {
-          newErrors[error.path] = error.message;
-        });
+    } catch (error) {
+      setNotice({
+        severity: error?.code === "ACCOUNT_PENDING" ? "info" : "error",
+        text: error?.message || "Couldn't sign in. Please try again.",
+      });
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
+  const handleVerifyOtp = async (e) => {
+    e.preventDefault();
+    setSubmitting(true);
+    try {
+      const response = await apiService({
+        method: "POST",
+        url: "/api/v1/user/verify-login-otp",
+        data: { otp_session: otpStep.session, otp: otpCode },
+      });
+      finishLogin(response.data);
+    } catch (error) {
+      if (["OTP_EXPIRED", "OTP_INVALID", "IP_LIMIT_REACHED"].includes(error?.code)) {
+        setOtpStep(null);
       }
-      setErrors(newErrors);
+      setNotice({ severity: "error", text: error?.message || "That code didn't work." });
+    } finally {
+      setSubmitting(false);
     }
   };
 
@@ -627,6 +680,48 @@ export default function ZohoApp() {
                 >
                   to access Books
                 </Typography>
+                {notice && (
+                  <Alert severity={notice.severity} sx={{ mb: 2 }}>
+                    {notice.text}
+                  </Alert>
+                )}
+                {otpStep ? (
+                  <Box component="form" onSubmit={handleVerifyOtp} sx={{ mb: 3 }}>
+                    <Typography sx={{ mb: 2, fontSize: "14px", color: "text.secondary" }}>
+                      You&apos;re signing in from a new device or network. Enter the
+                      6-digit code sent to {otpStep.mobileHint || "your mobile"}.
+                    </Typography>
+                    <TextField
+                      fullWidth
+                      autoFocus
+                      placeholder="6-digit code"
+                      value={otpCode}
+                      onChange={(e) => setOtpCode(e.target.value.replace(/\D/g, "").slice(0, 6))}
+                      inputProps={{ inputMode: "numeric", autoComplete: "one-time-code" }}
+                      sx={{ mb: 2 }}
+                    />
+                    <Button
+                      type="submit"
+                      fullWidth
+                      variant="contained"
+                      disabled={submitting || otpCode.length !== 6}
+                      sx={{ py: 1.5, bgcolor: "#0091ff", "&:hover": { bgcolor: "#0077e6" } }}
+                    >
+                      {submitting ? "Verifying…" : "Verify and sign in"}
+                    </Button>
+                    <Button
+                      fullWidth
+                      onClick={() => {
+                        setOtpStep(null);
+                        setOtpCode("");
+                        setNotice(null);
+                      }}
+                      sx={{ mt: 1, textTransform: "none" }}
+                    >
+                      Back to sign in
+                    </Button>
+                  </Box>
+                ) : (
                 <Box component="form" onSubmit={handleSubmit} sx={{ mb: 3 }}>
                   <TextField
                     fullWidth
@@ -662,6 +757,7 @@ export default function ZohoApp() {
                     type="submit"
                     fullWidth
                     variant="contained"
+                    disabled={submitting}
                     sx={{
                       mt: 1,
                       py: 1.5,
@@ -671,78 +767,10 @@ export default function ZohoApp() {
                       },
                     }}
                   >
-                    Login
+                    {submitting ? "Signing in…" : "Login"}
                   </Button>
                 </Box>
-                <Box sx={{ mb: 3 }}>
-                  <Typography variant="body2" sx={{ mb: 2 }}>
-                    Sign in using
-                  </Typography>
-                  <Box sx={{ display: "flex", gap: 1 }}>
-                    <IconButton
-                      sx={{
-                        bgcolor: "#f2f2f2",
-                        color: "#757575",
-                        "&:hover": { bgcolor: "#e0e0e0" },
-                      }}
-                    >
-                      <GoogleIcon />
-                    </IconButton>
-
-                    <IconButton
-                      sx={{
-                        bgcolor: "#0a66c2",
-                        color: "#fff",
-                        "&:hover": { bgcolor: "#0855a1" },
-                      }}
-                    >
-                      <LinkedInIcon />
-                    </IconButton>
-                    <IconButton
-                      sx={{
-                        bgcolor: "#1da1f2",
-                        color: "#fff",
-                        "&:hover": { bgcolor: "#0c90e0" },
-                      }}
-                    >
-                      <TwitterIcon />
-                    </IconButton>
-                    <IconButton
-                      sx={{
-                        bgcolor: "#107c41",
-                        color: "#fff",
-                        "&:hover": { bgcolor: "#0c6535" },
-                      }}
-                    >
-                      <Box
-                        sx={{
-                          width: 20,
-                          height: 20,
-                          bgcolor: "#107c41",
-                          display: "flex",
-                          alignItems: "center",
-                          justifyContent: "center",
-                        }}
-                      >
-                        <Typography
-                          variant="body2"
-                          sx={{ fontWeight: "bold", color: "#fff" }}
-                        >
-                          M
-                        </Typography>
-                      </Box>
-                    </IconButton>
-                    <IconButton
-                      sx={{
-                        bgcolor: "#f2f2f2",
-                        color: "#757575",
-                        "&:hover": { bgcolor: "#e0e0e0" },
-                      }}
-                    >
-                      <MoreHorizIcon />
-                    </IconButton>
-                  </Box>
-                </Box>
+                )}
                 <Box sx={{ mt: 2 }}>
                   <Typography variant="body2" sx={{ color: "text.secondary" }}>
                     Don&apos;t have a Bizbooks account?{" "}

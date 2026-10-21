@@ -40,6 +40,45 @@ import SettingsOutlinedIcon from "@mui/icons-material/SettingsOutlined";
 import ChevronLeftIcon from "@mui/icons-material/ChevronLeft";
 import ChevronRightIcon from "@mui/icons-material/ChevronRight";
 import KeyboardIcon from "@mui/icons-material/Keyboard";
+import AdminPanelSettingsOutlinedIcon from "@mui/icons-material/AdminPanelSettingsOutlined";
+import { usePermissions } from "../services/PermissionProvider";
+
+// Pages under each expandable section of the menu.
+const SUBMENU_ITEMS = {
+  sales: [
+    { path: "/sales/customer", label: "Customers" },
+    { path: "/sales/quotes", label: "Quotes" },
+    { path: "/sales/salesOrder", label: "Sales Orders" },
+    { path: "/sales/deliveryChallan", label: "Delivery Challans" },
+    { path: "/sales/invoices", label: "Invoices" },
+    { path: "/sales/paymentsReceived", label: "Payments Received" },
+    { path: "/sales/recurringInvoice", label: "Recurring Invoices" },
+    { path: "/sales/creditNotes", label: "Credit Notes" },
+  ],
+  purchase: [
+    { path: "/purchase/vendor", label: "Vendors" },
+    { path: "/purchase/expense", label: "Expenses" },
+    { path: "/purchase/recurringexpenses", label: "Recurring Expenses" },
+    { path: "/purchase/purchaseorder", label: "Purchase Orders" },
+    { path: "/purchase/bills", label: "Bills" },
+    { path: "/purchase/paymentmade", label: "Payment Made" },
+    { path: "/purchase/recurringbills", label: "Recurring Bills" },
+    { path: "/purchase/vendorcredits/homepage", label: "Vendor Credits" },
+  ],
+  timeTracking: [
+    { path: "/time/timesheets", label: "Timesheets" },
+    { path: "/time/projects", label: "Projects" },
+  ],
+  accountant: [
+    { path: "/accountant/chartOfAccounts", label: "Chart of Accounts" },
+    { path: "/accountant/journals", label: "Journal Entries" },
+  ],
+  reports: [
+    { path: "/reports/profitandloss", label: "Profit and Loss" },
+    { path: "/reports/balancesheet", label: "Balance Sheet" },
+    { path: "/reports/journalreport", label: "Journal Report" },
+  ],
+};
 
 // Custom styled components using theme
 const SidebarContainer = styled(Box, {
@@ -267,6 +306,14 @@ const Sidebar = ({ collapsed, toggleSidebar }) => {
     },
   };
 
+  // Only show what the signed-in user may open (see PermissionProvider).
+  const perms = usePermissions();
+  const canOpen = (path) => Boolean(perms?.canAccessPath(path));
+  const canCreateAt = (path) => {
+    const page = perms?.pageForPath(path);
+    return Boolean(perms?.isSuperadmin || (page && perms.can(page.key, "create")));
+  };
+
   // Define parent-child relationships for routes
   const routeRelationships = {
     "/sales": [
@@ -444,7 +491,7 @@ const Sidebar = ({ collapsed, toggleSidebar }) => {
   const renderSubmenuItems = (items) => {
     if (collapsed) return null;
 
-    return items.map(({ path, label, hasNotification }) => {
+    return items.filter(({ path }) => canOpen(path)).map(({ path, label, hasNotification }) => {
       const isSubItemActive = isSubmenuActive(path);
       const isHovered = hoveredItem === path;
 
@@ -489,17 +536,19 @@ const Sidebar = ({ collapsed, toggleSidebar }) => {
                 display: collapsed ? "none" : "block",
               }}
             />
-            <AddCircleIcon
-              sx={{
-                fontSize: 18,
-                color: isSubItemActive ? "white" : "primary.main",
-                opacity: isHovered || isSubItemActive ? 1 : 0,
-                transition: "opacity 0.2s ease",
-                display: collapsed ? "none" : "block",
-                marginLeft: "8px",
-              }}
-              onClick={(e) => handlePlusClick(path, e)}
-            />
+            {canCreateAt(path) && (
+              <AddCircleIcon
+                sx={{
+                  fontSize: 18,
+                  color: isSubItemActive ? "white" : "primary.main",
+                  opacity: isHovered || isSubItemActive ? 1 : 0,
+                  transition: "opacity 0.2s ease",
+                  display: collapsed ? "none" : "block",
+                  marginLeft: "8px",
+                }}
+                onClick={(e) => handlePlusClick(path, e)}
+              />
+            )}
           </SubMenuItemButton>
         </Link>
       );
@@ -523,6 +572,10 @@ const Sidebar = ({ collapsed, toggleSidebar }) => {
     if (isExpandable) {
       const menuKey = path.slice(1); // Remove the leading slash
       const normalizedKey = menuKey === "time" ? "timeTracking" : menuKey;
+      // Hide a section when the user can't open any of its pages.
+      if (!(SUBMENU_ITEMS[normalizedKey] || []).some((item) => canOpen(item.path))) {
+        return null;
+      }
       return renderExpandableMenuItem(
         path,
         label,
@@ -531,6 +584,8 @@ const Sidebar = ({ collapsed, toggleSidebar }) => {
         hasNotification
       );
     }
+
+    if (!canOpen(path)) return null;
 
     return (
       <Tooltip title={collapsed ? label : ""} placement="right" arrow>
@@ -734,59 +789,7 @@ const Sidebar = ({ collapsed, toggleSidebar }) => {
 
         {isOpen && !collapsed && (
           <List sx={{ py: 0 }}>
-            {menuKey === "sales" &&
-              renderSubmenuItems([
-                { path: "/sales/customer", label: "Customers" },
-                { path: "/sales/quotes", label: "Quotes" },
-                { path: "/sales/salesOrder", label: "Sales Orders" },
-                { path: "/sales/deliveryChallan", label: "Delivery Challans" },
-                { path: "/sales/invoices", label: "Invoices" },
-                { path: "/sales/paymentsReceived", label: "Payments Received" },
-                {
-                  path: "/sales/recurringInvoice",
-                  label: "Recurring Invoices",
-                },
-                { path: "/sales/creditNotes", label: "Credit Notes" },
-              ])}
-            {menuKey === "purchase" &&
-              renderSubmenuItems([
-                { path: "/purchase/vendor", label: "Vendors" },
-                { path: "/purchase/expense", label: "Expenses" },
-                {
-                  path: "/purchase/recurringexpenses",
-                  label: "Recurring Expenses",
-                },
-                { path: "/purchase/purchaseorder", label: "Purchase Orders" },
-                { path: "/purchase/bills", label: "Bills" },
-                {
-                  path: "/purchase/paymentmade",
-                  label: "Payment Made",
-                },
-                {
-                  path: "/purchase/recurringbills",
-                  label: "Recurring Bills",
-                },
-                {
-                  path: "/purchase/vendorcredits/homepage",
-                  label: "Vendor Credits",
-                },
-              ])}
-            {menuKey === "timeTracking" &&
-              renderSubmenuItems([
-                { path: "/time/timesheets", label: "Timesheets" },
-                { path: "/time/projects", label: "Projects" },
-              ])}
-            {menuKey === "accountant" &&
-              renderSubmenuItems([
-                { path: "/accountant/chartOfAccounts", label: "Chart of Accounts" },
-                { path: "/accountant/journals", label: "Journal Entries" },
-              ])}
-            {menuKey === "reports" &&
-              renderSubmenuItems([
-                { path: "/reports/profitandloss", label: "Profit and Loss" },
-                { path: "/reports/balancesheet", label: "Balance Sheet" },
-                { path: "/reports/journalreport", label: "Journal Report" },
-              ])}
+            {renderSubmenuItems(SUBMENU_ITEMS[menuKey] || [])}
           </List>
         )}
       </>
@@ -889,7 +892,7 @@ const Sidebar = ({ collapsed, toggleSidebar }) => {
   };
 
   return (
-    <SidebarContainer collapsedWidth={collapsed}>
+    <SidebarContainer collapsedWidth={collapsed} data-rbac-ignore>
       <SidebarContent>
         <List
           sx={{ display: "flex", flexDirection: "column", gap: "10px", p: 0 }}
@@ -913,6 +916,8 @@ const Sidebar = ({ collapsed, toggleSidebar }) => {
             "Configure Features list",
             SettingsOutlinedIcon
           )}
+          {perms?.isSuperadmin &&
+            renderMenuItem("/admin/users", "Users & Access", AdminPanelSettingsOutlinedIcon)}
 
           {/* Shortcuts section */}
           {/* {!collapsed && renderShortcutsList()} */}

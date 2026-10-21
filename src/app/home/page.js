@@ -26,9 +26,11 @@ import DownloadPDFPayable from "./DownloadPDFPayables.js";
 import { green } from "@mui/material/colors";
 import { ArrowBigDown, ArrowBigUp, TrendingDown } from "lucide-react";
 import { TrendingUp } from "@mui/icons-material";
+import { usePermissions } from "../../services/PermissionProvider";
 
 // Complete dashboard with Flexbox layout
 const Dashboard = () => {
+  const perms = usePermissions();
   const router = useRouter();
   const [value, setValue] = useState(0);
   const [view, setView] = useState("accrual");
@@ -202,6 +204,11 @@ const Dashboard = () => {
   // Fetch bills data from API
   useEffect(() => {
     const fetchBillsData = async () => {
+      // Skip sections this user may not view (the server would refuse them).
+      if (!perms?.can("bills", "view")) {
+        setBillsData({ total: 0, current: 0, overdue: 0, loading: false });
+        return;
+      }
       try {
         const organisation_id = localStorage.getItem("organization_id") || "1"; // Fallback value
 
@@ -258,10 +265,15 @@ const Dashboard = () => {
     };
 
     fetchBillsData();
-  }, []);
+  }, [perms?.me]);
   // useEffect for fetching invoice data
   useEffect(() => {
     const fetchInvoicesData = async () => {
+      // Skip sections this user may not view (the server would refuse them).
+      if (!perms?.can("invoices", "view")) {
+        setInvoicesData({total: 0, current: 0, overdue: 0, loading: false,});
+        return;
+      }
       try {
         const organisation_id =
           localStorage.getItem("organization_id") || "100000";
@@ -320,11 +332,16 @@ const Dashboard = () => {
     };
 
     fetchInvoicesData();
-  }, []);
+  }, [perms?.me]);
 
   // useEffect for fetching expense data
   useEffect(() => {
     const fetchExpensesData = async () => {
+      // Skip sections this user may not view (the server would refuse them).
+      if (!perms?.can("expenses", "view")) {
+        setExpensesData({fuelMileageExpenses: 0, costOfGoodsSold: 0, otherExpenses: 0, totalExpenses: 0, loading: false,});
+        return;
+      }
       try {
         const organisation_id =
           localStorage.getItem("organization_id") || "100000";
@@ -380,7 +397,7 @@ const Dashboard = () => {
     };
 
     fetchExpensesData();
-  }, []);
+  }, [perms?.me]);
 
   useEffect(() => {
     const fetchReceivable = async () => {

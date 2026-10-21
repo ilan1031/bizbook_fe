@@ -44,7 +44,7 @@ import {
   Settings,
   Upload,
 } from "lucide-react";
-import CreateAccountPopup from "../create/page";
+import CreateAccountPopup from "../CreateAccountPopup";
 
 // SideBarSkeleton component for the sidebar list items
 const SideBarSkeleton = () => {

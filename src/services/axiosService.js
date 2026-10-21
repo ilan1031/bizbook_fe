@@ -1,6 +1,15 @@
 import axios from "axios";
 import config from "./config";
 
+const SESSION_ENDING_CODES = ["ACCOUNT_INACTIVE", "ACCOUNT_PENDING", "IP_NOT_ALLOWED"];
+
+export const endSession = (reason) => {
+  ["token", "organization_id", "user_name"].forEach((k) => localStorage.removeItem(k));
+  if (typeof window !== "undefined" && !window.location.pathname.startsWith("/organisation/login")) {
+    window.location.href = `/organisation/login${reason ? `?reason=${encodeURIComponent(reason)}` : ""}`;
+  }
+};
+
 // Function to create Axios instances dynamically
 const createAxiosInstance = (baseURL, contentType = "application/json") => {
   const instance = axios.create({
@@ -15,6 +24,24 @@ const createAxiosInstance = (baseURL, contentType = "application/json") => {
     }
     return config;
   });
+
+  // The server ends a session when the account is deactivated, the device's
+  // IP is removed, or the token expires. Sign out and explain why.
+  instance.interceptors.response.use(
+    (response) => response,
+    (error) => {
+      const status = error.response?.status;
+      const data = error.response?.data || {};
+      const sessionEnded =
+        status === 401 ||
+        (status === 403 && SESSION_ENDING_CODES.includes(data.code)) ||
+        (status === 400 && data.message === "Invalid or expired token.");
+      if (sessionEnded && localStorage.getItem("token")) {
+        endSession(data.code || "SESSION_EXPIRED");
+      }
+      return Promise.reject(error);
+    }
+  );
 
   return instance;
 };

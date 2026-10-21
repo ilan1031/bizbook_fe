@@ -77,6 +77,7 @@ npm run lint
 ```
 
 ## Environment Setup
+- **API URL:** copy `.env.example` to `.env.local` and set `NEXT_PUBLIC_API_URL` to the backend (default `http://localhost:4000`).
 - **TypeScript:** Configured via `tsconfig.json`.
 - **ESLint:** Configured via `eslint.config.mjs` (uses Next.js core-web-vitals rules).
 - **Global Styles:** See `src/styles/globals.css`.
@@ -88,8 +89,19 @@ npm run lint
 - API and utility functions are in `src/services/` and `src/utils/`.
 - Email templates are in `public/email-template.html`.
 
+## Access control
+What a user sees comes from their permissions (`GET /api/v1/user/me`):
+- **Sidebar and routes:** the sidebar lists only granted pages, and `AuthGuard` blocks routes the user can't open, including create/edit screens without that permission.
+- **Buttons:** `RbacButtonGuard` hides create / edit / delete buttons on pages where the user lacks that action. Add `data-rbac-ignore` to an element to exclude it.
+- **Superadmin:** the superadmin manages users under **Users & Access** (`/admin/users`).
+
+The backend enforces the same rules on every request.
+
 ## Deployment
-Deploy easily on [Vercel](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme).
-See [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+On [Vercel](https://vercel.com/new), import the repo (framework: Next.js) and add the environment variable:
+
+- `NEXT_PUBLIC_API_URL` = your backend URL, e.g. `https://bizbooks-api.onrender.com` (no trailing slash)
+
+Then set the backend's `FRONTEND_URL` to the Vercel URL so it accepts requests from it.
 
 

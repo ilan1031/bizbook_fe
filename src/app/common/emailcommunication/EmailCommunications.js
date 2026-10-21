@@ -374,7 +374,7 @@ export default function EmailCommunications({ formik, contactId }) {
 
 
   const config = {
-    apiUrl: process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000",
+    apiUrl: API_BASE_URL,
     // other configuration values
   };
   // Validation schema

@@ -40,7 +40,7 @@ import html2pdf from "html2pdf.js";
 import { useSnackbar } from "../../../../components/SnackbarProvider";
 import RemoveCircleOutlineIcon from "@mui/icons-material/RemoveCircleOutline";
 import DeleteIcon from "@mui/icons-material/Delete";
-import CreateAccountPopup from "../create/page";
+import CreateAccountPopup from "../CreateAccountPopup";
 
 // Header Skeleton Component
 const HeaderSkeleton = () => {

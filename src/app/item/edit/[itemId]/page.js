@@ -651,7 +651,7 @@ const EditItemForm = () => {
           Item Not Found
         </Typography>
         <Typography variant="body1" sx={{ mb: 2 }}>
-          The item with ID "{itemId}" was not found in the database.
+          The item with ID &quot;{itemId}&quot; was not found in the database.
         </Typography>
         
         {/* Show available items */}

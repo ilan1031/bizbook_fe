@@ -174,7 +174,7 @@ export default function JournalEntriesPage() {
 
       <Box sx={{ p: 3 }}>
         <Typography sx={{ fontSize: "13px", color: "#6c718a", mb: 2 }}>
-          Manual journals record adjustments that don't come from an invoice,
+          Manual journals record adjustments that don&apos;t come from an invoice,
           bill or expense, such as owner capital, depreciation or corrections.
           Debits must always equal credits.
         </Typography>
@@ -334,7 +334,7 @@ export default function JournalEntriesPage() {
         <DialogContent>
           <Typography sx={{ fontSize: "14px" }}>
             {deleteTarget?.journal_id} for {formatINR(deleteTarget?.total_amount)} will
-            be removed and your reports will no longer include it. This can't be undone.
+            be removed and your reports will no longer include it. This can&apos;t be undone.
           </Typography>
         </DialogContent>
         <DialogActions>

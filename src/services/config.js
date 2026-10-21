@@ -1,35 +1,12 @@
-const development = {
-  // environment: 'development',
-  apiBaseUrl: "http://localhost:4000/", // Local API URL
-  PO_Base_url: "http://localhost:4000/",
-  SO_Base_url: "http://localhost:4000/",
-  // appName: 'MyReactApp (Dev)',
-  //local link -- http://localhost:4000/
-  //ilan link --  https://bizbooksbe-1.onrender.com/
-  //local link -- https://backend-micro-service-1.onrender.com/
-};
-  
-const staging = {
-  apiBaseUrl: "https://staging-api.example.com/", // Staging API URL
-  PO_Base_url: "https://staging-api.example.com/", // Staging API URL
-  SO_Base_url: "https://staging-api.example.com/", // Staging API URL
-  // environment: 'staging',
-  // appName: 'MyReactApp (Staging)',
+// Backend base URL, from NEXT_PUBLIC_API_URL (set in .env.local locally and
+// in the Vercel project settings for deployments), with a trailing slash.
+// Falls back to the local backend when unset.
+const apiBaseUrl = (process.env.NEXT_PUBLIC_API_URL || "http://localhost:4000").replace(/\/+$/, "") + "/";
+
+const config = {
+  apiBaseUrl,
+  PO_Base_url: apiBaseUrl,
+  SO_Base_url: apiBaseUrl,
 };
 
-const production = {
-  apiBaseUrl: "https://api.example.com/", // Live API URL
-  PO_Base_url: "https://staging-api.example.com/", // Staging API URL
-  SO_Base_url: "https://staging-api.example.com/", // Staging API URL
-  // environment: 'production',
-  // appName: 'MyReactApp',
-};
-
-// Select configuration based on environment
-const config =
-  process.env.REACT_APP_ENV === "staging"
-    ? staging
-    : process.env.REACT_APP_ENV === "production"
-    ? production
-    : development;
 export default config;

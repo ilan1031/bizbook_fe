@@ -18,10 +18,10 @@ import {
 import CloseIcon from "@mui/icons-material/Close";
 import * as Yup from "yup";
 import { useFormik } from "formik";
-import apiService from "../../../../services/axiosService";
-import config from "../../../../services/config";
+import apiService from "../../../services/axiosService";
+import config from "../../../services/config";
 import { useSearchParams } from "next/navigation";
-import { useSnackbar } from "../../../../components/SnackbarProvider";
+import { useSnackbar } from "../../../components/SnackbarProvider";
 
 // Styling
 const COLORS = {

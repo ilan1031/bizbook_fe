@@ -29,6 +29,7 @@ import HelpAndSupport from "../../common/helpAndSupport/HelpAndSupport";
 import ExportModal from "../../common/export/ExportModal";
 // import AccountsHomePage from "../../purchase/bills/homepage/page";
 import DotLoader from "../../../components/DotLoader";
+import CreateAccountPopup from "./CreateAccountPopup";
 import {
   ChevronRight,
   Download,
@@ -227,6 +228,7 @@ const AccountsList = () => {
   const limit = useRef(10);
   const [submenuAnchorEl, setSubmenuAnchorEl] = useState(null);
   const [submenuHover, setSubmenuHover] = useState(false);
+  const [createAccountOpen, setCreateAccountOpen] = useState(false);
   const [sortColumn, setSortColumn] = useState("account_id");
   const [sortOrder, setSortOrder] = useState("A");
   let submenuCloseTimeout = useRef(null);
@@ -709,13 +711,19 @@ const AccountsList = () => {
                         variant="contained"
                         className="button-submit"
                         startIcon={<AddOutlined />}
-                        onClick={() =>
-                          router.push("/purchase/chartOfAccounts/create")
-                        }
+                        onClick={() => setCreateAccountOpen(true)}
                       >
                         New
                       </Button>
                     </Box>
+                    <CreateAccountPopup
+                      open={createAccountOpen}
+                      onClose={() => setCreateAccountOpen(false)}
+                      onSuccess={() => {
+                        setCreateAccountOpen(false);
+                        getAccounts(filterBy, sortColumn, sortOrder);
+                      }}
+                    />
 
                     <IconButton
                       className="more-icon"

@@ -238,13 +238,13 @@ export default function BalanceSheetPage() {
               {/* Integrity checks */}
               {!checks.has_chart_of_accounts && (
                 <Alert severity="warning" sx={{ mb: 2 }}>
-                  This organization has no chart of accounts, so balances can't be
+                  This organization has no chart of accounts, so balances can&apos;t be
                   classified.
                 </Alert>
               )}
               {!checks.is_balanced && (
                 <Alert severity="error" sx={{ mb: 2 }}>
-                  The balance sheet doesn't balance: assets differ from liabilities +
+                  The balance sheet doesn&apos;t balance: assets differ from liabilities +
                   equity by {formatINR(report.totals.difference)}. See the details below.
                 </Alert>
               )}
@@ -252,7 +252,7 @@ export default function BalanceSheetPage() {
                 <Alert severity="warning" sx={{ mb: 2 }}>
                   {checks.unbalanced_journals.length} journal
                   {checks.unbalanced_journals.length === 1 ? " has" : "s have"} debits
-                  that don't equal credits:{" "}
+                  that don&apos;t equal credits:{" "}
                   {checks.unbalanced_journals
                     .map((j) => `${j.journal_id} (${j.type}, ${formatINR(j.difference)})`)
                     .join(", ")}
@@ -260,8 +260,8 @@ export default function BalanceSheetPage() {
               )}
               {checks.unclassified_accounts.length > 0 && (
                 <Alert severity="warning" sx={{ mb: 2 }}>
-                  Some entries use accounts that aren't in your chart of accounts and
-                  aren't shown above:{" "}
+                  Some entries use accounts that aren&apos;t in your chart of accounts and
+                  aren&apos;t shown above:{" "}
                   {checks.unclassified_accounts
                     .map((a) => `${a.account_name} (${formatINR(a.debit_balance)} Dr)`)
                     .join(", ")}
