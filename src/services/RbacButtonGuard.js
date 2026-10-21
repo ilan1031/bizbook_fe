@@ -10,29 +10,12 @@
 import { useEffect } from "react";
 import { usePathname } from "next/navigation";
 import { usePermissions } from "./PermissionProvider";
+import { actionForLabel } from "./rbacUtils";
 
 const CANDIDATES = 'button, [role="button"], [role="menuitem"], a, li.MuiMenuItem-root';
-const MAX_LABEL = 40;
 
-const ACTION_PATTERNS = {
-  delete: /^(delete|remove|void)\b/,
-  edit: /^(edit|mark as)\b/,
-  create: /^(\+\s*)?(new|create|add|clone|convert to|import)\b/,
-};
-// Labels that look like actions but aren't record changes.
-const IGNORE = /(custom view|filter|new tab|new window)/;
-
-const labelOf = (el) =>
-  (el.getAttribute("aria-label") || el.getAttribute("title") || el.textContent || "")
-    .trim()
-    .toLowerCase()
-    .replace(/\s+/g, " ");
-
-const actionOf = (el) => {
-  const label = labelOf(el);
-  if (!label || label.length > MAX_LABEL || IGNORE.test(label)) return null;
-  return Object.keys(ACTION_PATTERNS).find((a) => ACTION_PATTERNS[a].test(label)) || null;
-};
+const actionOf = (el) =>
+  actionForLabel(el.getAttribute("aria-label") || el.getAttribute("title") || el.textContent);
 
 const restoreAll = () => {
   document.querySelectorAll("[data-rbac-hidden]").forEach((el) => {

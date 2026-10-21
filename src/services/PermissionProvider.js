@@ -8,17 +8,9 @@ import React, { createContext, useCallback, useContext, useEffect, useMemo, useS
 import { usePathname } from "next/navigation";
 import apiService from "./axiosService";
 
+import { buildPermissionHelpers } from "./rbacUtils";
+
 const PermissionContext = createContext(null);
-
-const matchesRoute = (path, route) => path === route || path.startsWith(route + "/");
-
-// The action a frontend route represents (create/edit screens vs. viewing).
-export const actionForRoute = (path) => {
-  const p = path.toLowerCase();
-  if (/\/(edit|update)(\/|$)|\/edit[a-z]*(\/|$)/.test(p)) return "edit";
-  if (/\/(create|new|add)(\/|$)|\/(create|new)[a-z]+(\/|$)/.test(p)) return "create";
-  return "view";
-};
 
 export function PermissionProvider({ children }) {
   const pathname = usePathname();
@@ -68,52 +60,10 @@ export function PermissionProvider({ children }) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [pathname]);
 
-  const value = useMemo(() => {
-    const { me } = state;
-    const catalog = me?.catalog || [];
-    const perms = me?.permissions || {};
-    const isSuperadmin = Boolean(me?.is_superadmin);
-    const hasAnyPage = Object.values(perms).some((a) => Array.isArray(a) && a.length);
-
-    const can = (pageKey, action = "view") =>
-      isSuperadmin || (Array.isArray(perms[pageKey]) && perms[pageKey].includes(action));
-
-    // Longest matching catalog route wins (e.g. /purchase/vendorcredits
-    // vs /purchase/vendor).
-    const pageForPath = (path) => {
-      let best = null;
-      let bestLen = -1;
-      for (const page of catalog) {
-        for (const route of page.routes) {
-          if (matchesRoute(path, route) && route.length > bestLen) {
-            best = page;
-            bestLen = route.length;
-          }
-        }
-      }
-      return best;
-    };
-
-    const canAccessPath = (path) => {
-      if (!me) return false;
-      if (isSuperadmin) return true;
-      if (path.startsWith("/admin")) return false;
-      if ((me.always_allowed_routes || []).some((r) => matchesRoute(path, r))) return true;
-      if ((me.shared_routes || []).some((r) => matchesRoute(path, r))) return hasAnyPage;
-      const page = pageForPath(path);
-      if (!page) return false;
-      return can(page.key, actionForRoute(path));
-    };
-
-    // First route the user may open - where to send them after login.
-    const firstAllowedRoute = () => {
-      if (isSuperadmin) return "/home";
-      const page = catalog.find((p) => can(p.key, "view"));
-      return page ? page.routes[0] : null;
-    };
-
-    return { ...state, isSuperadmin, hasAnyPage, can, pageForPath, canAccessPath, firstAllowedRoute, reload: load };
-  }, [state, load]);
+  const value = useMemo(
+    () => ({ ...state, ...buildPermissionHelpers(state.me), reload: load }),
+    [state, load]
+  );
 
   return <PermissionContext.Provider value={value}>{children}</PermissionContext.Provider>;
 }

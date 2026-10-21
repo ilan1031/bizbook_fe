@@ -85,13 +85,14 @@ const apiService = async ({
 
     return { data: response.data, statusCode: response.status };
   } catch (error) {
-    console.error("API Error:", {
-      message: error.message,
-      url,
-      status: error.response?.status,
-      data: error.response?.data,
-    });
-    throw error.response?.data || error;
+    const status = error.response?.status;
+    // 4xx responses (wrong password, no permission, validation) are expected
+    // and shown by the caller; only log server faults and network failures.
+    // (console.error would also trigger Next.js's red error overlay in dev.)
+    if (!status || status >= 500) {
+      console.error(`API ${status || "network"} error on ${url}: ${error.message}`);
+    }
+    throw error.response?.data || { message: "Can't reach the server. Check your connection and try again." };
   }
 };
 
