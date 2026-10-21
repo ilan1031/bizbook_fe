@@ -536,7 +536,6 @@ const Dashboard = () => {
             }}
           >
             <Tab label="Dashboard" sx={{ ml: 2 }} iconPosition="start" />
-            <Box sx={{ flexGrow: 1 }} />
           </Tabs>
         </Box>
       </Box>

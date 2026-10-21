@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useEffect, useState } from "react";
-import {
+import { ListItemButton,
   Box,
   TextField,
   Avatar,
@@ -423,8 +423,7 @@ const CustomerDropDown = ({ handleCustomerChange, onClose }) => {
           p: 1,
         }}
       >
-        <ListItem
-          button
+        <ListItemButton
           alignItems="center"
           sx={{
             py: 0,
@@ -451,7 +450,7 @@ const CustomerDropDown = ({ handleCustomerChange, onClose }) => {
           >
             New Customer
           </Typography>
-        </ListItem>
+        </ListItemButton>
       </Box>
 
       {/* Dialog for New Customer Form */}

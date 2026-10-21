@@ -88,7 +88,7 @@
 
 // export default DropdownMenu;
 import React, { useState } from 'react';
-import { Box, List, ListItem, ListItemIcon, ListItemText, Typography, Paper, Divider, Menu, MenuItem } from '@mui/material';
+import { ListItemButton, Box, List, ListItem, ListItemIcon, ListItemText, Typography, Paper, Divider, Menu, MenuItem } from '@mui/material';
 import { ArrowForwardIos, FileDownloadOutlined, FileUploadOutlined, SettingsOutlined, EditOutlined, PaymentOutlined, RefreshOutlined, WidthNormalOutlined } from '@mui/icons-material';
 
 const menuItems = [
@@ -160,14 +160,13 @@ const DropdownMenu = () => {
       <List sx={{ py: 0 }}>
         {menuItems.map((item, index) => 
           item.divider ? <Divider key={index} /> : (
-            <ListItem 
+            <ListItemButton 
               key={index} 
-              button 
               sx={{ py: 1, '&:hover': { backgroundColor: '#408dfb', color: 'white' } }}
             >
               <ListItemIcon sx={{ color: 'inherit' }}>{item.icon}</ListItemIcon>
               <ListItemText primary={item.text} primaryTypographyProps={{ fontSize: 14 }} />
-            </ListItem>
+            </ListItemButton>
           )
         )}
       </List>

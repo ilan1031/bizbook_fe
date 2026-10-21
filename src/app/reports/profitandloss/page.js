@@ -1310,9 +1310,14 @@ import ExpandLessIcon from "@mui/icons-material/ExpandLess";
 import apiService from "../../../services/axiosService";
 import config from "../../../services/config";
 import dayjs from "dayjs";
+import customParseFormat from "dayjs/plugin/customParseFormat";
 import html2pdf from "html2pdf.js";
 // Import your Account Transactions component
 import AccountTransactions from "./ProfitandLossIndividual"; // Adjust the path as needed
+
+// Needed for dayjs(str, "DD-MM-YYYY"): without it the format is ignored and
+// "01-10-2026" is read as 10 January instead of 1 October.
+dayjs.extend(customParseFormat);
 
 const ProfitAndLoss = () => {
   const [exportAnchorEl, setExportAnchorEl] = useState(null);
@@ -1715,9 +1720,6 @@ const ProfitAndLoss = () => {
                 </Typography>
               </Box>
               {Object.entries(coaData).map(([accountId, accountData]) => {
-                // Filter out AC_051 account
-                if (accountId === "AC_051") return null;
-                
                 return (
                   <Box
                     key={accountId}

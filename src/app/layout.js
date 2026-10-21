@@ -11,6 +11,7 @@ import { SnackbarProvider } from "../components/SnackbarProvider";
 import { styled } from "@mui/material/styles";
 import AuthGuard from "../services/AuthGuard";
 import { ThemeProvider } from "@mui/material/styles";
+import { AppRouterCacheProvider } from "@mui/material-nextjs/v15-appRouter";
 import theme from "./theme"; // adjust path if needed
 
 export default function RootLayout({ children }) {
@@ -42,6 +43,9 @@ export default function RootLayout({ children }) {
   return (
     <html lang="en">
   <body>
+    {/* Collects emotion styles during SSR and injects them into <head>, so
+        the server and client render the same tree (no hydration mismatch). */}
+    <AppRouterCacheProvider>
     <ThemeProvider theme={theme}>
       <CssBaseline />
       <Box sx={{ display: "flex", flexDirection: "column", height: "100vh" }}>
@@ -79,6 +83,7 @@ export default function RootLayout({ children }) {
         </Box>
       </Box>
     </ThemeProvider>
+    </AppRouterCacheProvider>
   </body>
 </html>
 

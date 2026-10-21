@@ -586,7 +586,7 @@ const Quotes = () => {
         <Grid container>
           <Grid
             bgcolor="white"
-            items
+            item
             md={12}
             sx={{ height: "100vh", overflow: "hidden" }}
           >

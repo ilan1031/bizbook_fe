@@ -4,7 +4,7 @@
 
 import React, { useState, useRef } from "react";
 import axios from "axios";
-import {
+import { ListItemButton,
   Box,
   Typography,
   Table,
@@ -1040,8 +1040,7 @@ const Invoice = () => {
             {filteredItems.length > 0 ? (
               filteredItems.map((item, idx) => (
                 <React.Fragment key={item.id || item.sku || `item-${idx}`}>
-                  <ListItem
-                    button
+                  <ListItemButton
                     onClick={() => handleSelectItem(item)}
                     sx={{ py: 1.5 }}
                   >
@@ -1053,7 +1052,7 @@ const Invoice = () => {
                       primaryTypographyProps={{ fontSize: "14px" }}
                       secondaryTypographyProps={{ fontSize: "12px" }}
                     />
-                  </ListItem>
+                  </ListItemButton>
                   <Divider />
                   {/* <Button >Add New Item</Button> */}
                 </React.Fragment>
@@ -1149,8 +1148,7 @@ const Invoice = () => {
                     <React.Fragment
                       key={item.id || item.sku || `bulk-item-${index}`}
                     >
-                      <ListItem
-                        button
+                      <ListItemButton
                         onClick={() => toggleBulkItemSelection(item)}
                         sx={{ py: 1.5 }}
                       >
@@ -1167,7 +1165,7 @@ const Invoice = () => {
                           primaryTypographyProps={{ fontSize: "14px" }}
                           secondaryTypographyProps={{ fontSize: "12px" }}
                         />
-                      </ListItem>
+                      </ListItemButton>
                       <Divider />
                     </React.Fragment>
                   ))

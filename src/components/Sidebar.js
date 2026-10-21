@@ -42,7 +42,9 @@ import ChevronRightIcon from "@mui/icons-material/ChevronRight";
 import KeyboardIcon from "@mui/icons-material/Keyboard";
 
 // Custom styled components using theme
-const SidebarContainer = styled(Box)(({ theme, collapsedWidth }) => ({
+const SidebarContainer = styled(Box, {
+  shouldForwardProp: (prop) => prop !== "collapsedWidth",
+})(({ theme, collapsedWidth }) => ({
   width: collapsedWidth ? "60px" : "240px",
   backgroundColor: theme.palette.background.default,
   borderRight: `1px solid ${theme.palette.divider}`,

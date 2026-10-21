@@ -1279,7 +1279,7 @@ const menuItemStyles = {
 };
 
 export default function CustomizedTable({
-  columns = [],
+  columns: rawColumns = [],
   staticData,
   selected,
   handleSelectAll,
@@ -1305,6 +1305,15 @@ export default function CustomizedTable({
   getStatusText,
   handleStatusChange,
 }) {
+  // The table renders `col.key` as the header text and `col.value` as the row
+  // field. Server column config already has that shape, but the fallback
+  // columns each page passes in are `{ key: <field>, label: <header> }`, which
+  // left headers showing raw field names and every cell empty. Map them over.
+  const columns = rawColumns.map((col) =>
+    col.value !== undefined
+      ? col
+      : { ...col, value: col.key, key: col.label ?? col.key }
+  );
   console.log("=== CUSTOMIZED TABLE RENDERED ===");
   console.log("CustomizedTable - onRowClick prop:", onRowClick);
   console.log("CustomizedTable - staticData length:", staticData?.length);
@@ -1798,7 +1807,9 @@ export default function CustomizedTable({
                   : columns
                 ).map((col, index) => (
                     <TableCell
-                      key={col.value}
+                      // Server column config has `value`; the static fallback
+                      // columns pages pass in only have `key`.
+                      key={col.value ?? col.key ?? index}
                       sortDirection="asc"
                       align={
                         col.value === "invoiced_status_formatted" &&
@@ -1998,7 +2009,7 @@ export default function CustomizedTable({
                           : columns
                         ).map((col, index) => (
                             <TableCell
-                              key={col.value}
+                              key={col.value ?? col.key ?? index}
                               align={
                                 col.value === "invoiced_status_formatted" &&
                                 value === "salesorder"

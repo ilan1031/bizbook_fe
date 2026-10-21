@@ -1722,8 +1722,8 @@ const InvoiceView = ({
               }}
             >
               {data?.status === "draft" && (
-                <>
-                  <MenuItem
+                [
+                  <MenuItem key="menu-item-1"
                     sx={{
                       backgroundColor: "transparent",
                       fontSize: "14px",
@@ -1746,9 +1746,9 @@ const InvoiceView = ({
                   >
                     <MailCheck width="13px" style={{ marginRight: "10px" }} />
                     Mark as Sent
-                  </MenuItem>
-                  <SectionDivider sx={{ my: 4 }} />
-                </>
+                  </MenuItem>,
+                  <SectionDivider key="menu-item-2" sx={{ my: 4 }} />
+                ]
               )}
 
               <MenuItem

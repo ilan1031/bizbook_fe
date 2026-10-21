@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState } from "react";
-import {
+import { ListItemButton,
   Drawer,
   IconButton,
   Typography,
@@ -243,8 +243,7 @@ const HelpAndSupport = ({ open, onClose, headerHeight = 55 }) => {
         <List disablePadding>
           {helpDocs.map((doc) => (
             <React.Fragment key={doc.id}>
-              <ListItem
-                button
+              <ListItemButton
                 sx={{
                   padding: "8px 16px",
                   margin: "4px 8px",
@@ -257,7 +256,7 @@ const HelpAndSupport = ({ open, onClose, headerHeight = 55 }) => {
                 }}
               >
                 <HelpLink>{doc.title}</HelpLink>
-              </ListItem>
+              </ListItemButton>
             </React.Fragment>
           ))}
         </List>

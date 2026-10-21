@@ -2652,29 +2652,29 @@ const BillManagementApp = () => {
                 PaperProps={menuPaperProps}
               >
                 {purchaseOrder?.order_status !== "canceled" ? (
-                  <>
-                    <MenuItem sx={menuItemStyle}>
+                  [
+                    <MenuItem key="menu-item-1" sx={menuItemStyle}>
                       Expected Delivery Date
-                    </MenuItem>
-                    <MenuItem sx={menuItemStyle}>Cancel Items</MenuItem>
-                    <MenuItem
+                    </MenuItem>,
+                    <MenuItem key="menu-item-2" sx={menuItemStyle}>Cancel Items</MenuItem>,
+                    <MenuItem key="menu-item-3"
                       sx={menuItemStyle}
                       onClick={() => handlePurchaseStatus(4)}
                     >
                       Mark as Canceled
-                    </MenuItem>
-                    <MenuItem
+                    </MenuItem>,
+                    <MenuItem key="menu-item-4"
                       sx={{
                         ...menuItemStyle,
                         backgroundColor: "rgba(66, 133, 244, 0.1)",
                       }}
                     >
                       Clone
-                    </MenuItem>
-                    <MenuItem sx={menuItemStyle} onClick={handleDeletePayment}>
+                    </MenuItem>,
+                    <MenuItem key="menu-item-5" sx={menuItemStyle} onClick={handleDeletePayment}>
                       Delete
-                    </MenuItem>
-                    <MenuItem
+                    </MenuItem>,
+                    <MenuItem key="menu-item-6"
                       sx={menuItemStyle}
                       onClick={() =>
                         purchaseOrder?.received_status === "received"
@@ -2686,27 +2686,27 @@ const BillManagementApp = () => {
                         ? "Undo Marked Received"
                         : "Mark as Received"}
                     </MenuItem>
-                  </>
+                  ]
                 ) : (
-                  <>
-                    <MenuItem
+                  [
+                    <MenuItem key="menu-item-7"
                       sx={{
                         ...menuItemStyle,
                         backgroundColor: "rgba(66, 133, 244, 0.1)",
                       }}
                     >
                       Clone
-                    </MenuItem>
-                    <MenuItem
+                    </MenuItem>,
+                    <MenuItem key="menu-item-8"
                       sx={menuItemStyle}
                       onClick={() => handlePurchaseStatus(5)}
                     >
                       Reopen
-                    </MenuItem>
-                    <MenuItem sx={menuItemStyle} onClick={handleDeletePayment}>
+                    </MenuItem>,
+                    <MenuItem key="menu-item-9" sx={menuItemStyle} onClick={handleDeletePayment}>
                       Delete
                     </MenuItem>
-                  </>
+                  ]
                 )}
               </Menu>
             )}

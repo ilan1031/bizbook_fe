@@ -2,7 +2,7 @@
 import React, { useState, useRef, useEffect } from "react";
 import { useParams, usePathname, useRouter } from "next/navigation";
 import {
-  Box,
+  ListItemButton, Box,
   FormControl,
   FormControlLabel,
   Radio,
@@ -944,9 +944,8 @@ const EditPurchaseOrderForm = () => {
                                     }}
                                   >
                                     {additionalAddresses.map((address) => (
-                                      <ListItem
+                                      <ListItemButton
                                         key={address.id}
-                                        button
                                         onClick={() =>
                                           handleSelectAddress(address)
                                         }
@@ -963,7 +962,7 @@ const EditPurchaseOrderForm = () => {
                                             fontSize: "13px",
                                           }}
                                         />
-                                      </ListItem>
+                                      </ListItemButton>
                                     ))}
                                   </List>
                                 </Box>

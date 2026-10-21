@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState } from "react";
-import {
+import { ListItemButton,
   Box,
   TextField,
   Avatar,
@@ -128,8 +128,7 @@ const SearchComponent = () => {
 </Box>
 
         {/* Sticky New Customer button with hover effect */}
-        <ListItem
-          button
+        <ListItemButton
           alignItems="center"
           sx={{
             py: 1.5,
@@ -162,7 +161,7 @@ const SearchComponent = () => {
           <Typography variant="body1" color="primary">
             New Customer
           </Typography>
-        </ListItem>
+        </ListItemButton>
       </Paper>
     </Box>
   );

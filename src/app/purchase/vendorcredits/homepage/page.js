@@ -824,7 +824,7 @@ const VendorCredits = () => {
                 >
                   <Box
                     component="img"
-                    src="https://books.zoho.in/ogp.png"
+                    src="/books-logo.jpg"
                     alt="Zoho Books"
                     width={60}
                     height={30}

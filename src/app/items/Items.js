@@ -1,6 +1,6 @@
 "use client";
 import React, { useState, useRef, useEffect, useMemo } from "react";
-import {
+import { ListItemButton,
   Box,
   Typography,
   Table,
@@ -2233,8 +2233,7 @@ const Items = ({ formik }) => {
               {filteredItems.length > 0 ? (
                 filteredItems.map((item, idx) => (
                   <React.Fragment key={item.id || `item-${idx}`}>
-                    <ListItem
-                      button
+                    <ListItemButton
                       onClick={() => handleSelectItem(item)}
                       sx={{
                         py: 1.5,
@@ -2264,7 +2263,7 @@ const Items = ({ formik }) => {
                         primaryTypographyProps={{ fontSize: "14px" }}
                         secondaryTypographyProps={{ fontSize: "12px" }}
                       />
-                    </ListItem>
+                    </ListItemButton>
                     <Divider />
                   </React.Fragment>
                 ))
@@ -2407,8 +2406,7 @@ const Items = ({ formik }) => {
                 {bulkFilteredItems.length > 0 ? (
                   bulkFilteredItems.map((item, index) => (
                     <React.Fragment key={item.id || `bulk-item-${index}`}>
-                      <ListItem
-                        button
+                      <ListItemButton
                         onClick={() => toggleBulkItemSelection(item)}
                         sx={{ py: 1.5 }}
                         data-testid={`bulk-item-${index}`}
@@ -2426,7 +2424,7 @@ const Items = ({ formik }) => {
                           primaryTypographyProps={{ fontSize: "14px" }}
                           secondaryTypographyProps={{ fontSize: "12px" }}
                         />
-                      </ListItem>
+                      </ListItemButton>
                       <Divider />
                     </React.Fragment>
                   ))

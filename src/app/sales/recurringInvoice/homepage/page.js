@@ -4,7 +4,7 @@ import React from "react";
 import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation"; // Import useRouter
 import {
-  Box,
+  ListItemButton, Box,
   Typography,
   IconButton,
   Paper,
@@ -314,8 +314,8 @@ const CustomFilterMenu = ({
 
       {/* Favorites Section - Only show if there are favorites */}
       {filteredFavorites.length > 0 && (
-        <>
-          <Typography
+        [
+          <Typography key="menu-item-1"
             variant="subtitle2"
             sx={{
               p: 1,
@@ -326,13 +326,12 @@ const CustomFilterMenu = ({
             }}
           >
             FAVORITES
-          </Typography>
-          <List disablePadding sx={{ maxHeight: "150px", overflow: "auto" }}>
+          </Typography>,
+          <List key="menu-item-2" disablePadding sx={{ maxHeight: "150px", overflow: "auto" }}>
             {filteredFavorites.map((filter) => (
-              <ListItem
+              <ListItemButton
                 key={`fav-${filter.id}`}
                 dense
-                button
                 onClick={() => handleFilterSelect(filter)}
                 sx={{
                   py: 0.5,
@@ -362,11 +361,11 @@ const CustomFilterMenu = ({
                 >
                   <StarIcon fontSize="small" sx={{ color: "#f3cf00" }} />
                 </IconButton>
-              </ListItem>
+              </ListItemButton>
             ))}
-          </List>
-          <Divider />
-        </>
+          </List>,
+          <Divider key="menu-item-3" />
+        ]
       )}
 
       {/* All Filters Section - Always shows all filters */}
@@ -384,10 +383,9 @@ const CustomFilterMenu = ({
       </Typography>
       <List disablePadding sx={{ flexGrow: 1, overflow: "auto" }}>
         {filteredDefaultFilters.map((filter) => (
-          <ListItem
+          <ListItemButton
             key={filter.id}
             dense
-            button
             onClick={() => handleFilterSelect(filter)}
             sx={{
               py: 0.5,
@@ -420,13 +418,12 @@ const CustomFilterMenu = ({
                 <StarBorderIcon fontSize="small" sx={{ color: "#aaa" }} />
               )}
             </IconButton>
-          </ListItem>
+          </ListItemButton>
         ))}
       </List>
 
       {/* Sticky Footer with "+ New Custom View" Button */}
-      <ListItem
-        button
+      <ListItemButton
         alignItems="center"
         sx={{
           py: 1.5,
@@ -457,7 +454,7 @@ const CustomFilterMenu = ({
         <Typography variant="subtitle2" color="primary">
           New Custom View
         </Typography>
-      </ListItem>
+      </ListItemButton>
     </Menu>
   );
 };
@@ -633,7 +630,7 @@ const RecurringInvoicePage = () => {
                 >
                   <Box
                     component="img"
-                    src="https://books.zoho.in/ogp.png"
+                    src="/books-logo.jpg"
                     alt="Biz Books"
                     width={60}
                     height={30}

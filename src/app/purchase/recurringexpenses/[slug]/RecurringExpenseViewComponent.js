@@ -803,8 +803,8 @@ const RecurringExpenseViewComponent = () => {
             sx={{ borderRadius: 2, fontSize: "13px", left: 1400, top: 100 }}
           >
             {recurringExpense && recurringExpense.status === "active" ? (
-              <>
-                <MenuItem
+              [
+                <MenuItem key="menu-item-1"
                   sx={{
                     fontSize: "13px",
                     "&:hover": {
@@ -817,10 +817,10 @@ const RecurringExpenseViewComponent = () => {
                 >
                   Stop
                 </MenuItem>
-              </>
+              ]
             ) : (
-              <>
-                <MenuItem
+              [
+                <MenuItem key="menu-item-2"
                   sx={{
                     fontSize: "13px",
                     "&:hover": {
@@ -833,7 +833,7 @@ const RecurringExpenseViewComponent = () => {
                 >
                   Resume
                 </MenuItem>
-              </>
+              ]
             )}
             <MenuItem
               sx={{

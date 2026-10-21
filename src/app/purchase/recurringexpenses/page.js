@@ -506,7 +506,7 @@ const RecurringExpense = () => {
         <DotLoader />
       ) : (
         <Grid container>
-          <Grid bgcolor="white" items md={12}>
+          <Grid bgcolor="white" item md={12}>
             {selected.length > 0 ? (
               // Show selection toolbar when items are selected
               <SelectionToolbar

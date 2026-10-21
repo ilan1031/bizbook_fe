@@ -532,7 +532,7 @@ const SalesOrder = () => {
         <DotLoader />
       ) : (
         <Grid container>
-          <Grid bgcolor="white" items md={12}>
+          <Grid bgcolor="white" item md={12}>
             {welcomePg ? (
               <></>
             ) : (

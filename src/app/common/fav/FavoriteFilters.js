@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import {
+import { ListItemButton,
   List,
   ListItem,
   ListItemText,
@@ -107,9 +107,8 @@ const FavoriteFilters = ({ onSelect }) => {
             <Collapse in={showFavorites}>
               <List>
                 {favorites.map((filter) => (
-                  <ListItem
+                  <ListItemButton
                     key={filter.id}
-                    button
                     onClick={() => onSelect(filter.label)}
                     sx={{
                       "&:hover": { backgroundColor: "#408dfb ", color: "white" },
@@ -120,7 +119,7 @@ const FavoriteFilters = ({ onSelect }) => {
                     <IconButton onClick={() => handleToggleFavorite(filter)}>
                       <StarIcon sx={{ color: "#FFD700" }} /> {/* Yellow Star */}
                     </IconButton>
-                  </ListItem>
+                  </ListItemButton>
                 ))}
               </List>
             </Collapse>
@@ -149,9 +148,8 @@ const FavoriteFilters = ({ onSelect }) => {
         <Collapse in={showFilters}>
           <List>
             {filteredFilters.map((filter) => (
-             <ListItem
+             <ListItemButton
              key={filter.id}
-             button
              onClick={() => onSelect(filter.label)}
              sx={{
                "&:hover": { backgroundColor: "#408dfb ", color: "white" }, // Blue BG, White Text
@@ -174,7 +172,7 @@ const FavoriteFilters = ({ onSelect }) => {
                  <StarBorderIcon sx={{ color: "#aaa" }} /> // Default Grey Star
                )}
              </IconButton>
-           </ListItem>
+           </ListItemButton>
            
             ))}
           </List>

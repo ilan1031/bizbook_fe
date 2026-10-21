@@ -2,7 +2,7 @@
 
 import React, { useState, useRef, useEffect } from "react";
 import {
-  Box,
+  ListItemButton, Box,
   FormControl,
   FormControlLabel,
   Radio,
@@ -1004,9 +1004,8 @@ const PurchaseOrderForm = () => {
                                       }}
                                     >
                                       {additionalAddresses.map((address) => (
-                                        <ListItem
+                                        <ListItemButton
                                           key={address.id}
-                                          button
                                           onClick={() =>
                                             handleSelectAddress(address)
                                           }
@@ -1023,7 +1022,7 @@ const PurchaseOrderForm = () => {
                                               fontSize: "13px",
                                             }}
                                           />
-                                        </ListItem>
+                                        </ListItemButton>
                                       ))}
                                     </List>
                                   </Box>

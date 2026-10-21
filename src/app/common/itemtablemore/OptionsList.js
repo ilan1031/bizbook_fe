@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { Paper, Box, List, ListItem, ListItemText, Divider } from "@mui/material";
+import { ListItemButton, Paper, Box, List, ListItem, ListItemText, Divider } from "@mui/material";
 
 const OptionsList = () => {
   const [selectedIndex, setSelectedIndex] = useState(null);
@@ -21,8 +21,7 @@ const OptionsList = () => {
           {/* First Two Items with Divider */}
           {["Show Additional Information", "Clone"].map((option, index) => (
             <div key={option}>
-              <ListItem
-                button
+              <ListItemButton
                 sx={{
                   py: 1.5,
                   bgcolor: selectedIndex === index ? "#408dfb" : "transparent",
@@ -38,7 +37,7 @@ const OptionsList = () => {
                 onClick={() => setSelectedIndex(index)}
               >
                 <ListItemText primary={option} />
-              </ListItem>
+              </ListItemButton>
               <Divider />
             </div>
           ))}
@@ -46,8 +45,7 @@ const OptionsList = () => {
           {/* Remaining Three Items Inside a Container */}
           <Box sx={{ p: 1 }}>
             {["Insert New Row", "Insert Items in Bulk", "Insert New Header"].map((option, index) => (
-              <ListItem
-                button
+              <ListItemButton
                 key={option}
                 sx={{
                   py: 1.5,
@@ -63,7 +61,7 @@ const OptionsList = () => {
                 onClick={() => setSelectedIndex(index + 2)}
               >
                 <ListItemText primary={option} />
-              </ListItem>
+              </ListItemButton>
             ))}
           </Box>
         </List>
