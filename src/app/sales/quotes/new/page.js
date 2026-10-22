@@ -1309,7 +1309,7 @@ const QuoteCreationPage = () => {
                   fontWeight: "bold",
                 }}
               >
-                {"Zoho"}
+                {"Biz"}
               </Typography>
             </div>
 

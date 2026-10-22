@@ -713,7 +713,7 @@ const PaymentmadeHomePage = () => {
             sx={{ color: "black", fontSize: "15px", textAlign: "center" }}
           >
             We&apos;ve partnered with the above Bank(s). You can now initiate
-            payment directly via Zoho Books.
+            payment directly via Biz Books.
           </Typography>
           <button
             style={{ border: "NONE", backgroundColor: "", color: "#4285f4" }}

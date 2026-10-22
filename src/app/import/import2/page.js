@@ -245,7 +245,7 @@ export default function FormMapping() {
         </Box>
         <Box sx={{ p: 2 }}>
           <Typography variant="body2" color="text.secondary">
-            The customer`s billing and shipping address details will be obtained from their customer profile in Zoho Books.
+            The customer`s billing and shipping address details will be obtained from their customer profile in Biz Books.
           </Typography>
         </Box>
       </Paper>

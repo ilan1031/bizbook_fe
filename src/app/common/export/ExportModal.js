@@ -396,7 +396,7 @@ export default function ExportModal({ open, onClose, moduleName }) {
                   "& .MuiAlert-message": { fontSize: "12px" },
                 }}
               >
-                You can export your data from Zoho Books in CSV, XLS or XLSX
+                You can export your data from Biz Books in CSV, XLS or XLSX
                 format.
               </Alert>
 
@@ -1613,7 +1613,7 @@ export default function ExportModal({ open, onClose, moduleName }) {
                   <span style={{ fontWeight: 500 }}>Note:</span>
                   <span style={{ marginLeft: "4px", color: "#6c718a" }}>
                     You can export only the first 25,000 rows. If you have more
-                    rows, please initiate a backup for the data in your Zoho
+                    rows, please initiate a backup for the data in your Biz
                     Books organization, and download it.
                   </span>
                 </Typography>

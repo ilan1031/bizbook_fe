@@ -2043,7 +2043,7 @@ const InvoiceCreationPage = () => {
                     fontWeight: "bold",
                   }}
                 >
-                  {"Zoho"}
+                  {"Biz"}
                 </Typography>
               </div>
 

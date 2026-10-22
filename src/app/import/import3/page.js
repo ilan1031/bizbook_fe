@@ -215,7 +215,7 @@ export default function MapFields() {
           <Grid container spacing={2}>
             <Grid item xs={6}>
               <Typography variant="body2" fontWeight="medium" color="text.secondary">
-                ZOHO BOOKS FIELD
+                BIZ BOOKS FIELD
               </Typography>
             </Grid>
             <Grid item xs={6}>
@@ -320,7 +320,7 @@ export default function MapFields() {
           <Grid container spacing={2}>
             <Grid item xs={6}>
               <Typography variant="body2" fontWeight="medium" color="text.secondary">
-                ZOHO BOOKS FIELD
+                BIZ BOOKS FIELD
               </Typography>
             </Grid>
             <Grid item xs={6}>

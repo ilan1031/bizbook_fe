@@ -756,7 +756,7 @@ const DeliveryChallanCreationPage = () => {
                 variant="body1"
                 sx={{ ml: 1, color: "#333", fontWeight: "bold" }}
               >
-                {"Zoho"}
+                {"Biz"}
               </Typography>
             </div>
 

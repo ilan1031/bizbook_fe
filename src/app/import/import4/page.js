@@ -171,7 +171,7 @@ const ImportPreviewScreen = () => {
         <Collapse in={true}>
           <Box sx={{ pl: 4, mb: 3 }}>
             <Typography color="text.secondary" sx={{ mb: 2 }}>
-              The following fields in your import file have not been mapped to any Zoho Books field. The data in these fields will be ignored during the import.
+              The following fields in your import file have not been mapped to any Biz Books field. The data in these fields will be ignored during the import.
             </Typography>
             <List>
               <ListItem sx={{ py: 0.5 }}>• Branch Name</ListItem>

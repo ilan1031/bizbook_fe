@@ -212,14 +212,14 @@ export default function InvoiceImport() {
               label={
                 <Typography variant="body1" fontWeight="medium">
                   Map the customers addresses in the import file to their
-                  customer record in Zoho Books.
+                  customer record in Biz Books.
                 </Typography>
               }
             />
             <Box sx={{ pl: 4 }}>
               <Typography variant="body2" color="text.secondary">
                 If you enable this option, your customer`s name from the import file will be used to check if the same customer
-                already exists in Zoho Books. If the customer exists in Zoho Books, the address from the invoice will be mapped
+                already exists in Biz Books. If the customer exists in Biz Books, the address from the invoice will be mapped
                 to their customer record. If the customer does not exist, a new customer record will be created using the
                 corresponding address from the import file.
               </Typography>
