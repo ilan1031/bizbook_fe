@@ -724,7 +724,7 @@ const BillsHomePage = () => {
                   <Box
                     component="img"
                     src="/books-logo.jpg"
-                    alt="Zoho Books"
+                    alt="Biz Books"
                     width={60}
                     height={30}
                     sx={{ verticalAlign: "middle" }}

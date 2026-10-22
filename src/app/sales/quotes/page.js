@@ -695,7 +695,7 @@ const Quotes = () => {
                             // lineHeight: "32px",
                           }}
                         >
-                          {"Zoho"}
+                          {"Biz"}
                         </Typography>
                       </div>
                       <Button

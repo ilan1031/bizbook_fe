@@ -1349,7 +1349,7 @@ const SalesOrderCreation = () => {
                     fontWeight: "bold",
                   }}
                 >
-                  {"Zoho"}
+                  {"Biz"}
                 </Typography>
               </div>
 

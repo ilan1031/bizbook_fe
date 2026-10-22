@@ -733,7 +733,7 @@ const PurchaseOrderForm = () => {
                             fontWeight: "bold",
                           }}
                         >
-                          {"Zoho"}
+                          {"Biz"}
                         </Typography>
                       </div>
 

@@ -118,7 +118,7 @@ const BillHeader = ({
                 fontWeight: "bold",
               }}
             >
-              {"Zoho"}
+              {"Biz"}
             </Typography>
           </div>
 

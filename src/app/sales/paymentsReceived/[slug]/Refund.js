@@ -757,7 +757,7 @@ const RefundContent = ({ customer, payment, onCancel, onSave, payData }) => {
                 <MenuItem value="Petty Cash">Petty Cash</MenuItem>
                 <MenuItem value="Undeposited Funds">Undeposited Funds</MenuItem>
                 <MenuItem value="Zoho Payroll - Bank Account">
-                  Zoho Payroll - Bank Account
+                  Biz Payroll - Bank Account
                 </MenuItem>
               </TextField>
               {isDropdownOpen && (
@@ -863,7 +863,7 @@ const RefundContent = ({ customer, payment, onCancel, onSave, payData }) => {
                       "&:hover": { bgcolor: "#3399ff", color: "white" },
                     }}
                   >
-                    Zoho Payroll - Bank Account
+                    Biz Payroll - Bank Account
                     {selectedValue === "Zoho Payroll - Bank Account" && (
                       <CheckIcon
                         fontSize="small"
