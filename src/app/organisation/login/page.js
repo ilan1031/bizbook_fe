@@ -534,7 +534,7 @@ export default function ZohoApp() {
   };
 
   const [notice, setNotice] = useState(null); // { severity, text }
-  const [otpStep, setOtpStep] = useState(null); // { session, mobileHint }
+  const [otpStep, setOtpStep] = useState(null); // { session, channel, sentTo }
   const [otpCode, setOtpCode] = useState("");
   const [submitting, setSubmitting] = useState(false);
 
@@ -547,6 +547,8 @@ export default function ZohoApp() {
       IP_NOT_ALLOWED: "This device is no longer approved for your account. Please sign in again.",
       SESSION_EXPIRED: "Your session has ended. Please sign in again.",
     };
+    // The URL is only known in the browser, so this runs after the first render.
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     if (reason && reasons[reason]) setNotice({ severity: "warning", text: reasons[reason] });
   }, []);
 
@@ -581,7 +583,11 @@ export default function ZohoApp() {
         data: formData,
       });
       if (response.data?.otp_required) {
-        setOtpStep({ session: response.data.otp_session, mobileHint: response.data.mobile_hint });
+        setOtpStep({
+          session: response.data.otp_session,
+          channel: response.data.channel,
+          sentTo: response.data.sent_to || response.data.mobile_hint,
+        });
         setOtpCode("");
       } else {
         finishLogin(response.data);
@@ -688,8 +694,9 @@ export default function ZohoApp() {
                 {otpStep ? (
                   <Box component="form" onSubmit={handleVerifyOtp} sx={{ mb: 3 }}>
                     <Typography sx={{ mb: 2, fontSize: "14px", color: "text.secondary" }}>
-                      You&apos;re signing in from a new device or network. Enter the
-                      6-digit code sent to {otpStep.mobileHint || "your mobile"}.
+                      Enter the 6-digit code we sent{" "}
+                      {otpStep.channel === "email" ? "by email " : otpStep.channel === "sms" ? "by SMS " : ""}
+                      to {otpStep.sentTo || "you"}. It expires in 5 minutes.
                     </Typography>
                     <TextField
                       fullWidth
