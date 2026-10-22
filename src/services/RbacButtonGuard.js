@@ -3,7 +3,7 @@
 // Hides create / edit / delete buttons and menu items on the current page
 // when the user lacks that permission for the page. Buttons are recognised by
 // their visible label, aria-label or title ("New", "+ New", "Create ...",
-// "Edit", "Mark as ...", "Delete", ...), which lets every existing page follow
+// "Edit", "Mark as ...", "Delete", "Convert to ...", ...), which lets every existing page follow
 // the permissions without per-page changes. This is presentation only - the
 // backend refuses the same actions. Add data-rbac-ignore to an element (or an
 // ancestor) to exclude it.
@@ -34,7 +34,7 @@ export default function RbacButtonGuard() {
     if (!perms?.me || perms.isSuperadmin) return undefined;
     const page = perms.pageForPath(pathname);
     if (!page) return undefined; // shared/helper routes: backend still enforces
-    const missing = ["create", "edit", "delete"].filter((a) => !perms.can(page.key, a));
+    const missing = ["create", "edit", "delete", "convert"].filter((a) => !perms.can(page.key, a));
     if (!missing.length) return undefined;
 
     let frame = null;

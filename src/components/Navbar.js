@@ -42,6 +42,7 @@ import AppsIcon from "@mui/icons-material/Apps";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
 import apiService from "../services/axiosService";
+import { usePermissions } from "../services/PermissionProvider";
 const Navbar = () => {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [orgDropdownOpen, setOrgDropdownOpen] = useState(false);
@@ -50,39 +51,12 @@ const Navbar = () => {
 
   // const [open, setOpen] = useState(false);
   const router = useRouter();
+  const perms = usePermissions();
   const [userName, setUserName] = useState("");
   const [orgData, setOrgData] = useState([]);
   const theme = useTheme();
   const [anchorEl, setAnchorEl] = React.useState(null);
   const openProfile = Boolean(anchorEl);
-  const toggleDrawer = (newOpen) => () => {
-    getOrg();
-    setOpen(newOpen);
-  };
-  const handleOrgClose = () => {
-    setOrgDropdownOpen(false);
-  };
-  const handleClick = (event) => {
-    setAnchorEl(event.currentTarget);
-  };
-  const handleClose = () => {
-    setAnchorEl(null);
-  };
-  useEffect(() => {
-    let userName = localStorage.getItem("user_name");
-    userName ? setUserName(userName) : setUserName("");
-    getOrg();
-  }, []);
-  // The org button shows the organisation being worked in, not the user.
-  const currentOrgId = typeof window !== "undefined" ? localStorage.getItem("organization_id") : null;
-  const currentOrgName =
-    (Array.isArray(orgData) && orgData.find((o) => String(o.organization_id) === String(currentOrgId))?.org_name) ||
-    userName;
-  const switchOrg = (orgId) => {
-    if (String(orgId) === String(currentOrgId)) return setOpen(false);
-    localStorage.setItem("organization_id", orgId);
-    window.location.href = "/home";
-  };
   const getOrg = async () => {
     try {
       let params = {
@@ -97,6 +71,35 @@ const Navbar = () => {
     } catch (error) {
       console.log("getOrg error", error);
     }
+  };
+  const toggleDrawer = (newOpen) => () => {
+    getOrg();
+    setOpen(newOpen);
+  };
+  const handleOrgClose = () => {
+    setOrgDropdownOpen(false);
+  };
+  const handleClick = (event) => {
+    setAnchorEl(event.currentTarget);
+  };
+  const handleClose = () => {
+    setAnchorEl(null);
+  };
+  useEffect(() => {
+    // Browser-only values, read after the first render.
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    setUserName(localStorage.getItem("user_name") || "");
+    getOrg();
+  }, []);
+  // The org button shows the organisation being worked in, not the user.
+  const currentOrgId = typeof window !== "undefined" ? localStorage.getItem("organization_id") : null;
+  const currentOrgName =
+    (Array.isArray(orgData) && orgData.find((o) => String(o.organization_id) === String(currentOrgId))?.org_name) ||
+    userName;
+  const switchOrg = (orgId) => {
+    if (String(orgId) === String(currentOrgId)) return setOpen(false);
+    localStorage.setItem("organization_id", orgId);
+    window.location.assign("/home");
   };
 
   // Update the avatar click handler
@@ -333,18 +336,22 @@ const Navbar = () => {
           >
             +
           </Button>
-          <Button
-            onClick={() => router.push("/bot")}
-            sx={{
-              color: "menu.text.normal",
-              fontSize: 14,
-              cursor: "pointer",
-              display: "flex",
-              alignItems: "center",
-            }}
-          >
-            <Assistant />
-          </Button>
+          {perms?.canAccessPath("/bot") && (
+            <Button
+              data-rbac-ignore
+              onClick={() => router.push("/bot")}
+              aria-label="AI assistant"
+              sx={{
+                color: "menu.text.normal",
+                fontSize: 14,
+                cursor: "pointer",
+                display: "flex",
+                alignItems: "center",
+              }}
+            >
+              <Assistant />
+            </Button>
+          )}
           {/* Icons */}
           <IconButton size="small" sx={{ color: "menu.text.normal" }}>
             <NotificationsNoneIcon />

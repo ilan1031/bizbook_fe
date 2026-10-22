@@ -695,7 +695,7 @@ export default function ZohoApp() {
                   <Box component="form" onSubmit={handleVerifyOtp} sx={{ mb: 3 }}>
                     <Typography sx={{ mb: 2, fontSize: "14px", color: "text.secondary" }}>
                       Enter the 6-digit code we sent{" "}
-                      {otpStep.channel === "email" ? "by email " : otpStep.channel === "sms" ? "by SMS " : ""}
+                      {otpStep.channel === "email" ? "by email " : ""}
                       to {otpStep.sentTo || "you"}. It expires in 5 minutes.
                     </Typography>
                     <TextField

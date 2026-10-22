@@ -64,7 +64,9 @@ export const buildPermissionHelpers = (me) => {
 const ACTION_PATTERNS = {
   delete: /^(delete|remove|void)\b/,
   edit: /^(edit|mark as)\b/,
-  create: /^(\+\s*)?(new|create|add|clone|convert to|import)\b/,
+  // Turning a quote / order / challan into another document.
+  convert: /^convert( to)?\b/,
+  create: /^(\+\s*)?(new|create|add|clone|import)\b/,
 };
 // Labels that look like actions but aren't record changes.
 const IGNORE_LABEL = /(custom view|filter|new tab|new window)/;

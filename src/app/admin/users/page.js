@@ -8,7 +8,7 @@ import {
   Alert,
   Box,
   Button,
-  Checkbox,
+  Switch,
   Chip,
   CircularProgress,
   Dialog,
@@ -35,12 +35,13 @@ import {
 } from "@mui/material";
 import CloseIcon from "@mui/icons-material/Close";
 import DeleteOutlineIcon from "@mui/icons-material/DeleteOutline";
-import SmsOutlinedIcon from "@mui/icons-material/SmsOutlined";
+import MailOutlineIcon from "@mui/icons-material/MailOutline";
 import dayjs from "dayjs";
 import apiService from "../../../services/axiosService";
 import { useSnackbar } from "../../../components/SnackbarProvider";
 
-const ACTIONS = ["view", "create", "edit", "delete"];
+const ACTIONS = ["view", "create", "edit", "delete", "convert"];
+const ACTION_LABELS = { view: "View", create: "Create", edit: "Edit", delete: "Delete", convert: "Convert" };
 const STATUS_COLORS = { pending: "warning", active: "success", inactive: "default" };
 const headerCellSx = {
   fontSize: "12px",
@@ -57,10 +58,10 @@ export default function UsersAccessPage() {
   const [users, setUsers] = useState([]);
   const [counts, setCounts] = useState({});
   const [catalog, setCatalog] = useState([]);
-  const [sms, setSms] = useState(null);
+  const [mail, setMail] = useState(null);
   const [loading, setLoading] = useState(true);
   const [editing, setEditing] = useState(null);
-  const [smsDialog, setSmsDialog] = useState(false);
+  const [mailDialog, setMailDialog] = useState(false);
 
   const load = useCallback(async () => {
     setLoading(true);
@@ -73,7 +74,7 @@ export default function UsersAccessPage() {
       setUsers(res.data.data || []);
       setCounts(res.data.counts || {});
       setCatalog(res.data.catalog || []);
-      setSms(res.data.sms || null);
+      setMail(res.data.email || null);
     } catch (error) {
       showMessage(error?.message || "Couldn't load users", "error");
     } finally {
@@ -82,6 +83,8 @@ export default function UsersAccessPage() {
   }, [tab]);
 
   useEffect(() => {
+    // Fetch the list when the tab changes (load sets the loading state).
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     load();
   }, [load]);
 
@@ -93,8 +96,9 @@ export default function UsersAccessPage() {
         data: changes,
       });
       let text = successText || "Saved";
-      if (res.data.sms && !res.data.sms.ok) text += ` (SMS not sent: ${res.data.sms.error})`;
-      showMessage(text, res.data.sms && !res.data.sms.ok ? "warning" : "success");
+      if (res.data.email && !res.data.email.ok) text += ` (approval email not sent: ${res.data.email.error})`;
+      else if (res.data.email?.ok) text += " - approval email sent to the user";
+      showMessage(text, res.data.email && !res.data.email.ok ? "warning" : "success");
       await load();
       return res.data.data;
     } catch (error) {
@@ -130,20 +134,16 @@ export default function UsersAccessPage() {
           <Typography sx={{ fontSize: "18px", fontWeight: 600 }}>Users &amp; Access</Typography>
         </Box>
         <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
-          {sms && (
+          {mail && (
             <Chip
               size="small"
-              icon={<SmsOutlinedIcon />}
-              color={sms.provider === "console" ? "default" : sms.configured ? "success" : "warning"}
-              label={
-                sms.provider === "console"
-                  ? "SMS: log only (no provider set)"
-                  : `SMS: ${sms.provider}${sms.configured ? "" : " (not configured)"}`
-              }
+              icon={<MailOutlineIcon />}
+              color={mail.configured ? "success" : "warning"}
+              label={mail.configured ? `Email: ${mail.from}` : "Email not set up (EMAIL_USER / EMAIL_PASS)"}
             />
           )}
-          <Button size="small" variant="outlined" onClick={() => setSmsDialog(true)} sx={{ textTransform: "none" }}>
-            Send test SMS
+          <Button size="small" variant="outlined" onClick={() => setMailDialog(true)} sx={{ textTransform: "none" }}>
+            Send test email
           </Button>
         </Box>
       </Box>
@@ -279,7 +279,7 @@ export default function UsersAccessPage() {
         />
       )}
 
-      <TestSmsDialog open={smsDialog} onClose={() => setSmsDialog(false)} />
+      <TestEmailDialog open={mailDialog} onClose={() => setMailDialog(false)} />
     </Box>
   );
 }
@@ -315,7 +315,6 @@ function ManageUserDialog({ user, catalog, onClose, onSave, onRemoveIp }) {
     }
     setPage(page.key, ACTIONS.filter((a) => current.includes(a) && page.actions.includes(a)));
   };
-  const allOn = (page) => page.actions.every((a) => has(page.key, a));
   const setEveryPage = (actions) =>
     setPerms(() => {
       const next = {};
@@ -423,31 +422,48 @@ function ManageUserDialog({ user, catalog, onClose, onSave, onRemoveIp }) {
           <TableHead>
             <TableRow>
               <TableCell sx={headerCellSx}>Page</TableCell>
+              <TableCell sx={headerCellSx} align="center">
+                Page on
+              </TableCell>
               {ACTIONS.map((a) => (
                 <TableCell key={a} sx={headerCellSx} align="center">
-                  {a}
+                  {ACTION_LABELS[a]}
                 </TableCell>
               ))}
-              <TableCell sx={headerCellSx} align="center">
-                All
-              </TableCell>
             </TableRow>
           </TableHead>
           <TableBody>
             {groups.map(([group, pages]) => (
               <React.Fragment key={group}>
                 <TableRow>
-                  <TableCell colSpan={6} sx={{ fontSize: "12px", fontWeight: 700, color: "#4C526C", pt: 1.5 }}>
+                  <TableCell colSpan={ACTIONS.length + 2} sx={{ fontSize: "12px", fontWeight: 700, color: "#4C526C", pt: 1.5 }}>
                     {group}
                   </TableCell>
                 </TableRow>
                 {pages.map((page) => (
                   <TableRow key={page.key} hover>
-                    <TableCell sx={{ fontSize: "13px", pl: 3 }}>{page.label}</TableCell>
+                    <TableCell sx={{ fontSize: "13px", pl: 3 }}>
+                      {page.label}
+                      {page.key === "customerPortal" && (
+                        <Typography component="span" sx={{ display: "block", fontSize: "11px", color: "#6c718a" }}>
+                          Off: their customers can&apos;t use the portal
+                        </Typography>
+                      )}
+                    </TableCell>
+                    <TableCell align="center" sx={{ py: 0 }}>
+                      {/* Page on gives everything; off removes the page. */}
+                      <Switch
+                        size="small"
+                        color="success"
+                        checked={(perms[page.key] || []).length > 0}
+                        onChange={() => setPage(page.key, (perms[page.key] || []).length ? [] : [...page.actions])}
+                        inputProps={{ "aria-label": `${page.label} on` }}
+                      />
+                    </TableCell>
                     {ACTIONS.map((a) => (
                       <TableCell key={a} align="center" sx={{ py: 0 }}>
                         {page.actions.includes(a) ? (
-                          <Checkbox
+                          <Switch
                             size="small"
                             checked={has(page.key, a)}
                             onChange={() => toggle(page, a)}
@@ -458,15 +474,6 @@ function ManageUserDialog({ user, catalog, onClose, onSave, onRemoveIp }) {
                         )}
                       </TableCell>
                     ))}
-                    <TableCell align="center" sx={{ py: 0 }}>
-                      <Checkbox
-                        size="small"
-                        checked={allOn(page)}
-                        indeterminate={!allOn(page) && (perms[page.key] || []).length > 0}
-                        onChange={() => setPage(page.key, allOn(page) ? [] : [...page.actions])}
-                        inputProps={{ "aria-label": `${page.label} all` }}
-                      />
-                    </TableCell>
                   </TableRow>
                 ))}
               </React.Fragment>
@@ -501,22 +508,26 @@ function ManageUserDialog({ user, catalog, onClose, onSave, onRemoveIp }) {
   );
 }
 
-function TestSmsDialog({ open, onClose }) {
+function TestEmailDialog({ open, onClose }) {
   const { showMessage } = useSnackbar();
-  const [mobile, setMobile] = useState("");
+  const [email, setEmail] = useState("");
   const [sending, setSending] = useState(false);
+  const valid = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.trim());
   return (
     <Dialog open={open} onClose={onClose} maxWidth="xs" fullWidth>
-      <DialogTitle sx={{ fontSize: "16px" }}>Send a test SMS</DialogTitle>
+      <DialogTitle sx={{ fontSize: "16px" }}>Send a test email</DialogTitle>
       <DialogContent>
+        <Typography sx={{ fontSize: "13px", color: "#6c718a", mt: 0.5 }}>
+          If this arrives, sign-in codes, sign-up alerts and approval emails will too.
+        </Typography>
         <TextField
           autoFocus
           fullWidth
           size="small"
-          label="Mobile number"
-          value={mobile}
-          onChange={(e) => setMobile(e.target.value)}
-          sx={{ mt: 1 }}
+          label="Email address"
+          value={email}
+          onChange={(e) => setEmail(e.target.value)}
+          sx={{ mt: 2 }}
         />
       </DialogContent>
       <DialogActions>
@@ -525,15 +536,15 @@ function TestSmsDialog({ open, onClose }) {
         </Button>
         <Button
           variant="contained"
-          disabled={sending || mobile.replace(/\D/g, "").length < 10}
+          disabled={sending || !valid}
           onClick={async () => {
             setSending(true);
             try {
-              const res = await apiService({ method: "POST", url: "api/v1/admin/sms/test", data: { mobile } });
-              showMessage(res.data.message, "success");
+              const res = await apiService({ method: "POST", url: "api/v1/admin/email/test", data: { email: email.trim() } });
+              showMessage(res.data.message, res.data.channel === "console" ? "warning" : "success");
               onClose();
             } catch (error) {
-              showMessage(error?.message || "Test SMS failed", "error");
+              showMessage(error?.message || "Test email failed", "error");
             } finally {
               setSending(false);
             }
