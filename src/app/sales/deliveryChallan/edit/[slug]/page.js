@@ -105,6 +105,7 @@ const DeliveryChallanCreationPage = () => {
           amount: item.quantity * item.rate,
           unit: item.unit || "",
           tax_percentage: item.tax_percentage || 0,
+          gst_rate: Number(item.gst_rate) || 0,
         })),
         sub_total: data.sub_total || 0,
         sub_total_formatted: data.sub_total_formatted || "₹0.00",

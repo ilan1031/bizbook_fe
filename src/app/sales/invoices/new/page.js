@@ -461,6 +461,7 @@ const InvoiceCreationPage = () => {
               amount: item.quantity * item.rate,
               unit: item.unit || "",
               tax_percentage: item.tax_percentage || 0,
+              gst_rate: Number(item.gst_rate) || 0,
             })),
             sub_total: quotesData.sub_total || 0,
             sub_total_formatted: quotesData.sub_total_formatted || "₹0.00",
@@ -537,6 +538,7 @@ const InvoiceCreationPage = () => {
               amount: item.quantity * item.rate,
               unit: item.unit || "",
               tax_percentage: item.tax_percentage || 0,
+              gst_rate: Number(item.gst_rate) || 0,
             })),
             sub_total: invoicesData.sub_total || 0,
             sub_total_formatted: invoicesData.sub_total_formatted || "₹0.00",
@@ -664,6 +666,7 @@ const InvoiceCreationPage = () => {
               amount: item.quantity * item.rate,
               unit: item.unit || "",
               tax_percentage: item.tax_percentage || 0,
+              gst_rate: Number(item.gst_rate) || 0,
             })),
             sub_total: salesData.sub_total || 0,
             sub_total_formatted: salesData.sub_total_formatted || "₹0.00",
@@ -739,6 +742,7 @@ const InvoiceCreationPage = () => {
               amount: item.quantity * item.rate,
               unit: item.unit || "",
               tax_percentage: item.tax_percentage || 0,
+              gst_rate: Number(item.gst_rate) || 0,
             })),
             due_date: challanData.expiry_date || "",
             due_date_formatted: challanData.expiry_date_formatted || "",
@@ -1532,8 +1536,8 @@ const InvoiceCreationPage = () => {
   // Handle Save and Send
   const handleSaveAndSend = () => {
     setOpenAlert(true); // Show validation errors if any
-    formik.setFieldValue("status", "send");
-    formik.setFieldValue("status_formatted", "Send");
+    formik.setFieldValue("status", "sent");
+    formik.setFieldValue("status_formatted", "Sent");
     setStatus("sent");
     formik.handleSubmit(); // Trigger form submission
   };

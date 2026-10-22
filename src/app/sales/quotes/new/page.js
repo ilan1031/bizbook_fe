@@ -421,6 +421,7 @@ const QuoteCreationPage = () => {
           amount: parseFloat(item.amount) || 0,
           discount: parseFloat(item.discount) || 0,
           tax_percentage: parseFloat(item.tax_percentage) || 0,
+          gst_rate: Number(item.gst_rate) || 0,
           unit: item.unit || "",
           item_total: parseFloat(item.item_total) || 0,
         }));
@@ -465,6 +466,7 @@ const QuoteCreationPage = () => {
           rate: parseFloat(item.rate) || 0,
           discount: parseFloat(item.discount) || 0,
           tax_percentage: parseFloat(item.tax_percentage) || 0,
+          gst_rate: Number(item.gst_rate) || 0,
           unit: item.unit || "",
           amount: parseFloat(item.item_total) || 0,
           item_total: parseFloat(item.item_total) || 0,

@@ -181,8 +181,8 @@ const NewItemForm = () => {
     purchaseAccount: "cost-of-goods-sold",
     purchaseDescription: "",
     preferredVendor: "",
-    gstRate: "12",
-    igstRate: "5",
+    gstRate: "18",
+    igstRate: "18",
     trackInventory: false,
     inventoryAccount: "",
     valuationMethod: "",
@@ -255,6 +255,8 @@ const NewItemForm = () => {
         is_taxable: values.taxPreference === "taxable",
         sku: values.sku,
         hsn_or_sac: values.hsnCode,
+        // GST charged on sales (split CGST+SGST or IGST by place of supply)
+        gst_rate: values.taxPreference === "taxable" ? Number(values.gstRate) || 0 : 0,
         tags: [],
       };
 

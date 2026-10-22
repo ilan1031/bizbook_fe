@@ -398,6 +398,7 @@ const InvoiceCreationPage = () => {
             amount: item.quantity * item.rate,
             unit: item.unit || "",
             tax_percentage: item.tax_percentage || 0,
+            gst_rate: Number(item.gst_rate) || 0,
           })),
           tax_type: invoiceData.tax_type || "TDS",
           discount_percent: invoiceData.discount_percent || 0,

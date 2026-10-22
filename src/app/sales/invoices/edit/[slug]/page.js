@@ -424,6 +424,7 @@ const InvoiceEditPage = () => {
               amount: item.quantity * item.rate,
               unit: item.unit || "",
               tax_percentage: item.tax_percentage || 0,
+              gst_rate: Number(item.gst_rate) || 0,
             })),
             sub_total: invoiceData.sub_total || 0,
             sub_total_formatted: invoiceData.sub_total_formatted || "₹0.00",

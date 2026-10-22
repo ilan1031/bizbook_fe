@@ -422,8 +422,8 @@ const EditItemForm = () => {
         preferredVendor: item.preferred_vendor || "",
         
         // Tax Information
-        gstRate: item.gst_rate || "12",
-        igstRate: item.igst_rate || "12",
+        gstRate: String(item.gst_rate ?? 18),
+        igstRate: String(item.gst_rate ?? 18),
         
         // Inventory Information
         trackInventory: item.track_inventory || false,
@@ -515,7 +515,9 @@ const EditItemForm = () => {
         valuation_method: values.valuationMethod,
         opening_stock: values.openingStock,
         opening_stock_rate: values.openingStockRate,
-        hsn_code: values.hsnCode,
+        hsn_or_sac: values.hsnCode,
+        // GST charged on sales (split CGST+SGST or IGST by place of supply)
+        gst_rate: values.taxPreference === "taxable" ? Number(values.gstRate) || 0 : 0,
         tax_preference: values.taxPreference,
         gst_rate: values.gstRate,
         igst_rate: values.igstRate,

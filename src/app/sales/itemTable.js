@@ -1543,6 +1543,7 @@ import SettingsOutlinedIcon from "@mui/icons-material/SettingsOutlined";
 import TaxModal from "../common/Tax/TcsModal"; // Tax Modal
 import NewItemForm from "../common/newitem/page";
 import { usePathname } from "next/navigation";
+import { GST_RATES, priceDocument, stateCode } from "../../services/gst";
 
 export default function InvoiceItemTable({formik}) {
   const [customerNotes, setCustomerNotes] = useState(
@@ -1661,6 +1662,19 @@ export default function InvoiceItemTable({formik}) {
     fetchItemList();
 
   }, []);
+
+  // The company's state decides CGST+SGST (same state) or IGST (other state).
+  const [sellerState, setSellerState] = useState(null);
+  useEffect(() => {
+    const orgId = localStorage.getItem("organization_id");
+    if (!orgId) return;
+    apiService({ method: "GET", url: `api/v1/organization/${orgId}` })
+      .then((res) => {
+        const org = res.data?.data || {};
+        setSellerState(stateCode(org.gst_in) || stateCode(org.state));
+      })
+      .catch(() => {});
+  }, []);
  console.log(formik.values.discount_percent,"discount_percent");
 
   const handleClose = () => {
@@ -1677,6 +1691,7 @@ export default function InvoiceItemTable({formik}) {
         quantity: 1,
         rate: 0,
         tax_percentage: 0,
+        gst_rate: 0,
         unit: "",
       }]);
     }
@@ -1710,7 +1725,8 @@ export default function InvoiceItemTable({formik}) {
         item_id: newValue.id,
         name: newValue.name,
         rate: rate,
-        amount: amount
+        amount: amount,
+        gst_rate: newValue.is_taxable === false ? 0 : Number(newValue.gst_rate ?? 0),
       };
 
       formik.setFieldValue('line_items', currentItems);
@@ -1718,65 +1734,52 @@ export default function InvoiceItemTable({formik}) {
     }
   };
 
+  // Totals with GST, worked out the same way the server saves them.
+  const priced = priceDocument(formik.values, {
+    sellerState,
+    placeOfSupply: formik.values.place_of_supply,
+    gstTreatment: formik.values.gst_treatment,
+  });
+
   const calculateTotals = () => {
-    const items = formik.values.line_items || [];
-
-    // Calculate subtotal from line items
-    const subTotal = items.reduce((sum, item) => {
-      const quantity = parseFloat(item.quantity) || 0;
-      const rate = parseFloat(item.rate) || 0;
-      const amount = quantity * rate;
-      return sum + amount;
-    }, 0);
-
-    // Set subtotal values
-    formik.setFieldValue('sub_total', subTotal);
-    formik.setFieldValue('sub_total_formatted', `₹${subTotal.toFixed(2)}`);
-
-    // Calculate discount on subtotal
-    const discountPercentage = parseFloat(formik.values.discount_percent) || 0;
-    const discountAmount = (subTotal * discountPercentage) / 100;
-    const subTotalAfterDiscount = subTotal - discountAmount;
-
-    // Set discount values
-    // formik.setFieldValue('discount_percent', discountPercentage);
-    formik.setFieldValue('discount_amount', discountAmount);
-    formik.setFieldValue('discount_amount_formatted', `₹${discountAmount.toFixed(2)}`);
-
-    // Calculate tax amount based on TDS/TCS selection
-    const taxPercentage = parseFloat(formik.values.tax_percentage) || 0;
-    const taxAmount = (subTotalAfterDiscount * taxPercentage) / 100;
-
-    // Set tax amount values
-    formik.setFieldValue('tax_total', taxAmount);
-    formik.setFieldValue('tax_total_formatted', `₹${taxAmount.toFixed(2)}`);
-
-    // Calculate total with adjustment
-    const adjustment = parseFloat(formik.values.adjustment) || 0;
-    let total;
-
-    if (formik.values.tax_type === 'TCS') {
-      // For TCS, add tax amount
-      total = subTotalAfterDiscount + taxAmount + adjustment;
-    } else {
-      // For TDS, subtract tax amount
-      total = subTotalAfterDiscount - taxAmount + adjustment;
-    }
-
-    // Set all total values in formik
-    formik.setFieldValue('total', total);
-    formik.setFieldValue('total_formatted', `₹${total.toFixed(2)}`);
-    formik.setFieldValue('total_amount', total);
-    formik.setFieldValue('total_amount_formatted', `₹${total.toFixed(2)}`);
+    const p = priceDocument(formik.values, {
+      sellerState,
+      placeOfSupply: formik.values.place_of_supply,
+      gstTreatment: formik.values.gst_treatment,
+    });
+    const set = (field, value) => {
+      if (formik.values[field] !== value) formik.setFieldValue(field, value);
+    };
+    set('sub_total', p.subTotal);
+    set('sub_total_formatted', `₹${p.subTotal.toFixed(2)}`);
+    set('discount_amount', p.discount);
+    set('discount_amount_formatted', `₹${p.discount.toFixed(2)}`);
+    set('tax_total', p.withholding);
+    set('tax_total_formatted', `₹${p.withholding.toFixed(2)}`);
+    set('supply_type', p.supplyType);
+    set('gst_total', p.gst);
+    set('cgst_total', p.cgst);
+    set('sgst_total', p.sgst);
+    set('igst_total', p.igst);
+    set('total', p.total);
+    set('total_formatted', `₹${p.total.toFixed(2)}`);
+    set('total_amount', p.total);
+    set('total_amount_formatted', `₹${p.total.toFixed(2)}`);
 
     // Set tax IDs based on selection
     if (formik.values.tax_type === 'TDS') {
-      formik.setFieldValue('tds_id', formik.values.tds_option);
-      formik.setFieldValue('tcs_id', '');
+      set('tds_id', formik.values.tds_option);
+      set('tcs_id', '');
     } else {
-      formik.setFieldValue('tcs_id', formik.values.tds_option);
-      formik.setFieldValue('tds_id', '');
+      set('tcs_id', formik.values.tds_option);
+      set('tds_id', '');
     }
+  };
+
+  const handleGstRateChange = (index, value) => {
+    const updatedItems = [...formik.values.line_items];
+    updatedItems[index] = { ...updatedItems[index], gst_rate: Number(value) };
+    formik.setFieldValue('line_items', updatedItems);
   };
 
   const handleTaxMethodChange = (event) => {
@@ -1861,6 +1864,7 @@ export default function InvoiceItemTable({formik}) {
       rate: 0,
       discount: 0,
       tax_percentage: 0,
+      gst_rate: 0,
       unit: "",
     });
     formik.setFieldValue("line_items", newLineItems);
@@ -2054,6 +2058,20 @@ export default function InvoiceItemTable({formik}) {
           }}
         />
       </Box>
+      <Box sx={{ flex: 1, p: 2, textAlign: "center" }}>
+        <Select
+          size="small"
+          value={Number(item.gst_rate ?? 0)}
+          onChange={(e) => handleGstRateChange(index, e.target.value)}
+          sx={{ minWidth: 92, bgcolor: "white", fontSize: "13px", height: 36 }}
+        >
+          {GST_RATES.map((r) => (
+            <MenuItem key={r} value={r} sx={{ fontSize: "13px" }}>
+              {r === 0 ? "No GST" : `GST ${r}%`}
+            </MenuItem>
+          ))}
+        </Select>
+      </Box>
       <Box sx={{ flex: 1, p: 2, textAlign: "right", fontWeight: 500 }}>
       {calculateItemTotal(item)}
       </Box>
@@ -2075,7 +2093,10 @@ export default function InvoiceItemTable({formik}) {
     formik.values.tax_percentage,
     formik.values.tax_type,
     formik.values.adjustment,
-    formik.values.discount_percent
+    formik.values.discount_percent,
+    formik.values.place_of_supply,
+    formik.values.gst_treatment,
+    sellerState,
   ]);
 
   const handleManageTaxClick = (event) => {
@@ -2209,6 +2230,18 @@ export default function InvoiceItemTable({formik}) {
             >
               ₹
             </Box>
+          </Box>
+          <Box
+            sx={{
+              flex: 1,
+              p: 2,
+              fontSize: "12px",
+              fontWeight: 600,
+              color: "#475569",
+              textAlign: "center",
+            }}
+          >
+            TAX
           </Box>
           <Box
             sx={{
@@ -2432,6 +2465,30 @@ export default function InvoiceItemTable({formik}) {
     </Grid>
     <Typography variant="body2">{calculateDiscount()}</Typography>
   </Box>
+
+  {/* GST: CGST + SGST within the state, IGST to another state */}
+  {priced.supplyType === "inter" ? (
+    <Box sx={{ display: "flex", justifyContent: "space-between", mb: 2 }}>
+      <Typography variant="body2">IGST</Typography>
+      <Typography variant="body2">{priced.igst.toFixed(2)}</Typography>
+    </Box>
+  ) : priced.supplyType === "zero_rated" ? (
+    <Box sx={{ display: "flex", justifyContent: "space-between", mb: 2 }}>
+      <Typography variant="body2">GST (zero-rated supply)</Typography>
+      <Typography variant="body2">0.00</Typography>
+    </Box>
+  ) : (
+    <>
+      <Box sx={{ display: "flex", justifyContent: "space-between", mb: 1 }}>
+        <Typography variant="body2">CGST</Typography>
+        <Typography variant="body2">{priced.cgst.toFixed(2)}</Typography>
+      </Box>
+      <Box sx={{ display: "flex", justifyContent: "space-between", mb: 2 }}>
+        <Typography variant="body2">SGST</Typography>
+        <Typography variant="body2">{priced.sgst.toFixed(2)}</Typography>
+      </Box>
+    </>
+  )}
 
 {!isChallan && (
   formik.values.tax_type === "TDS" ? (
