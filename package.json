@@ -20,7 +20,7 @@
     "@fortawesome/react-fontawesome": "^0.2.2",
     "@iconify/react": "^5.2.0",
     "@mui/icons-material": "^6.4.8",
-    "@mui/lab": "^7.0.0-beta.11",
+    "@mui/lab": "6.0.0-beta.30",
     "@mui/material": "^6.4.10",
     "@mui/material-nextjs": "^6.5.0",
     "@mui/x-date-pickers": "^7.29.4",
