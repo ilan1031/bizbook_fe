@@ -7,9 +7,10 @@ export const portalStateOf = (person) =>
       ? "invited"
       : "none";
 
-// label: shown under the contact; action: the invite link's text (none once accepted).
+// label: shown under the contact; action: the invite link's text. Once they've
+// accepted, the same request emails them the portal sign-in link.
 export const PORTAL_STATE = {
   none: { label: "Portal not enabled", color: "#8a6d3b", action: "Invite to Portal" },
   invited: { label: "Portal invitation sent, not accepted yet", color: "#d9822b", action: "Re-invite" },
-  accepted: { label: "Portal invitation accepted", color: "#1b7a2f", action: null },
+  accepted: { label: "Portal invitation accepted", color: "#1b7a2f", action: "Resend Portal Link" },
 };
