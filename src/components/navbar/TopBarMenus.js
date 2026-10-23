@@ -33,6 +33,7 @@ import RefreshIcon from "@mui/icons-material/Refresh";
 import ErrorOutlineIcon from "@mui/icons-material/ErrorOutline";
 import WarningAmberIcon from "@mui/icons-material/WarningAmber";
 import InfoOutlinedIcon from "@mui/icons-material/InfoOutlined";
+import CheckCircleOutlineIcon from "@mui/icons-material/CheckCircleOutline";
 import apiService from "../../services/axiosService";
 import { usePermissions } from "../../services/PermissionProvider";
 
@@ -317,6 +318,7 @@ const SEVERITY_ICON = {
   error: <ErrorOutlineIcon fontSize="small" color="error" />,
   warning: <WarningAmberIcon fontSize="small" color="warning" />,
   info: <InfoOutlinedIcon fontSize="small" color="info" />,
+  success: <CheckCircleOutlineIcon fontSize="small" color="success" />,
 };
 
 export function NotificationsMenu() {

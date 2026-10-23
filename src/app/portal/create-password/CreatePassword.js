@@ -72,16 +72,14 @@ const CreatePassword = () => {
     validationSchema: validationSchema,
     onSubmit: async (values) => {
       try {
+        // The invitation token says who this is; the server checks it.
         const formData = {
-          email: values?.email,
+          token,
           password: values?.password,
-          role: "client",
-          clientId: values?.clientId,
-          clientPersonId: values?.clientPersonId,
         };
         const response = await apiService({
           method: "POST",
-          url: `/api/v1/client/register `,
+          url: `/api/v1/client/register`,
           data: formData,
         });
         const data = response.data;

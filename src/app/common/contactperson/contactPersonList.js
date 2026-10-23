@@ -23,6 +23,7 @@ import { useRouter } from "next/navigation";
 import { Settings } from "lucide-react";
 import apiService from "../../../services/axiosService";
 import { useSnackbar } from "../../../components/SnackbarProvider";
+import { PORTAL_STATE, portalStateOf } from "./portalStatus";
 
 const ContactPersonList = ({
   contactPersons,
@@ -99,8 +100,10 @@ const ContactPersonList = ({
         break;
       case "delete":
         handleDelete(selectedContact.contact_person_id);
+        break;
       case "reInvite":
         handleInvite(selectedContact);
+        break;
       case "primary":
         handleMarkAsPrimary(selectedContact);
         break;
@@ -204,35 +207,18 @@ const ContactPersonList = ({
                 </Typography>
               )}
 
-              {!contact?.can_invite ? (
-                <Typography
-                  variant="body2"
-                  sx={{
-                    color: "#8a6d3b",
-                    mb: 0.5,
-                    display: "flex",
-                    alignItems: "center",
-                    fontSize: "11px",
-                  }}
-                >
-                  Portal not enabled
-                </Typography>
-              ) : !contact?.is_added_in_portal ? (
-                <Typography
-                  variant="body2"
-                  sx={{
-                    color: "#8a6d3b",
-                    mb: 0.5,
-                    display: "flex",
-                    alignItems: "center",
-                    fontSize: "11px",
-                  }}
-                >
-                  Portal invitation not accepted
-                </Typography>
-              ) : (
-                <></>
-              )}
+              <Typography
+                variant="body2"
+                sx={{
+                  color: PORTAL_STATE[portalStateOf(contact)].color,
+                  mb: 0.5,
+                  display: "flex",
+                  alignItems: "center",
+                  fontSize: "11px",
+                }}
+              >
+                {PORTAL_STATE[portalStateOf(contact)].label}
+              </Typography>
             </Box>
             <IconButton
               size="small"
@@ -305,28 +291,15 @@ const ContactPersonList = ({
 )}
 
 
-{!selectedContact?.is_added_in_portal && !selectedContact?.can_invite ? (
-  <MenuItem
-    sx={{ ...menuItemStyles, fontSize: "13px", fontWeight: 400}}
-    onClick={() => handleInvite(selectedContact)}
-  >
-    Invite to Portal
-  </MenuItem>
-) : !selectedContact?.is_added_in_portal &&
-  selectedContact?.can_invite &&
-  !selectedContact?.is_portal_invitation_accepted ? (
+{PORTAL_STATE[portalStateOf(selectedContact)].action && (
   <MenuItem
     sx={{ ...menuItemStyles, fontSize: "13px", fontWeight: 400 }}
-    onClick={() => handleInvite(selectedContact)}
+    onClick={() => {
+      handleCloseContactMenu();
+      handleInvite(selectedContact);
+    }}
   >
-    Re-invite
-  </MenuItem>
-) : (
-  <MenuItem
-    sx={{ ...menuItemStyles, fontSize: "13px", fontWeight: 400 }}
-    onClick={() => handleInvite(selectedContact)}
-  >
-    Resend Portal Link
+    {PORTAL_STATE[portalStateOf(selectedContact)].action}
   </MenuItem>
 )}
 

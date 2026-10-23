@@ -64,6 +64,7 @@ import AnimatedBarChart from "../../../components/AnimatedBarChart";
 import config from "../../../services/config";
 import { Settings } from "lucide-react";
 import DotLoader from "../../../components/DotLoader";
+import { PORTAL_STATE, portalStateOf } from "../contactperson/portalStatus";
 // import { Link } from 'react-router-dom';
 
 const Overview = ({ details, callAPI, moduleKey }) => {
@@ -384,74 +385,34 @@ const Overview = ({ details, callAPI, moduleKey }) => {
     }
   };
 
-  const handleInviteToPortal = async (data) => {
-    let inviteData = data ? data : details;
-    if (!inviteData?.email) {
-      showMessage("No email address available for this contact", "error");
+  // Emails a contact person (by default the customer's primary contact) a
+  // link to the customer portal.
+  const handleInviteToPortal = async (person) => {
+    const contactPerson = person?.contact_person_id ? person : null;
+    if (contactPerson && !contactPerson.email) {
+      showMessage("Add an email address for this contact person first", "error");
       return;
     }
-
-    // Set loading state
     setInviteLoading(true);
-
     try {
       const response = await apiService({
         method: "POST",
         url: "/api/v1/email/invite-portal",
         customBaseUrl: config.PO_Base_url,
         data: {
-          contactId: inviteData.contact_id,
-          contact_person_id: inviteData?.contact_person_id,
-          email: inviteData.email,
-          name: inviteData.contact_name,
+          contactId: details?.contact_id,
+          contact_person_id: contactPerson?.contact_person_id,
           organizationId: organizationId,
-          companyName: inviteData.company_name || "Our Company",
+          organization_id: organizationId,
         },
       });
-
-      // Clear loading state
-      setInviteLoading(false);
-
-      // Check response structure correctly
-      if (response?.data?.status === true) {
-        showMessage(
-          response?.data?.message || "Portal invitation sent successfully",
-          "success"
-        );
-
-        // Update the UI to reflect the new status
-        const updatedDetails = customerDetailsData.map((item) => {
-          if (item.id === "portalStatus") {
-            return { ...item, value: "Invited" };
-          }
-          return item;
-        });
-
-        setCustomerDetailsData(updatedDetails);
-        callAPI(details?.contact_id);
-        // Optionally refresh data if needed
-        // fetchContactDetails();
-      } else {
-        // Handle API success but business logic failure
-        showMessage(
-          response?.data?.message || "Failed to send invitation",
-          "error"
-        );
-      }
+      showMessage(response?.data?.message || "Portal invitation sent", "success");
+      callAPI(details?.contact_id);
     } catch (error) {
-      // Clear loading state
-      setInviteLoading(false);
-
       console.error("Invite to portal error:", error);
-
-      // Properly extract error message from response
-      const errorMessage =
-        error.response?.data?.message ||
-        error.response?.data?.error ||
-        error.message ||
-        "Unknown error";
-
-      showMessage(`Failed to send invitation: ${errorMessage}`, "error");
+      showMessage(error?.message || "Couldn't send the invitation", "error");
+    } finally {
+      setInviteLoading(false);
     }
   };
 
@@ -864,6 +825,7 @@ const Overview = ({ details, callAPI, moduleKey }) => {
               const primaryContact = details.contact_persons.find(
                 (contact) => contact.is_primary_contact
               );
+              const primaryPortal = PORTAL_STATE[portalStateOf(primaryContact)];
               return (
                 <Box
                   key={primaryContact?.contact_person_id}
@@ -963,58 +925,39 @@ const Overview = ({ details, callAPI, moduleKey }) => {
                       </Typography>
                     )}
 
-                    {primaryContact?.is_added_in_portal &&
-                      !primaryContact?.is_portal_invitation_accepted && (
-                        <Typography
-                          variant="body2"
-                          sx={{
-                            color: "#fd9134c2",
-                            mb: 0.5,
-                            display: "flex",
-                            alignItems: "center",
-                            fontSize: "11px",
-                          }}
-                        >
-                          Portal invitation not accepted
-                        </Typography>
-                      )}
+                    {portalStateOf(primaryContact) !== "none" && (
+                      <Typography
+                        variant="body2"
+                        sx={{
+                          color: primaryPortal.color,
+                          mb: 0.5,
+                          display: "flex",
+                          alignItems: "center",
+                          fontSize: "11px",
+                        }}
+                      >
+                        {primaryPortal.label}
+                      </Typography>
+                    )}
 
-                    {!primaryContact?.is_added_in_portal &&
-                    !primaryContact?.can_invite ? (
+                    {primaryPortal.action && (
                       <Link
                         href="#"
                         color="#408dfb"
                         underline="hover"
                         sx={{ fontSize: "13px", fontWeight: 300 }}
-                        onClick={() => handleInviteToPortal(primaryContact)}
+                        onClick={(e) => {
+                          e.preventDefault();
+                          if (!inviteLoading) handleInviteToPortal(primaryContact);
+                        }}
                       >
-                        {inviteLoading ? <DotLoader /> : "Invite to Portal"}
-                      </Link>
-                    ) : !primaryContact?.is_added_in_portal &&
-                      primaryContact?.can_invite &&
-                      !primaryContact?.is_portal_invitation_accepted ? (
-                      <Link
-                        href="#"
-                        color="#408dfb"
-                        underline="hover"
-                        sx={{ fontSize: "13px", fontWeight: 300 }}
-                      >
-                        Re-invite
-                      </Link>
-                    ) : (
-                      <Link
-                        href="#"
-                        color="#408dfb"
-                        underline="hover"
-                        sx={{ fontSize: "13px", fontWeight: 300 }}
-                      >
-                        Resend Portal Link
+                        {inviteLoading ? <DotLoader /> : primaryPortal.action}
                       </Link>
                     )}
 
                     {!inviteLoading && (
                       <>
-                        <span style={{ color: "#ddd" }}> | </span>
+                        {primaryPortal.action && <span style={{ color: "#ddd" }}> | </span>}
                         <Link
                           href={`/common/customerEmail?org_id=${
                             localStorage.getItem("organization_id") || ""
