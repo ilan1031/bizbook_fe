@@ -64,6 +64,7 @@ import TableExpenses from "../../expense/newexpense/recordExpense/TableExpenses"
 import KeyboardArrowLeftIcon from "@mui/icons-material/KeyboardArrowLeft";
 import StarIcon from "@mui/icons-material/Star";
 import StarBorderIcon from "@mui/icons-material/StarBorder";
+import { domProps } from "../../../../services/styledDom";
 
 // Custom Styles
 const COLORS = {
@@ -76,7 +77,7 @@ const COLORS = {
   bgLight: "#f8f8f8",
 };
 
-const StyledTextField = styled("input")(({ error }) => ({
+const StyledTextField = styled("input", domProps)(({ error }) => ({
   height: "35px",
   width: "100%",
   padding: "6px 12px",
@@ -130,7 +131,7 @@ const commonTextareaStyle = {
   },
 };
 
-const StyledTextarea = styled("textarea")({
+const StyledTextarea = styled("textarea", domProps)({
   ...commonTextareaStyle,
 });
 

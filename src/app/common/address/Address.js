@@ -1685,6 +1685,7 @@ import countriesList from "country-list";
 import { State } from "country-state-city";
 import { KeyboardArrowDown } from "@mui/icons-material";
 import { useTheme } from "@mui/material/styles";
+import { domProps } from "../../../services/styledDom";
 
 // Sample countries data
 const countries = countriesList.getData().map((c) => ({
@@ -1722,7 +1723,7 @@ const StyledSelect = styled(Select)({
   },
 });
 
-const StyledTextField = styled("input")(({ error }) => ({
+const StyledTextField = styled("input", domProps)(({ error }) => ({
   height: "35px",
   width: "100%",
   padding: "6px 12px",

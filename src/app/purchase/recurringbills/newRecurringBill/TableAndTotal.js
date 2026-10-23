@@ -1611,6 +1611,7 @@ import AddCircleOutlineIcon from "@mui/icons-material/AddCircleOutline";
 import CloseIcon from "@mui/icons-material/Close";
 import SearchIcon from "@mui/icons-material/Search";
 import { useTheme } from "@mui/material/styles";
+import { domProps } from "../../../../services/styledDom";
 
 const options = ["At Transaction Level", "At Line Item Level"];
 
@@ -1687,7 +1688,7 @@ const COLORS = {
   bgLight: "#f8f8f8",
 };
 
-const StyledTextField = styled("input")(({ error }) => ({
+const StyledTextField = styled("input", domProps)(({ error }) => ({
   height: "35px",
   width: "100%",
   padding: "6px 12px",

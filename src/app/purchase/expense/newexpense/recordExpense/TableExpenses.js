@@ -16,6 +16,7 @@ import {
 } from "@mui/material";
 import CloseIcon from "@mui/icons-material/Close";
 import AddCircleOutlineIcon from "@mui/icons-material/AddCircleOutline";
+import { domProps } from "../../../../../services/styledDom";
 
 const COLORS = {
   primary: "#408dfb",
@@ -27,7 +28,7 @@ const COLORS = {
   bgLight: "#f8f8f8",
 };
 
-const StyledTextField = styled("input")(({ error }) => ({
+const StyledTextField = styled("input", domProps)(({ error }) => ({
   height: "35px",
   width: "100%",
   padding: "6px 12px",
@@ -84,7 +85,7 @@ const commonTextareaStyle = {
   },
 };
 
-const StyledTextarea = styled("textarea")({
+const StyledTextarea = styled("textarea", domProps)({
   ...commonTextareaStyle,
 });
 

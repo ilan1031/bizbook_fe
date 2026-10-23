@@ -14,6 +14,7 @@ import {
 import InfoIcon from "@mui/icons-material/Info";
 import KeyboardArrowDownIcon from "@mui/icons-material/KeyboardArrowDown";
 import { Select } from "@mui/material";
+import { domProps } from "../../../../services/styledDom";
 
 // Define COLORS object for consistent coloring
 const COLORS = {
@@ -85,7 +86,7 @@ const commonTextareaStyle = {
 };
 
 // Custom styled components for consistent field heights and styling
-const StyledTextField = styled("input")(({ error }) => ({
+const StyledTextField = styled("input", domProps)(({ error }) => ({
   height: "35px",
   width: "100%",
   padding: "6px 12px",
@@ -128,7 +129,7 @@ const StyledSelect = styled(Select)({
   },
 });
 
-const StyledTextarea = styled("textarea")({
+const StyledTextarea = styled("textarea", domProps)({
   ...commonTextareaStyle,
 });
 

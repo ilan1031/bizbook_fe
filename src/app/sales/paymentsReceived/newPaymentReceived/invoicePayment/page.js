@@ -62,6 +62,7 @@ import CloseIcon from "@mui/icons-material/Close";
 import InfoOutlinedIcon from "@mui/icons-material/InfoOutlined";
 import { SettingsApplications, SettingsOutlined } from "@mui/icons-material";
 import CustomerForm from "../../../../sales/customer/create/page";
+import { domProps } from "../../../../../services/styledDom";
 
 // Validation schema
 const validationSchema = Yup.object({
@@ -115,7 +116,7 @@ const StyledSelect = styled(Select)({
     boxShadow: `0 0 0 0.2rem rgba(97, 160, 255, 0.3)`,
   },
 });
-const StyledTextField = styled("input")(({ error }) => ({
+const StyledTextField = styled("input", domProps)(({ error }) => ({
   height: "35px",
   width: "100%",
   padding: "6px 12px",

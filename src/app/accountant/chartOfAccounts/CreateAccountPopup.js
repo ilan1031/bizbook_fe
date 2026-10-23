@@ -22,6 +22,7 @@ import apiService from "../../../services/axiosService";
 import config from "../../../services/config";
 import { useSearchParams } from "next/navigation";
 import { useSnackbar } from "../../../components/SnackbarProvider";
+import { domProps } from "../../../services/styledDom";
 
 // Styling
 const COLORS = {
@@ -43,7 +44,7 @@ const defaultAccountTypeInfo = {
   examples: [],
 };
 
-const StyledTextField = styled("input")(({ error }) => ({
+const StyledTextField = styled("input", domProps)(({ error }) => ({
   height: "35px",
   width: "100%",
   padding: "6px 12px",
@@ -67,7 +68,7 @@ const StyledTextField = styled("input")(({ error }) => ({
   MozAppearance: "textfield",
 }));
 
-const StyledTextArea = styled("textarea")(({ error }) => ({
+const StyledTextArea = styled("textarea", domProps)(({ error }) => ({
   width: "100%",
   minHeight: "100px",
   padding: "6px 12px",

@@ -34,6 +34,7 @@ import apiService from "../../../services/axiosService";
 import config from "../../../services/config";
 import AddCircleOutlinedIcon from "@mui/icons-material/AddCircleOutlined";
 import theme from "../../theme";
+import { domProps } from "../../../services/styledDom";
 
 const COLORS = {
   primary: "#408dfb",
@@ -45,7 +46,7 @@ const COLORS = {
   bgLight: "#f8f8f8",
 };
 
-const StyledTextField = styled("input")(({ error }) => ({
+const StyledTextField = styled("input", domProps)(({ error }) => ({
   height: "35px",
   width: "100%",
   padding: "6px 12px",

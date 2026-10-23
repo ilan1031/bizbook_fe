@@ -322,7 +322,6 @@ const MyClientOnlyComponent = () => {
     if (organization_id) {
       fetchCustomers();
     }
-    fetchMileageData();
   }, [organization_id]);
 
   useEffect(() => {

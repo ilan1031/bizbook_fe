@@ -44,6 +44,7 @@ import ArrowDropDownIcon from "@mui/icons-material/ArrowDropDown";
 import SearchIcon from "@mui/icons-material/Search";
 import { useHotkeys } from "react-hotkeys-hook";
 import { useTheme } from "@mui/material/styles";
+import { domProps } from "../../../../../services/styledDom";
 
 // Custom Styles
 const COLORS = {
@@ -56,7 +57,7 @@ const COLORS = {
   bgLight: "#f8f8f8",
 };
 
-const StyledTextField = styled("input")(({ error }) => ({
+const StyledTextField = styled("input", domProps)(({ error }) => ({
   height: "35px",
   width: "100%",
   padding: "6px 12px",
@@ -110,7 +111,7 @@ const commonTextareaStyle = {
   },
 };
 
-const StyledTextarea = styled("textarea")({
+const StyledTextarea = styled("textarea", domProps)({
   ...commonTextareaStyle,
 });
 

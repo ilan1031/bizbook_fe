@@ -46,6 +46,7 @@ import RemoveIcon from "@mui/icons-material/Remove";
 import LanguageIcon from "@mui/icons-material/Language";
 import FacebookIcon from "@mui/icons-material/Facebook";
 import PaymentTermsConfig from "./configurePaymentTerms/PaymentTermsConfig";
+import { domProps } from "../../../services/styledDom";
 
 // Common styles
 const commonStyles = {
@@ -92,7 +93,7 @@ const StyledSelect = styled(Select)({
     boxShadow: `0 0 0 0.2rem rgba(97, 160, 255, 0.3)`,
   },
 });
-const StyledTextField = styled("input")(({ error }) => ({
+const StyledTextField = styled("input", domProps)(({ error }) => ({
   height: "35px",
   width: "100%",
   padding: "6px 12px",

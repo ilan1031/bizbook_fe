@@ -43,6 +43,7 @@ import KeyboardArrowRightIcon from "@mui/icons-material/KeyboardArrowRight";
 import { useSnackbar } from "../../../../components/SnackbarProvider";
 import { useRouter } from "next/navigation";
 import { useSearchParams } from "next/navigation";
+import { domProps } from "../../../../services/styledDom";
 // TabPanel component for handling tab content
 function TabPanel(props) {
   const { children, value, index, ...other } = props;
@@ -201,7 +202,7 @@ const VendorForm = () => {
     },
   });
 
-  const StyledTextField = styled("input")(({ error }) => ({
+  const StyledTextField = styled("input", domProps)(({ error }) => ({
     height: "35px",
     width: "100%",
     padding: "6px 12px",

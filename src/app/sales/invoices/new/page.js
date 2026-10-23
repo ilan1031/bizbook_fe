@@ -70,6 +70,7 @@ import GSTIn from "../../../common/gstIN/TaxInformationManager";
 import EmailCommunications from "../../../common/emailcommunication/EmailCommunications";
 import AddressDropdown from "../../../common/ship_bill_address/AddressManagement";
 import BillingAddress from "../../../common/BillingAddressForm";
+import { domProps } from "../../../../services/styledDom";
 
 const validationSchema = Yup.object({
   customer_id: Yup.string().required("Customer is required"),
@@ -1003,7 +1004,7 @@ const InvoiceCreationPage = () => {
     },
   };
 
-  const StyledTextField = styled("input")(({ error }) => ({
+  const StyledTextField = styled("input", domProps)(({ error }) => ({
     height: "35px",
     width: "100%",
     padding: "6px 12px",
