@@ -1234,7 +1234,7 @@ const EditPurchaseOrderForm = () => {
                   </Box>
 
                   {/* Items Section */}
-                  <Box fullWidth sx={{ mt: 0, width: "100%" }}>
+                  <Box sx={{ mt: 0, width: "100%" }}>
                     <Invoice
                       formik={formik}
                       initialItems={initialValues.items}

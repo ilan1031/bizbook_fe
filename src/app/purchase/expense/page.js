@@ -379,7 +379,7 @@ function Expenses() {
       }
     } catch (error) {
       console.error("Failed to fetch expense data:", error);
-      setError(error);
+      setError(error?.message || "Something went wrong. Please try again.");
     } finally {
       setLoading(false);
     }

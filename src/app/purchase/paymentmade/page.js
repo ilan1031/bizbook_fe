@@ -364,7 +364,7 @@ function PaymentMade() {
       setHasMore(response.data.pagination.hasNextPage);
       setPurchaseOrderList(data);
     } catch (error) {
-      setError(error);
+      setError(error?.message || "Something went wrong. Please try again.");
     } finally {
       setLoading(false);
     }

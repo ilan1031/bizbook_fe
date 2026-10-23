@@ -5,7 +5,7 @@ import { Box, Typography, Button, Paper } from '@mui/material';
 import { styled } from '@mui/material/styles';
 
 
-const LicenseButton = styled(Button)(({ theme, highlighted = false }) => ({
+const LicenseButton = styled(Button, { shouldForwardProp: (prop) => prop !== "highlighted" })(({ theme, highlighted = false }) => ({
   width: '180px',
   height: '50px',
   margin: '0 8px',

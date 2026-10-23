@@ -2115,13 +2115,12 @@ export default function InvoiceItemTable({formik}) {
     return `${selected.name || selected.label} [${selected.rate}%]`;
   };
   useEffect(() => {
-    if (tdsSelectRef.current) {
-      setTimeout(() => {
-        setIsTdsTruncated(
-          tdsSelectRef.current.scrollWidth > tdsSelectRef.current.clientWidth
-        );
-      }, 50); // Wait for DOM update
-    }
+    // Wait for the DOM update; the select may be gone by then.
+    const timer = setTimeout(() => {
+      const el = tdsSelectRef.current;
+      if (el) setIsTdsTruncated(el.scrollWidth > el.clientWidth);
+    }, 50);
+    return () => clearTimeout(timer);
   }, [formik.values.tds_option, formik.values.tax_type]);
 
   return (

@@ -2459,7 +2459,6 @@ const CustomerAdvance = () => {
         {/* Action Buttons */}
         <Paper
           elevation={2}
-          fullWidth
           sx={{
             display: "flex",
             alignItems: "center",

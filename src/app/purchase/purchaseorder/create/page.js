@@ -1396,7 +1396,7 @@ const PurchaseOrderForm = () => {
                     </Box>
 
                     {/* Items Section */}
-                    <Box fullWidth sx={{ mt: 0, width: "80%" }}>
+                    <Box sx={{ mt: 0, width: "80%" }}>
                       <Invoice formik={formik} />
 
                       {formik.touched.items && formik.errors.items && (

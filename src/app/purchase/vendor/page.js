@@ -362,7 +362,7 @@ const Vendor = () => {
       }
     } catch (error) {
       console.error("Failed to fetch vendor list:", error);
-      setError(error);
+      setError(error?.message || "Something went wrong. Please try again.");
       showMessage("Failed to load vendors. Please try again.", "error");
       setVendorList([]);
     } finally {

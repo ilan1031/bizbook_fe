@@ -394,7 +394,7 @@ const AccountsList = () => {
       setHasMore(response.data.pagination?.hasNextPage || false);
     } catch (error) {
       console.error("Error fetching accounts:", error);
-      setError(error);
+      setError(error?.message || "Something went wrong. Please try again.");
     } finally {
       setLoading(false);
     }
