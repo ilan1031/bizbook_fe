@@ -1197,10 +1197,6 @@ const fetchDataFixed = async () => {
           e.preventDefault();
           formik.handleSubmit(e);
         }}
-        sx={{
-          overflowY: "auto",
-          backgroundColor: "#f6f6f6",
-        }}
       >
         <Box
           sx={{
@@ -1346,6 +1342,7 @@ const fetchDataFixed = async () => {
                       >
                         {customerData?.billing_address ? (
                           <Typography
+                            component="div"
                             variant="body2"
                             sx={{
                               fontSize: "13px",
@@ -1459,6 +1456,7 @@ const fetchDataFixed = async () => {
                       >
                         {customerData?.shipping_address ? (
                           <Typography
+                            component="div"
                             variant="body2"
                             sx={{
                               fontSize: "13px",

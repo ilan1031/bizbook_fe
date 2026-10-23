@@ -968,6 +968,7 @@ const MyClientOnlyComponent = () => {
               <>
                 <Box sx={{ display: "flex", alignItems: "center", mb: 2 }}>
                   <Typography
+                    component="div"
                     sx={{ width: "160px", fontSize: "13px", color: "#d62134" }}
                   >
                     <Box sx={{ width: "140px" }}>Calculate mileage using*</Box>
@@ -1272,6 +1273,7 @@ const MyClientOnlyComponent = () => {
                   }}
                 >
                   <Typography
+                    component="div"
                     sx={{
                       display: "flex",
                       alignItems: "center",
@@ -2340,6 +2342,7 @@ const MyClientOnlyComponent = () => {
                   Reporting Tags
                 </Typography>
                 <Typography
+                  component="div"
                   sx={{
                     fontSize: "14px",
                     Color: "#408dfb",

@@ -725,9 +725,9 @@ const SalesView = ({ data, organizationData, callViewAPI, loading }) => {
                 Status
               </Typography>
               <Box sx={{ borderLeft: "3px solid orange", mt: 1, pl: 2 }}>
-                <Table>
-                  <TableHead sx={{ display: "flex" }}>
-                    <TableRow
+                <Table component="div">
+                  <TableHead component="div" sx={{ display: "flex" }}>
+                    <TableRow component="div"
                       sx={{
                         width: "100px",
                         fontSize: "13px",
@@ -739,7 +739,7 @@ const SalesView = ({ data, organizationData, callViewAPI, loading }) => {
                         Order
                       </Typography>
                     </TableRow>
-                    <TableRow
+                    <TableRow component="div"
                       sx={{
                         fontSize: "12px",
                         fontWeight: "500",
@@ -753,8 +753,8 @@ const SalesView = ({ data, organizationData, callViewAPI, loading }) => {
                       {data?.order_status_formatted}
                     </TableRow>
                   </TableHead>
-                  <TableBody sx={{ display: "flex" }}>
-                    <TableRow
+                  <TableBody component="div" sx={{ display: "flex" }}>
+                    <TableRow component="div"
                       sx={{
                         width: "100px",
                         fontSize: "13px",
@@ -766,7 +766,7 @@ const SalesView = ({ data, organizationData, callViewAPI, loading }) => {
                         Invoice
                       </Typography>
                     </TableRow>
-                    <TableRow
+                    <TableRow component="div"
                       sx={{
                         width: "100px",
                         fontSize: "13px",
@@ -778,8 +778,8 @@ const SalesView = ({ data, organizationData, callViewAPI, loading }) => {
                       {data?.invoiced_status_formatted}
                     </TableRow>
                   </TableBody>
-                  <TableBody sx={{ display: "flex" }}>
-                    <TableRow
+                  <TableBody component="div" sx={{ display: "flex" }}>
+                    <TableRow component="div"
                       sx={{
                         width: "100px",
                         fontSize: "13px",
@@ -791,7 +791,7 @@ const SalesView = ({ data, organizationData, callViewAPI, loading }) => {
                         Payment
                       </Typography>
                     </TableRow>
-                    <TableRow
+                    <TableRow component="div"
                       sx={{
                         width: "100px",
                         fontSize: "13px",
@@ -803,8 +803,8 @@ const SalesView = ({ data, organizationData, callViewAPI, loading }) => {
                       {data?.paid_status_formatted}
                     </TableRow>
                   </TableBody>
-                  <TableBody sx={{ display: "flex" }}>
-                    <TableRow
+                  <TableBody component="div" sx={{ display: "flex" }}>
+                    <TableRow component="div"
                       sx={{
                         width: "100px",
                         fontSize: "13px",
@@ -817,7 +817,7 @@ const SalesView = ({ data, organizationData, callViewAPI, loading }) => {
                         Shipment
                       </Typography>
                     </TableRow>
-                    <TableRow
+                    <TableRow component="div"
                       sx={{
                         width: "100px",
                         fontSize: "13px",
@@ -835,9 +835,9 @@ const SalesView = ({ data, organizationData, callViewAPI, loading }) => {
           )}
 
           <Box sx={{ mt: 4, ml: 7, fontSize: "12px" }}>
-            <Table>
-              <TableHead sx={{ display: "flex" }}>
-                <TableRow
+            <Table component="div">
+              <TableHead component="div" sx={{ display: "flex" }}>
+                <TableRow component="div"
                   sx={{
                     width: "150px",
                     fontSize: "13px",
@@ -855,7 +855,7 @@ const SalesView = ({ data, organizationData, callViewAPI, loading }) => {
                     Reference#
                   </Typography>
                 </TableRow>
-                <TableRow
+                <TableRow component="div"
                   sx={{
                     width: "150px",
                     fontSize: "13px",
@@ -866,8 +866,8 @@ const SalesView = ({ data, organizationData, callViewAPI, loading }) => {
                   {data?.reference_number || "-"}
                 </TableRow>
               </TableHead>
-              <TableBody sx={{ display: "flex" }}>
-                <TableRow
+              <TableBody component="div" sx={{ display: "flex" }}>
+                <TableRow component="div"
                   sx={{
                     width: "150px",
                     fontSize: "13px",
@@ -885,7 +885,7 @@ const SalesView = ({ data, organizationData, callViewAPI, loading }) => {
                     Order Date
                   </Typography>
                 </TableRow>
-                <TableRow
+                <TableRow component="div"
                   sx={{
                     width: "150px",
                     fontSize: "13px",
@@ -896,8 +896,8 @@ const SalesView = ({ data, organizationData, callViewAPI, loading }) => {
                   {data?.date_formatted}
                 </TableRow>
               </TableBody>
-              <TableBody sx={{ display: "flex" }}>
-                <TableRow
+              <TableBody component="div" sx={{ display: "flex" }}>
+                <TableRow component="div"
                   sx={{
                     width: "150px",
                     fontSize: "13px",
@@ -915,7 +915,7 @@ const SalesView = ({ data, organizationData, callViewAPI, loading }) => {
                     Expected Shipment Date
                   </Typography>
                 </TableRow>
-                <TableRow
+                <TableRow component="div"
                   sx={{
                     width: "150px",
                     fontSize: "13px",
@@ -926,8 +926,8 @@ const SalesView = ({ data, organizationData, callViewAPI, loading }) => {
                   {data?.shipment_date_formatted}
                 </TableRow>
               </TableBody>
-              <TableBody sx={{ display: "flex" }}>
-                <TableRow
+              <TableBody component="div" sx={{ display: "flex" }}>
+                <TableRow component="div"
                   sx={{
                     width: "150px",
                     fontSize: "13px",
@@ -945,7 +945,7 @@ const SalesView = ({ data, organizationData, callViewAPI, loading }) => {
                     Payment Terms
                   </Typography>
                 </TableRow>
-                <TableRow
+                <TableRow component="div"
                   sx={{
                     width: "150px",
                     fontSize: "13px",
@@ -956,8 +956,8 @@ const SalesView = ({ data, organizationData, callViewAPI, loading }) => {
                   {data?.payment_terms_label}
                 </TableRow>
               </TableBody>
-              <TableBody sx={{ display: "flex" }}>
-                <TableRow
+              <TableBody component="div" sx={{ display: "flex" }}>
+                <TableRow component="div"
                   sx={{
                     width: "150px",
                     fontSize: "13px",
@@ -975,7 +975,7 @@ const SalesView = ({ data, organizationData, callViewAPI, loading }) => {
                     Delivery Method
                   </Typography>
                 </TableRow>
-                <TableRow
+                <TableRow component="div"
                   sx={{
                     width: "150px",
                     fontSize: "13px",
@@ -986,8 +986,8 @@ const SalesView = ({ data, organizationData, callViewAPI, loading }) => {
                   {data?.invoiced_status_formatted}
                 </TableRow>
               </TableBody>
-              <TableBody sx={{ display: "flex" }}>
-                <TableRow
+              <TableBody component="div" sx={{ display: "flex" }}>
+                <TableRow component="div"
                   sx={{
                     width: "150px",
                     fontSize: "13px",
@@ -1005,7 +1005,7 @@ const SalesView = ({ data, organizationData, callViewAPI, loading }) => {
                     Salesperson
                   </Typography>
                 </TableRow>
-                <TableRow
+                <TableRow component="div"
                   sx={{
                     width: "150px",
                     fontSize: "13px",
@@ -1213,7 +1213,7 @@ const SalesView = ({ data, organizationData, callViewAPI, loading }) => {
           </TableHead>
           <TableBody>
             {data?.line_items?.map((row, index) => (
-              <>
+              <React.Fragment key={index}>
                 <TableRow>
                   <TableCell>{index + 1}</TableCell>
                   <TableCell>
@@ -1266,7 +1266,7 @@ const SalesView = ({ data, organizationData, callViewAPI, loading }) => {
                     {/* {row?.item_total} */}
                   </TableCell>
                 </TableRow>
-              </>
+              </React.Fragment>
             ))}
           </TableBody>
         </Table>
@@ -1374,16 +1374,16 @@ const SalesView = ({ data, organizationData, callViewAPI, loading }) => {
           <Typography variant="subtitle2" sx={{ pb: 1 }}>
             More Information
           </Typography>
-          <Table>
-            <TableHead sx={{ display: "flex" }}>
-              <TableRow>
+          <Table component="div">
+            <TableHead component="div" sx={{ display: "flex" }}>
+              <TableRow component="div">
                 <Typography
                   sx={{ fontSize: "13px", color: "#555555", width: "100px" }}
                 >
                   Salesperson:
                 </Typography>
               </TableRow>
-              <TableRow>
+              <TableRow component="div">
                 <Typography sx={{ fontSize: "14px" }}>
                   {data?.salesperson_name}
                 </Typography>
@@ -2318,8 +2318,8 @@ const SalesView = ({ data, organizationData, callViewAPI, loading }) => {
                       </TableRow>
                     </TableHead>
                     <TableBody>
-                      {data?.invoices?.map((row) => (
-                        <>
+                      {data?.invoices?.map((row, idx) => (
+                        <React.Fragment key={idx}>
                           <TableRow sx={{ height: 20 }}>
                             <TableCell
                               align="left"
@@ -2492,7 +2492,7 @@ const SalesView = ({ data, organizationData, callViewAPI, loading }) => {
                               </Popover>
                             </TableCell> */}
                           </TableRow>
-                        </>
+                        </React.Fragment>
                       ))}
                     </TableBody>
                   </Table>

@@ -1192,6 +1192,7 @@ const ExpenseViewComponent = () => {
                   Distance
                 </Typography>
                 <Typography
+                  component="div"
                   sx={{
                     color: "#000000",
                     fontSize: "13px",

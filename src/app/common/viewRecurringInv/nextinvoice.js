@@ -574,7 +574,7 @@ const TaxInvoiceTemplate = ({ details, callBack, loading }) => {
                 </TableRow>
                 <TableRow>
                   <SummaryCell sx={{ textAlign: "right" }}>
-                    <Typography sx={{ fontSize: "12px", fontWeight: "bold" }}>
+                    <Typography component="div" sx={{ fontSize: "12px", fontWeight: "bold" }}>
                       <Typography
                         sx={{
                           fontSize: "10.6667px",
@@ -586,7 +586,7 @@ const TaxInvoiceTemplate = ({ details, callBack, loading }) => {
                     </Typography>
                   </SummaryCell>
                   <SummaryCell align="right">
-                    <Typography sx={{ fontSize: "12px", fontWeight: "bold" }}>
+                    <Typography component="div" sx={{ fontSize: "12px", fontWeight: "bold" }}>
                       <Typography
                         sx={{
                           fontSize: "10.6667px",
@@ -600,7 +600,7 @@ const TaxInvoiceTemplate = ({ details, callBack, loading }) => {
                 </TableRow>
                 <TableRow>
                   <SummaryCell sx={{ textAlign: "right" }}>
-                    <Typography sx={{ fontSize: "14px", fontWeight: "bold" }}>
+                    <Typography component="div" sx={{ fontSize: "14px", fontWeight: "bold" }}>
                       <Typography
                         sx={{
                           fontSize: "10.6667px",
@@ -612,7 +612,7 @@ const TaxInvoiceTemplate = ({ details, callBack, loading }) => {
                     </Typography>
                   </SummaryCell>
                   <SummaryCell align="right">
-                    <Typography sx={{ fontSize: "14px", fontWeight: "bold" }}>
+                    <Typography component="div" sx={{ fontSize: "14px", fontWeight: "bold" }}>
                       <Typography
                         sx={{
                           fontSize: "10.6667px",

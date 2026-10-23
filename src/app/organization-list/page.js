@@ -176,6 +176,7 @@ const OrganizationPage = () => {
             mb={3}
           >
             <Typography
+              component="div"
               variant="body1"
               fontWeight={600}
               mb={2}
@@ -213,7 +214,7 @@ const OrganizationPage = () => {
                 {orgData.length &&
                   orgData.map((data, index) => {
                     return (
-                      <>
+                      <React.Fragment key={index}>
                         <Paper
                           elevation={0}
                           sx={{
@@ -351,7 +352,7 @@ const OrganizationPage = () => {
                             </Grid>
                           </Grid>
                         </Paper>
-                      </>
+                      </React.Fragment>
                     );
                   })}
               </>

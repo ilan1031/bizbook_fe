@@ -218,8 +218,8 @@ const DeliveryChallanViewComponent = ({ data, callViewAPI , organizationData }) 
                       </TableRow>
                     </TableHead>
                     <TableBody>
-                      {data?.invoices?.map((row) => (
-                        <>
+                      {data?.invoices?.map((row, idx) => (
+                        <React.Fragment key={idx}>
                           <TableRow sx={{ height: 20 }}>
                             <TableCell
                               align="left"
@@ -269,7 +269,7 @@ const DeliveryChallanViewComponent = ({ data, callViewAPI , organizationData }) 
                               {row?.balance_formatted}
                             </TableCell>
                           </TableRow>
-                        </>
+                        </React.Fragment>
                       ))}
                     </TableBody>
                   </Table>
@@ -947,7 +947,7 @@ const DeliveryChallanViewComponent = ({ data, callViewAPI , organizationData }) 
           </TableHead>
           <TableBody>
             {data?.line_items?.map((row, index) => (
-              <>
+              <React.Fragment key={index}>
                 <TableRow>
                   <TableCell>{index + 1}</TableCell>
                   <TableCell>
@@ -1002,7 +1002,7 @@ const DeliveryChallanViewComponent = ({ data, callViewAPI , organizationData }) 
                     {/* {row?.item_total} */}
                   </TableCell>
                 </TableRow>
-              </>
+              </React.Fragment>
             ))}
           </TableBody>
         </Table>

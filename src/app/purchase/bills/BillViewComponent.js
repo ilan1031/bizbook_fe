@@ -2022,7 +2022,7 @@ const BillManagementApp = ({ journalId }) => {
           }}
         >
           <InfoOutlinedIcon sx={{ color: "#5C6BC0", mr: 1 }} />
-          <Typography variant="body2" sx={{ display: "flex" }}>
+          <Typography component="div" variant="body2" sx={{ display: "flex" }}>
             <Typography sx={{ fontWeight: "600", fontSize: "12px", pr: 1 }}>
               WHAT&apos;S NEXT?
             </Typography>
@@ -2159,9 +2159,9 @@ const BillManagementApp = ({ journalId }) => {
                       </TableRow>
                     </TableHead>
                     {billDetail.purchase_orders.length &&
-                      billDetail.purchase_orders.map((data) => {
+                      billDetail.purchase_orders.map((data, idx) => {
                         return (
-                          <>
+                          <React.Fragment key={idx}>
                             <TableBody>
                               <TableRow sx={{ height: 30 }}>
                                 <TableCell
@@ -2264,7 +2264,7 @@ const BillManagementApp = ({ journalId }) => {
                        </TableCell> */}
                               </TableRow>
                             </TableBody>
-                          </>
+                          </React.Fragment>
                         );
                       })}
                   </Table>

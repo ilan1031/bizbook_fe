@@ -992,7 +992,7 @@ const CustomerForm = () => {
             {/* Remarks Tab */}
             <TabPanel value={tabValue} index={5}>
               <Grid>
-                <Typography sx={{ display: "flex", fontSize: "13px" }}>
+                <Typography component="div" sx={{ display: "flex", fontSize: "13px" }}>
                   <Typography sx={{ fontWeight: 550, fontSize: "13px", mr: 1 }}>
                     Remarks
                   </Typography>

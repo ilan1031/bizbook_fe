@@ -1640,7 +1640,6 @@ const Transactions = ({ customerId, moduleKey }) => {
                           <TableCell>{bill.status_type}</TableCell>
                           <TableCell>{bill.total}</TableCell>
                         </TableRow>
-                        {billsDetail.length > 1 && <Divider />}
                       </TableBody>
                     ))}
                   </Table>
@@ -1811,7 +1810,6 @@ const Transactions = ({ customerId, moduleKey }) => {
                           <TableCell>{bill.status_type}</TableCell>
                           <TableCell>{bill.total}</TableCell>
                         </TableRow>
-                        {purchaseOrderDetail.length > 1 && <Divider />}
                       </TableBody>
                     ))}
                   </Table>

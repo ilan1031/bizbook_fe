@@ -1314,8 +1314,8 @@ const InvoiceView = ({
                       </TableRow>
                     </TableHead>
                     <TableBody>
-                      {data?.payments?.map((row) => (
-                        <>
+                      {data?.payments?.map((row, idx) => (
+                        <React.Fragment key={idx}>
                           <TableRow sx={{ height: 20 }}>
                             <TableCell
                               align="left"
@@ -1377,7 +1377,7 @@ const InvoiceView = ({
                           </Box>
                         </TableCell> */}
                           </TableRow>
-                        </>
+                        </React.Fragment>
                       ))}
                     </TableBody>
                   </Table>
@@ -1480,8 +1480,8 @@ const InvoiceView = ({
                       </TableRow>
                     </TableHead>
                     <TableBody>
-                      {data?.salesorders?.map((row) => (
-                        <>
+                      {data?.salesorders?.map((row, idx) => (
+                        <React.Fragment key={idx}>
                           <TableRow sx={{ height: 20 }}>
                             {/* Reduced row height */}
                             <TableCell
@@ -1510,7 +1510,7 @@ const InvoiceView = ({
                               {row?.shipment_date_formatted}
                             </TableCell>
                           </TableRow>
-                        </>
+                        </React.Fragment>
                       ))}
                     </TableBody>
                   </Table>

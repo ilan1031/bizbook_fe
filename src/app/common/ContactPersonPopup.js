@@ -208,7 +208,7 @@ const ContactPersonPopup = ({
             <CloseIcon className="close-icon" fill="#fe4242" />
           </IconButton>
         </DialogTitle>
-        <form onSubmit={formik.handleSubmit} sx={{ fontSize: "13px" }}>
+        <form onSubmit={formik.handleSubmit}>
           <DialogContent sx={{ pt: 3 }}>
             {openAlert && formik.errors.general && (
               <Alert

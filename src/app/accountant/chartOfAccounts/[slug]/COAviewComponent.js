@@ -750,6 +750,7 @@ const COAviewComponent = () => {
           }}
         >
           <Typography
+            component="div"
             sx={{
               fontWeight: "600",
               fontSize: "24px",

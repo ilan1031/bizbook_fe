@@ -816,10 +816,6 @@ const DeliveryChallanCreationPage = () => {
           e.preventDefault();
           formik.handleSubmit(e);
         }}
-        sx={{
-          overflowY: "auto",
-          backgroundColor: "#f6f6f6",
-        }}
       >
         <Box
           sx={{
@@ -965,6 +961,7 @@ const DeliveryChallanCreationPage = () => {
                       >
                         {customerData?.billing_address ? (
                           <Typography
+                            component="div"
                             variant="body2"
                             sx={{
                               fontSize: "13px",
@@ -1078,6 +1075,7 @@ const DeliveryChallanCreationPage = () => {
                       >
                         {customerData?.shipping_address ? (
                           <Typography
+                            component="div"
                             variant="body2"
                             sx={{
                               fontSize: "13px",

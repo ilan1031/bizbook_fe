@@ -135,11 +135,11 @@ const StyledTextField = styled("input")(({ error }) => ({
 
   /* Add these lines directly to the component styling */
   "&::-webkit-inner-spin-button, &::-webkit-outer-spin-button": {
-    "-webkit-appearance": "none",
+    WebkitAppearance: "none",
     margin: 0,
   },
   /* For Firefox */
-  "-moz-appearance": "textfield",
+  MozAppearance: "textfield",
 }));
 const formLabelStyle = {
   fontSize: "13px",
@@ -2117,7 +2117,7 @@ const CreateInvoicePayment = () => {
                             /* Remove spinner arrows */
                             "&::-webkit-inner-spin-button, &::-webkit-outer-spin-button":
                               {
-                                "-webkit-appearance": "none !important",
+                                WebkitAppearance: "none !important",
                                 margin: 0,
                               },
                           },

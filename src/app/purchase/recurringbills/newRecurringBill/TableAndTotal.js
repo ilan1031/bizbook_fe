@@ -1709,10 +1709,10 @@ const StyledTextField = styled("input")(({ error }) => ({
     opacity: 1,
   },
   "&::-webkit-inner-spin-button, &::-webkit-outer-spin-button": {
-    "-webkit-appearance": "none",
+    WebkitAppearance: "none",
     margin: 0,
   },
-  "-moz-appearance": "textfield",
+  MozAppearance: "textfield",
 }));
 
 const TableAndTotal = ({ formik }) => {
@@ -2816,10 +2816,10 @@ const TableAndTotal = ({ formik }) => {
                       },
                       "&::-webkit-inner-spin-button, &::-webkit-outer-spin-button":
                         {
-                          "-webkit-appearance": "none",
+                          WebkitAppearance: "none",
                           margin: 0,
                         },
-                      "-moz-appearance": "textfield",
+                      MozAppearance: "textfield",
                     },
                   }}
                   InputProps={{

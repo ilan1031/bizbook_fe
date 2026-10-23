@@ -1107,8 +1107,8 @@ const QuoteView = () => {
                           </TableRow>
                         </TableHead>
                         <TableBody>
-                          {quoteData?.invoices?.map((row) => (
-                            <>
+                          {quoteData?.invoices?.map((row, idx) => (
+                            <React.Fragment key={idx}>
                               <TableRow sx={{ height: 20 }}>
                                 <TableCell
                                   align="left"
@@ -1142,7 +1142,7 @@ const QuoteView = () => {
                                   {row?.status_formatted}
                                 </TableCell>
                               </TableRow>
-                            </>
+                            </React.Fragment>
                           ))}
                         </TableBody>
                       </Table>

@@ -324,7 +324,7 @@ const BillDetails = ({ formik, paymentTerms,billNumber }) => {
         </Typography>
         <StyledTextField
           name="bill_number"
-          value={billNumber}
+          value={billNumber ?? ""}
           onChange={formik.handleChange}
           disabled
           onBlur={formik.handleBlur}

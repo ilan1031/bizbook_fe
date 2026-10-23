@@ -87,7 +87,7 @@ const WelcomeScreen = () => {
           <Box sx={{ display: "flex", alignItems: "center" }}>
             <Box sx={{ mr: 1 }}>
               <img
-                src="/Bizbooks-icon.png"
+                src="/books-logo.jpg"
                 alt="Bizbooks"
                 width="24"
                 height="24"
@@ -147,14 +147,6 @@ const WelcomeScreen = () => {
               <Typography variant="h6" sx={{ fontWeight: 600 }}>
                 OVER 5 MILLION BUSINESSES TRUST Bizbooks
               </Typography>
-              <Box>
-                <img
-                  src="/biz-trust-badge.png"
-                  alt="Trusted"
-                  width="80"
-                  height="40"
-                />
-              </Box>
             </Box>
             <Box sx={{ display: "flex", alignItems: "center", mb: 3 }}>
               <FormControlLabel

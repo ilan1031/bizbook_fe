@@ -1160,6 +1160,7 @@ const Overview = ({ details, callAPI, moduleKey }) => {
               {details?.billing_address ? (
                 <>
                   <Typography
+                    component="div"
                     variant="body2"
                     sx={{ fontSize: "13px", color: "#363636", lineHeight: 1.5 }}
                   >
@@ -1271,6 +1272,7 @@ const Overview = ({ details, callAPI, moduleKey }) => {
               {details?.shipping_address ? (
                 <>
                   <Typography
+                    component="div"
                     variant="body2"
                     sx={{ fontSize: "13px", color: "#363636", lineHeight: 1.5 }}
                   >
@@ -1385,8 +1387,9 @@ const Overview = ({ details, callAPI, moduleKey }) => {
                   >
                     {details?.additional_address?.map((addAddress, idx) => {
                       return (
-                        <>
+                        <React.Fragment key={idx}>
                           <Typography
+                            component="div"
                             key={idx}
                             variant="body2"
                             sx={{
@@ -1480,7 +1483,7 @@ const Overview = ({ details, callAPI, moduleKey }) => {
                               contactId={details?.contact_id}
                             />
                           </Popover>
-                        </>
+                        </React.Fragment>
                       );
                     })}
                   </Box>

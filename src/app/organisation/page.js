@@ -147,16 +147,23 @@ export default function ZohoSignupPage() {
               </Typography>
               <Box sx={{ display: "flex", alignItems: "center" }}>
                 <Box
-                  component="img"
-                  src="/api/placeholder/60/60"
-                  alt="Profile"
+                  aria-hidden
                   sx={{
                     width: 60,
                     height: 60,
                     borderRadius: "50%",
                     mr: 2,
+                    bgcolor: "rgba(255,255,255,0.2)",
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    fontWeight: 700,
+                    fontSize: 20,
+                    flexShrink: 0,
                   }}
-                />
+                >
+                  NV
+                </Box>
                 <Box>
                   <Typography variant="subtitle1" fontWeight="bold">
                     Naveedh V.V

@@ -1909,7 +1909,7 @@ const BillManagementApp = () => {
                   marginTop: "-4px",
                 }}
               />
-              <Typography variant="body2" sx={{ display: "flex" }}>
+              <Typography component="div" variant="body2" sx={{ display: "flex" }}>
                 <Typography variant="body2" sx={{ fontSize: "12px" }}>
                   <span style={{ fontWeight: "600" }}>WHAT`S NEXT? </span>
                   {getWhatsNext()}
@@ -2099,9 +2099,9 @@ const BillManagementApp = () => {
                         </TableRow>
                       </TableHead>
                       {purchaseOrder.bills.length &&
-                        purchaseOrder.bills.map((data) => {
+                        purchaseOrder.bills.map((data, idx) => {
                           return (
-                            <>
+                            <React.Fragment key={idx}>
                               <TableBody>
                                 <TableRow sx={{ height: 30 }}>
                                   {/* Reduced row height */}
@@ -2219,7 +2219,7 @@ const BillManagementApp = () => {
                                   </TableCell> */}
                                 </TableRow>
                               </TableBody>
-                            </>
+                            </React.Fragment>
                           );
                         })}
                     </Table>

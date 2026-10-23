@@ -20,7 +20,7 @@ import {
   Paper,
 } from "@mui/material";
 import Image from "next/image";
-import InfoOutlineIcon from "@mui/icons-material/InfoOutline";
+import InfoOutlineIcon from "@mui/icons-material/InfoOutlined";
 import Footer from "../components/Footer"
 import apiService, { portalGet, savePortalSession, clearPortalSession, portalLoginPath, decodeJwt } from "../portalApi";
 

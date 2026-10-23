@@ -2220,6 +2220,7 @@ const InvoiceCreationPage = () => {
                   >
                     {customerData?.billing_address ? (
                       <Typography
+                        component="div"
                         variant="body2"
                         sx={{
                           fontSize: "13px",
@@ -2325,6 +2326,7 @@ const InvoiceCreationPage = () => {
                   >
                     {customerData?.shipping_address ? (
                       <Typography
+                        component="div"
                         variant="body2"
                         sx={{
                           fontSize: "13px",

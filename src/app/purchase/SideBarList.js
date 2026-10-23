@@ -162,6 +162,7 @@ export default function UserManagementInterface({
                         >
                           <Box>
                             <Typography
+                              component="div"
                               variant="body1"
                               sx={{
                                 fontWeight: 550,
@@ -203,6 +204,7 @@ export default function UserManagementInterface({
                               )}
                             </Typography>
                             <Typography
+                              component="div"
                               variant="body2"
                               sx={{
                                 color: "#4C526C",

@@ -76,11 +76,11 @@ const StyledTextField = styled("input")(({ error }) => ({
 
   /* Add these lines directly to the component styling */
   "&::-webkit-inner-spin-button, &::-webkit-outer-spin-button": {
-    "-webkit-appearance": "none",
+    WebkitAppearance: "none",
     margin: 0,
   },
   /* For Firefox */
-  "-moz-appearance": "textfield",
+  MozAppearance: "textfield",
 }));
 
 const commonTextareaStyle = {
@@ -1276,7 +1276,7 @@ const RecordExpense = () => {
                         /* Remove spinner arrows */
                         "&::-webkit-inner-spin-button, &::-webkit-outer-spin-button":
                           {
-                            "-webkit-appearance": "none !important",
+                            WebkitAppearance: "none !important",
                             margin: 0,
                           },
                       },
@@ -1751,6 +1751,7 @@ const RecordExpense = () => {
           <>
             <Box sx={{ display: "flex", alignItems: "center", mb: 2 }}>
               <Typography
+                component="div"
                 sx={{ width: "160px", fontSize: "13px", color: "#d62134" }}
               >
                 <Box sx={{ width: "140px" }}>Expense Type*</Box>
@@ -2656,7 +2657,7 @@ const RecordExpense = () => {
                 {/* The Amount is */}
 
                 <Box sx={{ display: "flex", alignItems: "center", my: 2 }}>
-                  <Typography sx={{ width: "160px", fontSize: "13px" }}>
+                  <Typography component="div" sx={{ width: "160px", fontSize: "13px" }}>
                     <Box sx={{ width: "140px" }}>Amount is</Box>
                   </Typography>
                   <FormControl component="fieldset">

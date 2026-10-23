@@ -1465,8 +1465,8 @@ const RecurringExpenseViewComponent = () => {
             <TableBody>
               {childExpense &&
                 childExpense.length &&
-                childExpense.map((data) => (
-                  <>
+                childExpense.map((data, idx) => (
+                  <React.Fragment key={idx}>
                     <TableRow
                       key={data._id}
                       hover
@@ -1541,7 +1541,7 @@ const RecurringExpenseViewComponent = () => {
                         {formatCurrency(data.tax_amount)}
                       </TableCell>
                     </TableRow>
-                  </>
+                  </React.Fragment>
                 ))}
             </TableBody>
           </Table>

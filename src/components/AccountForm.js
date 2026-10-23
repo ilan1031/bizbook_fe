@@ -48,10 +48,10 @@ const StyledTextField = styled("input")(({ error }) => ({
     boxShadow: `0 0 0 0.2rem rgba(97, 160, 255, 0.3)`,
   },
   "&::-webkit-inner-spin-button, &::-webkit-outer-spin-button": {
-    "-webkit-appearance": "none",
+    WebkitAppearance: "none",
     margin: 0,
   },
-  "-moz-appearance": "textfield",
+  MozAppearance: "textfield",
 }));
 
 const StyledTextArea = styled("textarea")(({ error }) => ({
