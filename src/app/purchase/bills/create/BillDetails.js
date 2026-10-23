@@ -369,7 +369,7 @@ const BillDetails = ({ formik, paymentTerms,billNumber }) => {
             const input = e.currentTarget.querySelector("input");
             if (input && input.showPicker) input.showPicker();
           }}
-          inputRef={(ref) => {
+          ref={(ref) => {
             if (ref) {
               ref.onclick = () => ref.showPicker && ref.showPicker();
             }
@@ -460,13 +460,11 @@ const BillDetails = ({ formik, paymentTerms,billNumber }) => {
               filter: formik.values.billDate ? "none" : "grayscale(100%)",
             },
           }}
-          inputProps={{
-            min: getMinDueDate(formik.values.billDate),
-            max: "2099-12-31",
-            style: {
-              color: formik.values.billDate ? "#333" : "#999",
-              backgroundColor: formik.values.billDate ? "#fff" : "#f5f5f5",
-            },
+          min={getMinDueDate(formik.values.billDate)}
+          max="2099-12-31"
+          style={{
+            color: formik.values.billDate ? "#333" : "#999",
+            backgroundColor: formik.values.billDate ? "#fff" : "#f5f5f5",
           }}
           onKeyDown={(e) => {
             e.preventDefault();

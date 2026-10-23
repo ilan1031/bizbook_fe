@@ -3245,7 +3245,7 @@ const NewRecurringBill = () => {
                     );
                     if (input && input.showPicker) input.showPicker();
                   }}
-                  inputRef={(ref) => {
+                  ref={(ref) => {
                     if (ref) {
                       ref.onclick = () => ref.showPicker && ref.showPicker();
                     }
@@ -3298,7 +3298,7 @@ const NewRecurringBill = () => {
                     );
                     if (input && input.showPicker) input.showPicker();
                   }}
-                  inputRef={(ref) => {
+                  ref={(ref) => {
                     // Trigger the picker even if clicked directly on input
                     if (ref) {
                       ref.onclick = () => ref.showPicker && ref.showPicker();

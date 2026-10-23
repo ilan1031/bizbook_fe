@@ -23,9 +23,9 @@ const FunctionKeys = ({ functionKeys }) => {
         }}
       >
         <img
-          src="https://via.placeholder.com/60x60"
-          alt="Function key icon"
-          style={{ width: "60px", height: "60px" }}
+          src="/books-logo.jpg"
+          alt="Bizbooks"
+          style={{ width: "60px", height: "60px", objectFit: "contain" }}
         />
       </div>
       <div style={{ overflowY: "auto", flex: 1 }}>
