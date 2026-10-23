@@ -68,8 +68,8 @@ export default function PrintDocumentPage() {
       </Stack>
       {state.settings?.style === "standard" && (
         <Alert severity="info" sx={{ maxWidth: 700, mx: "auto", mb: 2, "@media print": { display: "none" } }}>
-          This organisation uses the standard layout; showing the detailed layout here. Change it under Invoice &amp;
-          Quote Templates.
+          This organisation uses the standard layout; showing the detailed GST layout here. Change it under Invoice
+          &amp; Quote Templates.
         </Alert>
       )}
       <Box sx={{ boxShadow: 2, width: "fit-content", mx: "auto", "@media print": { boxShadow: "none" } }}>

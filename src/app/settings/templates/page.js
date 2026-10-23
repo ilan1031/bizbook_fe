@@ -1,7 +1,8 @@
 "use client";
 
-// Settings > Invoice & Quote Templates: what printed invoices and quotes look
-// like for this organisation, with a live preview.
+// Settings > Invoice & Quote Templates: what invoices and quotes look like
+// for this organisation (on their pages, in PDFs and when printed), with a
+// live preview. The logo and name in the header are the organisation's own.
 import React, { useEffect, useMemo, useState } from "react";
 import {
   Alert,
@@ -23,8 +24,7 @@ import apiService from "../../../services/axiosService";
 import { usePermissions } from "../../../services/PermissionProvider";
 import { useSnackbar } from "../../../components/SnackbarProvider";
 import DocumentTemplate, { SAMPLE_DOC } from "../../common/templates/DocumentTemplate";
-
-const MAX_LOGO_BYTES = 300 * 1024;
+import OrgLogoField from "../../common/OrgLogoField";
 
 export default function TemplatesPage() {
   const perms = usePermissions();
@@ -56,16 +56,6 @@ export default function TemplatesPage() {
   const set = (patch) => setTemplates((t) => ({ ...t, [kind]: { ...t[kind], ...patch } }));
   const setBank = (patch) => set({ bank: { ...s.bank, ...patch } });
   const sample = useMemo(() => SAMPLE_DOC(kind), [kind]);
-
-  const onLogo = (e) => {
-    const file = e.target.files?.[0];
-    e.target.value = "";
-    if (!file) return;
-    if (file.size > MAX_LOGO_BYTES) return showMessage?.("The logo must be under 300 KB.", "error");
-    const reader = new FileReader();
-    reader.onload = () => set({ logo: String(reader.result) });
-    reader.readAsDataURL(file);
-  };
 
   const save = async () => {
     setSaving(true);
@@ -105,7 +95,7 @@ export default function TemplatesPage() {
           Invoice & Quote Templates
         </Typography>
         <Typography fontSize={13} color="text.secondary" mb={1.5}>
-          Used when you print or save a PDF of an invoice or quote.
+          Used on invoice and quote pages, their PDFs and printouts.
         </Typography>
         <Tabs value={kind} onChange={(_, v) => setKind(v)} sx={{ mb: 2 }}>
           <Tab value="invoice" label="Invoice" />
@@ -118,8 +108,8 @@ export default function TemplatesPage() {
         )}
         <Stack spacing={1.5}>
           <TextField select size="small" label="Layout" value={s.style} onChange={(e) => set({ style: e.target.value })} disabled={!canEdit}>
-            <MenuItem value="terranova">Detailed GST layout (Terranova)</MenuItem>
-            <MenuItem value="standard">Standard (the app&apos;s built-in PDF)</MenuItem>
+            <MenuItem value="detailed">Detailed GST layout</MenuItem>
+            <MenuItem value="standard">Standard (the app&apos;s built-in layout)</MenuItem>
           </TextField>
           {text("title", "Title", { helperText: kind === "invoice" ? "e.g. TAX INVOICE or PROFORMA INVOICE" : "e.g. QUOTATION" })}
           {text("subtitle", "Subtitle", { helperText: "e.g. NOT A TAX INVOICE" })}
@@ -128,17 +118,25 @@ export default function TemplatesPage() {
             {text("accent", "Accent colour", { sx: { flex: 1 } })}
             <input type="color" value={s.accent} onChange={(e) => set({ accent: e.target.value })} disabled={!canEdit} aria-label="Pick accent colour" />
           </Stack>
-          <Stack direction="row" spacing={1} alignItems="center">
-            <Button variant="outlined" component="label" size="small" disabled={!canEdit}>
-              {s.logo ? "Change logo" : "Upload logo"}
-              <input hidden type="file" accept="image/png,image/jpeg,image/svg+xml,image/webp" onChange={onLogo} />
-            </Button>
-            {s.logo && (
-              <Button size="small" color="error" onClick={() => set({ logo: "" })} disabled={!canEdit}>
-                Remove logo
-              </Button>
-            )}
-          </Stack>
+          <Divider />
+          <Typography fontSize={13} fontWeight={600}>
+            {org.org_name || "Organisation"} logo
+          </Typography>
+          <OrgLogoField
+            organizationId={org.organization_id}
+            logo={org.logo}
+            onChange={(logo) => setOrg((o) => ({ ...o, logo }))}
+            disabled={!canEdit}
+          />
+          <Typography fontSize={11.5} color="text.secondary">
+            The organisation&apos;s logo and name head every invoice and quote. It&apos;s saved straight away.
+          </Typography>
+          {s.logo && !org.logo && canEdit && (
+            <Alert severity="info" action={<Button size="small" onClick={() => set({ logo: "" })}>Remove</Button>}>
+              Showing the logo saved on this template earlier. Upload one for the organisation, or remove it and save.
+            </Alert>
+          )}
+          <Divider />
           {text("advance_percent", "Advance payable (%)", { type: "number", inputProps: { min: 0, max: 100 } })}
           <Divider />
           {toggle("show_ship_to", "Show Ship To")}
@@ -176,7 +174,7 @@ export default function TemplatesPage() {
           Preview with sample data
         </Typography>
         {s.style === "standard" ? (
-          <Alert severity="info">The standard layout uses the app&apos;s built-in PDF on the invoice and quote pages.</Alert>
+          <Alert severity="info">The standard layout uses the app&apos;s built-in layout on the invoice and quote pages.</Alert>
         ) : (
           <Box sx={{ boxShadow: 2, width: "fit-content", mx: "auto" }}>
             <DocumentTemplate doc={sample} org={org} customer={{}} settings={s} />

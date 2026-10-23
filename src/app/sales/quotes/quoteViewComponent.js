@@ -71,6 +71,7 @@ import SettingsIcon from "@mui/icons-material/Settings";
 import Image from "next/image";
 import WarningIcon from "@mui/icons-material/Warning";
 import html2pdf from "html2pdf.js";
+import DocumentTemplate, { toTemplateDoc, useDocTemplate } from "../../common/templates/DocumentTemplate";
 import theme from "../../theme";
 
 const AddButton = styled(Button)(({ theme }) => ({
@@ -112,6 +113,10 @@ const QuotesView = ({ data, callViewAPI,organizationData }) => {
   const router = useRouter();
   const [isConvert, setIsConvert] = useState(false);
   const [showConvertWarning, setShowConvertWarning] = useState(false);
+  // The organisation's quote template, used for the preview and PDF below
+  // unless it's set to the standard layout.
+  const template = useDocTemplate("quote", data?.customer_id);
+  const useTemplate = Boolean(template.settings && template.settings.style !== "standard" && data?.quote_id);
   const generatePDF = () => {
     setIsPdfGenerating(true); // Show loading state
     setShowPDFView(true); // Ensure the PDF view container is rendered
@@ -324,7 +329,19 @@ const QuotesView = ({ data, callViewAPI,organizationData }) => {
   };
 
   // PDF View Component
-  const PDFView = () => (
+  const PDFView = () =>
+    useTemplate ? (
+      <Box sx={{ mb: 2, boxShadow: 4 }}>
+        <Box id="pdf-view-container">
+          <DocumentTemplate
+            doc={toTemplateDoc("quote", data)}
+            org={organizationData || {}}
+            customer={template.customer}
+            settings={template.settings}
+          />
+        </Box>
+      </Box>
+    ) : (
     <Paper
       elevation={4}
       id="pdf-view-container" // Add this ID to ensure the element can be queried

@@ -11,6 +11,7 @@ import {
   Container,
   MenuItem,
   Menu,
+  Tooltip,
 } from "@mui/material";
 import MoreVertIcon from "@mui/icons-material/MoreVert";
 import BusinessIcon from "@mui/icons-material/Business";
@@ -18,6 +19,7 @@ import Button from "../common/btn/Button";
 import apiService from "../../services/axiosService";
 import { useSnackbar } from "../../components/SnackbarProvider";
 import { useRouter } from "next/navigation";
+import { LOGO_ACCEPT, saveOrgLogo, uploadOrgLogo } from "../common/OrgLogoField";
 const OrganizationPage = () => {
   const [menuOpenIndex, setMenuOpenIndex] = useState(null);
   const [anchorEl, setAnchorEl] = useState(null);
@@ -44,6 +46,26 @@ const OrganizationPage = () => {
       showMessage(res.data.message, "error");
     }
     setAnchorEl(null);
+  };
+  // Logos are printed on the organisation's invoices and quotes.
+  const setLogo = (organizationId, logo) =>
+    setOrgData((list) => list.map((o) => (o.organization_id === organizationId ? { ...o, logo } : o)));
+  const onLogoFile = async (org, e) => {
+    const file = e.target.files?.[0];
+    e.target.value = "";
+    const logo = await uploadOrgLogo(org.organization_id, file, showMessage);
+    if (logo !== null) setLogo(org.organization_id, logo);
+  };
+  const handleRemoveLogo = async () => {
+    const org = orgData.find((o) => o._id === menuOpenIndex);
+    setAnchorEl(null);
+    if (!org) return;
+    try {
+      setLogo(org.organization_id, await saveOrgLogo(org.organization_id, ""));
+      showMessage("Logo removed", "success");
+    } catch (e) {
+      showMessage(e?.message || "Couldn't remove the logo.", "error");
+    }
   };
   const getOrg = async () => {
     try {
@@ -227,21 +249,32 @@ const OrganizationPage = () => {
 
                           <Grid container spacing={2} alignItems="center">
                             <Grid item>
-                              <Box
-                                sx={{
-                                  width: 60,
-                                  height: 60,
-                                  backgroundColor: "#f3f4f6",
-                                  borderRadius: 2,
-                                  display: "flex",
-                                  alignItems: "center",
-                                  justifyContent: "center",
-                                }}
-                              >
-                                <BusinessIcon
-                                  sx={{ color: "#9ca3af", fontSize: 32 }}
-                                />
-                              </Box>
+                              <Tooltip title={data.logo ? "Change logo" : "Upload logo"}>
+                                <Box
+                                  component="label"
+                                  sx={{
+                                    width: 60,
+                                    height: 60,
+                                    backgroundColor: "#f3f4f6",
+                                    borderRadius: 2,
+                                    display: "flex",
+                                    alignItems: "center",
+                                    justifyContent: "center",
+                                    cursor: "pointer",
+                                    overflow: "hidden",
+                                  }}
+                                >
+                                  {data.logo ? (
+                                    // eslint-disable-next-line @next/next/no-img-element
+                                    <img src={data.logo} alt={`${data.org_name} logo`} style={{ maxWidth: 56, maxHeight: 56 }} />
+                                  ) : (
+                                    <BusinessIcon
+                                      sx={{ color: "#9ca3af", fontSize: 32 }}
+                                    />
+                                  )}
+                                  <input hidden type="file" accept={LOGO_ACCEPT} onChange={(e) => onLogoFile(data, e)} />
+                                </Box>
+                              </Tooltip>
                             </Grid>
 
                             <Grid item xs>
@@ -309,6 +342,9 @@ const OrganizationPage = () => {
                                   <MenuItem onClick={() => handleSetDefault()}>
                                     Set as default
                                   </MenuItem>
+                                  {orgData.find((o) => o._id === menuOpenIndex)?.logo && (
+                                    <MenuItem onClick={handleRemoveLogo}>Remove logo</MenuItem>
+                                  )}
                                   {/* <MenuItem>View</MenuItem> */}
                                 </Menu>
                               </Box>

@@ -53,6 +53,7 @@ import BrowserUpdatedOutlinedIcon from "@mui/icons-material/BrowserUpdatedOutlin
 import FolderDeleteOutlinedIcon from "@mui/icons-material/FolderDeleteOutlined";
 import { useRouter } from "next/navigation";
 import html2pdf from "html2pdf.js";
+import DocumentTemplate, { toTemplateDoc, useDocTemplate } from "../../common/templates/DocumentTemplate";
 import {
   Ban,
   BookCopy,
@@ -129,6 +130,10 @@ const InvoiceView = ({
   const router = useRouter();
   const { showMessage } = useSnackbar();
   const [isZoho, setIsZoho] = useState(false);
+  // The organisation's invoice template, used for the preview and PDF below
+  // unless it's set to the standard layout.
+  const template = useDocTemplate("invoice", data?.customer_id);
+  const useTemplate = Boolean(template.settings && template.settings.style !== "standard" && data?.invoice_id);
 
   useEffect(() => {
     // Access localStorage only on client side
@@ -317,7 +322,19 @@ const InvoiceView = ({
   };
 
   // PDF View Component
-  const PDFView = () => (
+  const PDFView = () =>
+    useTemplate ? (
+      <Box sx={{ mb: 2, boxShadow: 4 }}>
+        <Box id="pdf-view-container">
+          <DocumentTemplate
+            doc={toTemplateDoc("invoice", data)}
+            org={organizationData || {}}
+            customer={template.customer}
+            settings={template.settings}
+          />
+        </Box>
+      </Box>
+    ) : (
     <Box>
       <Paper
         elevation={4}

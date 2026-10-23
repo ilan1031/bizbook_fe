@@ -1,12 +1,13 @@
 "use client";
 
-// Printable invoice / quote laid out like the Terranova proforma: header
-// with company and document details, Bill to / Ship to / Supply details,
+// Printable invoice / quote in the detailed GST layout: header with the
+// organisation's logo, name and details, Bill to / Ship to / Supply details,
 // line items with HSN and GST, an HSN-wise tax summary, totals, amount in
 // words, bank details, terms and signatory. Everything optional comes from
 // the organisation's saved template (Settings > Invoice & Quote Templates).
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { Box } from "@mui/material";
+import apiService from "../../../services/axiosService";
 import { amountInWords } from "../../../services/amountInWords";
 
 const inr = (n) =>
@@ -135,6 +136,8 @@ export default function DocumentTemplate({ doc, org = {}, customer = {}, setting
     [org.state, org.country].filter(Boolean).join(", "),
   ].filter(Boolean);
   const qtyTotal = doc.lines.reduce((s, l) => s + l.qty, 0);
+  // A logo saved on the template earlier is only used if the organisation has none.
+  const logo = org.logo || settings.logo;
   const columns = 3 - (settings.show_ship_to === false ? 1 : 0) - (settings.show_supply_details === false ? 1 : 0);
 
   return (
@@ -156,9 +159,9 @@ export default function DocumentTemplate({ doc, org = {}, customer = {}, setting
       {/* Header */}
       <Box sx={{ display: "flex", justifyContent: "space-between", gap: 3, pb: 2, borderBottom: `3px solid ${accent}` }}>
         <Box sx={{ maxWidth: "60%" }}>
-          {settings.logo && (
+          {logo && (
             // eslint-disable-next-line @next/next/no-img-element
-            <img src={settings.logo} alt="" style={{ maxHeight: 54, maxWidth: 220, marginBottom: 8 }} />
+            <img src={logo} alt="" style={{ maxHeight: 54, maxWidth: 220, marginBottom: 8 }} />
           )}
           <Box sx={{ fontWeight: 700, fontSize: 15, letterSpacing: "0.04em" }}>{(org.org_name || "").toUpperCase()}</Box>
           {settings.tagline && <Box sx={{ fontStyle: "italic", fontSize: 11 }}>{settings.tagline}</Box>}
@@ -420,6 +423,31 @@ export default function DocumentTemplate({ doc, org = {}, customer = {}, setting
       )}
     </Box>
   );
+}
+
+// The organisation's template for `kind` and the document's customer, for
+// showing a stored invoice or quote in the template. `settings` stays null
+// until loaded (or if it can't be), so callers can keep their old layout.
+export function useDocTemplate(kind, customerId) {
+  const [state, setState] = useState({ settings: null, customer: {} });
+  useEffect(() => {
+    let live = true;
+    const orgId = localStorage.getItem("organization_id");
+    Promise.allSettled([
+      apiService({ method: "GET", url: "api/v1/org/templates", params: { organization_id: orgId } }),
+      customerId ? apiService({ method: "GET", url: `api/v1/contact/${customerId}`, params: { organization_id: orgId } }) : null,
+    ]).then(([tpl, contact]) => {
+      if (!live) return;
+      setState({
+        settings: tpl.status === "fulfilled" ? tpl.value.data?.data?.[kind] || null : null,
+        customer: (contact.status === "fulfilled" && contact.value?.data?.data) || {},
+      });
+    });
+    return () => {
+      live = false;
+    };
+  }, [kind, customerId]);
+  return state;
 }
 
 // Sample document for the template editor's preview.

@@ -1,6 +1,7 @@
 "use client";
 
-// The signed-in user's own account: details, approved devices and password.
+// The signed-in user's own account: details, the current organisation's logo,
+// approved devices and password.
 import React, { useEffect, useState } from "react";
 import {
   Alert,
@@ -21,6 +22,7 @@ import {
 } from "@mui/material";
 import apiService from "../../services/axiosService";
 import { usePermissions } from "../../services/PermissionProvider";
+import OrgLogoField from "../common/OrgLogoField";
 
 const fmt = (d) => (d ? new Date(d).toLocaleString("en-IN", { dateStyle: "medium", timeStyle: "short" }) : "-");
 
@@ -47,6 +49,7 @@ export default function ProfilePage() {
   const [pw, setPw] = useState({ current_password: "", new_password: "", confirm: "" });
   const [pwMsg, setPwMsg] = useState(null);
   const [pwBusy, setPwBusy] = useState(false);
+  const [org, setOrg] = useState(null);
   const me = usePermissions()?.me;
 
   const load = async () => {
@@ -63,6 +66,12 @@ export default function ProfilePage() {
   useEffect(() => {
     // eslint-disable-next-line react-hooks/set-state-in-effect
     load();
+    const orgId = localStorage.getItem("organization_id");
+    if (orgId) {
+      apiService({ method: "GET", url: `api/v1/organization/${orgId}` })
+        .then((res) => setOrg(res.data?.data || null))
+        .catch(() => setOrg(null));
+    }
   }, []);
 
   const saveProfile = async () => {
@@ -153,6 +162,15 @@ export default function ProfilePage() {
           Member since {fmt(profile.created_at)} · Last sign-in {fmt(profile.last_login_at)}
         </Typography>
       </Section>
+
+      {org && (
+        <Section title={`${org.org_name || "Organisation"} logo`}>
+          <Typography fontSize={13} color="text.secondary" mb={1.5}>
+            Shown with the organisation&apos;s name at the top of its invoices and quotes.
+          </Typography>
+          <OrgLogoField organizationId={org.organization_id} logo={org.logo} onChange={(logo) => setOrg({ ...org, logo })} />
+        </Section>
+      )}
 
       {me && !me.is_superadmin && (
         <Section title="Usage and limits">
