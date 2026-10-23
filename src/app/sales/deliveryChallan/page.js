@@ -183,13 +183,6 @@ const menuItems = [
     border: true,
   },
   {
-    text: "Preferences",
-    icon: <Settings className="menu-icon" />,
-    hasArrow: false,
-    primary: false,
-    border: false,
-  },
-  {
     text: "Manage Custom Fields",
     icon: <ListAltIcon className="menu-icon" />,
     hasArrow: false,
@@ -199,13 +192,6 @@ const menuItems = [
   {
     text: "Refresh List",
     icon: <RefreshCcw className="menu-icon" />,
-    hasArrow: false,
-    primary: false,
-    border: false,
-  },
-  {
-    text: "Reset Column Width",
-    icon: <RotateCcw className="menu-icon" />,
     hasArrow: false,
     primary: false,
     border: false,
@@ -300,9 +286,14 @@ const DeliveryChallan = () => {
   const handleCloseSearchDialog = () => setOpenSearchDialog(false);
 
   const handleMenuItemClick = (item) => {
-    if (item === "Export Delivery Challans") {
+    if (typeof item === "string") item = menuItems.find((m) => m.text === item) || { text: item };
+    if (/^Import /.test(item.text) && item.route !== "/import-files") {
+      const type = { "Import Customers": "customers", "Import Vendors": "vendors", "Import Items": "items", "Import Quotes": "quote", "Import Bills": "bills", "Import Purchase Orders": "purchase-order" }[item.text];
+      router.push(type ? `/import-files?type=${type}&organization_id=${localStorage.getItem("organization_id")}` : "/import");
+    }
+    if ((item.text === "Export Delivery Challans" || item.text === "Export Current View")) {
       setOpen(true);
-    } else if (item === "Refresh List") {
+    } else if (item.text === "Refresh List") {
       fetchChallans(filterBy, sortColumn, sortOrder);
     }
     setMenuAnchorEl(null);

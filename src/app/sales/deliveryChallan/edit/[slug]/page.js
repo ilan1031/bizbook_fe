@@ -740,7 +740,7 @@ const DeliveryChallanCreationPage = () => {
         </Box>
         <Box>
           <div style={{ display: "flex", alignItems: "center", gap: "15px" }}>
-            <div
+            <div data-rbac-feature="tally"
               style={{
                 display: "flex",
                 alignItems: "center",
@@ -918,22 +918,7 @@ const DeliveryChallanCreationPage = () => {
 
                   {customerData?.currency_code && (
                     <Box sx={{ ml: 1 }}>
-                      <IconButton
-                        sx={{
-                          border: "1px solid #ccc",
-                          borderRadius: "4px",
-                          px: 2,
-                          fontSize: "13px",
-                          fontWeight: "600",
-                          color: "#222",
-                          backgroundColor: "#f5f5f5",
-                          cursor: "default",
-                          "&:hover": { backgroundColor: "#f5f5f5" },
-                        }}
-                        disableRipple
-                      >
-                        {customerData.currency_code.split("-")[0].trim()}
-                      </IconButton>
+                      <Box sx={{ border: "1px solid #ccc", borderRadius: "4px", px: 2, py: 0.75, fontSize: "13px", fontWeight: 600, color: "#222", backgroundColor: "#f5f5f5" }}>{customerData.currency_code.split("-")[0].trim()}</Box>
                     </Box>
                   )}
                 </Grid>
@@ -1434,12 +1419,7 @@ const DeliveryChallanCreationPage = () => {
                   InputProps={{
                     endAdornment: (
                       <InputAdornment position="end">
-                        <IconButton
-                          // onClick={handleSettingsClick}
-                          sx={{ color: "primary.main", p: 0 }}
-                        >
-                          <SettingsOutlinedIcon fontSize="small" />
-                        </IconButton>
+                        
                       </InputAdornment>
                     ),
                   }}
@@ -1758,17 +1738,7 @@ const DeliveryChallanCreationPage = () => {
                 {" "}
                 `Spreadsheet Template`{" "}
               </span>
-              <Button
-                variant="text"
-                sx={{
-                  ...formLabelBlackStyle,
-                  color: "rgb(29, 127, 207)",
-                  textTransform: "none",
-                  ml: 20,
-                }}
-              >
-                Change
-              </Button>
+              
             </Typography>
           </Grid>
         </Grid>

@@ -1975,31 +1975,10 @@ const OtherDetailsVendor = ({ formik }) => {
             </Grid>
 
             {/* Documents Field */}
-            <Grid item xs={12} sm={4}>
-              <Typography variant="body1" sx={{ fontSize: "13px" }}>
-                Documents
-              </Typography>
-            </Grid>
+            
             <Grid item xs={12} sm={8} ml={20} mt={-5}>
               <Box>
-                <Button
-                  variant="outlined"
-                  startIcon={<FileUploadIcon />}
-                  endIcon={<KeyboardArrowDownIcon />}
-                  sx={{
-                    textTransform: "none",
-                    borderColor: "#ddd",
-                    color: "#555",
-                    fontSize: "13px",
-                    height: "36px",
-                    "&:hover": {
-                      borderColor: "#bbb",
-                      bgcolor: "#f9f9f9",
-                    },
-                  }}
-                >
-                  Upload File
-                </Button>
+                
                 <Typography
                   variant="caption"
                   sx={{

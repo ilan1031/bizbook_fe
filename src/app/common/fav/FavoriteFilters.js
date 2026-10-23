@@ -180,26 +180,7 @@ const FavoriteFilters = ({ onSelect }) => {
       </Box>
 
       {/* Sticky Footer */}
-      <Box
-  sx={{
-    p: 1.5,
-    backgroundColor: "#fff",
-    position: "sticky",
-    bottom: 0,
-    borderTop: "1px solid #ddd",
-    textAlign: "center",
-    display: "flex",
-    alignItems: "center",
-    justifyContent: "center",
-    gap: 1,
-    cursor: "pointer",
-  }}
->
-  <AddCircleOutlinedIcon color="primary" fontSize="small" />
-  <Typography variant="body2" color="primary">
-    New Custom View
-  </Typography>
-</Box>
+      
     </Box>
   );
 };

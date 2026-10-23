@@ -42,6 +42,7 @@ import {
 } from "draft-js";
 import { convertFromHTML } from "draft-convert";
 import { stateToHTML } from "draft-js-export-html";
+import { imageBlockRenderer, insertImage, insertLink } from "./draftInsert";
 
 import "draft-js/dist/Draft.css";
 import { useParams, usePathname, useRouter } from "next/navigation";
@@ -555,7 +556,7 @@ const EmailComposer = () => {
           entityTypeSegment === "paymentmade"
         ) {
           // Use appropriate route for payments
-          router.push(`/purchase/payment/${uniqueId}`);
+          router.push(`/purchase/paymentmade/${uniqueId}`);
         } else if (entityTypeSegment === "quotes") {
           if (status === "draft") {
             handleStatusUpdate(uniqueId);
@@ -655,7 +656,7 @@ url =`/api/v1/estimate/status?organization_id=${organization_id}&quote_id=${id}`
       });
       const data = response.data.status;
       if (data === true) {
-        router.push(`/purchase/payment/${id}`);
+        router.push(`/purchase/paymentmade/${id}`);
       }
     } catch (error) {
       showMessage(error.message, "error");
@@ -1322,12 +1323,12 @@ url =`/api/v1/estimate/status?organization_id=${organization_id}&quote_id=${id}`
                   <Divider orientation="vertical" flexItem sx={dividerSx} />
 
                   {/** Link */}
-                  <IconButton size="small" sx={buttonSx}>
+                  <IconButton aria-label="Insert link" onClick={() => setEditorState(insertLink(editorState))} size="small" sx={buttonSx}>
                     <LinkIcon sx={iconSx} />
                   </IconButton>
 
                   {/** Image */}
-                  <IconButton size="small" sx={buttonSx}>
+                  <IconButton aria-label="Insert image" onClick={() => setEditorState(insertImage(editorState))} size="small" sx={buttonSx}>
                     <ImageOutlined sx={iconSx} />
                   </IconButton>
                 </Box>
@@ -1335,7 +1336,7 @@ url =`/api/v1/estimate/status?organization_id=${organization_id}&quote_id=${id}`
                 {/* Text editor */}
                 <Box sx={styles.editorContainer} onClick={focusEditor}>
                   <Box sx={styles.editor}>
-                    <Editor
+                    <Editor blockRendererFn={imageBlockRenderer}
                       ref={editorRef}
                       editorState={editorState}
                       onChange={setEditorState}

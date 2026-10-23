@@ -111,7 +111,7 @@ const Header = ({
           onClick={toggleMode}
         >
           <span style={{ marginLeft: "5px", fontWeight: "bold" }}>
-            {"Tally"}
+            {"Classic"}
           </span>
           {isZoho ? (
             <ToggleOffIcon style={{ color: "gray", fontSize: "18px" }} />

@@ -31,7 +31,7 @@ export default function Dropdown({
           <div style={styles.listHeader}>
             <div>{title}</div>
             <div style={{marginRight: '15px'}}>
-              <button style={styles.newButton}>{buttonText}</button>
+              
             </div>
           </div>
           

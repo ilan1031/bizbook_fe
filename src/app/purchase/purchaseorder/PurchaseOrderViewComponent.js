@@ -630,7 +630,7 @@ const BillManagementApp = () => {
 
   const handleEditClick = () => {
     // Navigate to the edit page with the purchase_id
-    router.push(`/purchase/purchaseorder/edit/${Purchase_ID}`);
+    router.push(`/purchase/purchaseorder/create?purchase_id=${Purchase_ID}`);
   };
   const handleConvert = async (PO_ID) => {
     console.log(org_id, PO_ID, "handleConvert");
@@ -2259,7 +2259,7 @@ const BillManagementApp = () => {
         </Box>
 
         <Box sx={{ display: "flex", alignItems: "center", gap: 2 }}>
-          <div
+          <div data-rbac-feature="tally"
                       style={{ display: "flex", alignItems: "center", cursor: "pointer" }}
                       onClick={toggleMode}
                     >
@@ -2653,17 +2653,13 @@ const BillManagementApp = () => {
               >
                 {purchaseOrder?.order_status !== "canceled" ? (
                   [
-                    <MenuItem key="menu-item-1" sx={menuItemStyle}>
-                      Expected Delivery Date
-                    </MenuItem>,
-                    <MenuItem key="menu-item-2" sx={menuItemStyle}>Cancel Items</MenuItem>,
                     <MenuItem key="menu-item-3"
                       sx={menuItemStyle}
                       onClick={() => handlePurchaseStatus(4)}
                     >
                       Mark as Canceled
                     </MenuItem>,
-                    <MenuItem key="menu-item-4"
+                    <MenuItem key="menu-item-4" onClick={() => router.push(`/purchase/purchaseorder/create?clone_id=${Purchase_ID}`)}
                       sx={{
                         ...menuItemStyle,
                         backgroundColor: "rgba(66, 133, 244, 0.1)",
@@ -2689,7 +2685,7 @@ const BillManagementApp = () => {
                   ]
                 ) : (
                   [
-                    <MenuItem key="menu-item-7"
+                    <MenuItem key="menu-item-7" onClick={() => router.push(`/purchase/purchaseorder/create?clone_id=${Purchase_ID}`)}
                       sx={{
                         ...menuItemStyle,
                         backgroundColor: "rgba(66, 133, 244, 0.1)",

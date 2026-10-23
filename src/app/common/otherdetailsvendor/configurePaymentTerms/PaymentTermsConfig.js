@@ -190,24 +190,7 @@ const PaymentTermsConfig = () => {
               }}
             >
               {term.isDefault ? (
-                <Button
-                  variant="contained"
-                  size="small"
-                  sx={{
-                    backgroundColor: "#4CAF50",
-                    borderRadius: "4px",
-                    textTransform: "none",
-                    fontSize: "13px",
-                    padding: "4px 10px",
-                    width: "120px",
-                    // minWidth: "80px",
-                    "&:hover": {
-                      backgroundColor: "#43A047",
-                    },
-                  }}
-                >
-                  Default
-                </Button>
+                <Box component="span" sx={{ bgcolor: "#4CAF50", color: "white", borderRadius: 1, px: 1, py: 0.25, fontSize: 12 }}>Default</Box>
               ) : (
                 <Button
                   variant="text"

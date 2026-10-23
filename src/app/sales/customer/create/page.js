@@ -563,23 +563,11 @@ const CustomerForm = () => {
             New Customer
           </Typography>
           <Typography variant="bottom">
-            <Button
-              variant="text"
-              // color="primary"
-              endIcon={<></>}
-              sx={{
-                fontSize: "12px",
-                textTransform: "none",
-                padding: "0px",
-                color: "#408DFB",
-              }}
-            >
-              Fetch Customer Details From GSTN
-            </Button>
+            
           </Typography>
         </Box>
         <Box>
-          <IconButton
+          <IconButton aria-label="Help" onClick={() => window.dispatchEvent(new Event("bizbooks:help"))}
             sx={{
               backgroundColor: "#ff9800",
               color: "white",

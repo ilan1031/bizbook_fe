@@ -67,7 +67,7 @@ const Sidebar = ({
             borderBottom: "1px solid #eee",
           }}
         >
-          <button
+          <button onClick={() => window.open("/accountant/chartOfAccounts", "_blank")}
             style={{
               backgroundColor: "#4a7ebb",
               color: "white",

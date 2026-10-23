@@ -191,13 +191,6 @@ const menuItems = [
     primary: false,
     border: true,
   },
-  {
-    text: "Preferences",
-    icon: <Settings className="menu-icon" />,
-    hasArrow: false,
-    primary: false,
-    border: false,
-  },
 ];
 
 const columns = [
@@ -269,9 +262,14 @@ const PaymentmadeHomePage = () => {
   };
 
   const handleMenuItemClick = (item) => {
-    if (item === "Refresh List") {
+    if (typeof item === "string") item = menuItems.find((m) => m.text === item) || { text: item };
+    if (/^Import /.test(item.text) && item.route !== "/import-files") {
+      const type = { "Import Customers": "customers", "Import Vendors": "vendors", "Import Items": "items", "Import Quotes": "quote", "Import Bills": "bills", "Import Purchase Orders": "purchase-order" }[item.text];
+      router.push(type ? `/import-files?type=${type}&organization_id=${localStorage.getItem("organization_id")}` : "/import");
+    }
+    if (item.text === "Refresh List") {
       getPaymentMade();
-    } else if (item === "Export Payments") {
+    } else if ((item.text === "Export Payments" || item.text === "Export Current View")) {
       setOpen(true);
     }
     setMenuAnchorEl(null);
@@ -516,50 +514,8 @@ const PaymentmadeHomePage = () => {
             )}
           </Box>
 
-          {/* New Custom View Fixed at Bottom */}
           <Divider />
-          <MenuItem
-            onClick={handleNewCustomView}
-            sx={{
-              display: "flex",
-              alignItems: "center",
-              px: 2,
-              py: 1,
-              position: "sticky",
-              bottom: 0,
-              backgroundColor: "white",
-              zIndex: 1,
-              "&:hover": {
-                backgroundColor: "#E6F1FF",
-              },
-            }}
-          >
-            <IconButton
-              size="small"
-              sx={{
-                backgroundColor: "#4285F4",
-                width: 20,
-                height: 20,
-                borderRadius: "50%",
-                marginRight: 1,
-              }}
-            >
-              <AddIcon
-                sx={{
-                  fontSize: 14,
-                  color: "white",
-                }}
-              />
-            </IconButton>
-            <Typography
-              sx={{
-                fontSize: "14px",
-                color: "#4285F4",
-              }}
-            >
-              New Custom View
-            </Typography>
-          </MenuItem>
+          
         </Menu>
 
         <Box sx={{ display: "flex", alignItems: "center", gap: 1.2 }}>
@@ -715,12 +671,7 @@ const PaymentmadeHomePage = () => {
             We&apos;ve partnered with the above Bank(s). You can now initiate
             payment directly via Biz Books.
           </Typography>
-          <button
-            style={{ border: "NONE", backgroundColor: "", color: "#4285f4" }}
-          >
-            {" "}
-            Set up Now
-          </button>
+          
         </Box>
 
         <Divider sx={{ my: 4 }} />

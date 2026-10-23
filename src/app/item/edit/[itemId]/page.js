@@ -790,7 +790,7 @@ const EditItemForm = () => {
                       Type
                     </Typography>
                     <Tooltip title="Select if this is a physical product (Goods) or a service you provide">
-                      <IconButton size="small">
+                      <IconButton aria-label="Help" onClick={() => window.dispatchEvent(new Event("bizbooks:help"))} size="small">
                         <HelpOutlineIcon fontSize="small" />
                       </IconButton>
                     </Tooltip>
@@ -1723,7 +1723,7 @@ const EditItemForm = () => {
                         }
                       />
                       <Tooltip title="Track quantity and value of this item in inventory">
-                        <IconButton size="small">
+                        <IconButton aria-label="Help" onClick={() => window.dispatchEvent(new Event("bizbooks:help"))} size="small">
                           <HelpOutlineIcon fontSize="small" />
                         </IconButton>
                       </Tooltip>

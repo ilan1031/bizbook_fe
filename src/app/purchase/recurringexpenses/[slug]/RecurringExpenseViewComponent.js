@@ -1252,7 +1252,7 @@ const RecurringExpenseViewComponent = () => {
                           }}
                           onClick={() =>
                             router.push(
-                              `/purchase/expenses/${historyItem.expense_id}`
+                              `/purchase/expense/${historyItem.expense_id}`
                             )
                           }
                         >
@@ -1353,7 +1353,7 @@ const RecurringExpenseViewComponent = () => {
                           }}
                           onClick={() =>
                             router.push(
-                              `/purchase/expenses/${recurringExpense.last_expense_id}`
+                              `/purchase/expense/${recurringExpense.last_expense_id}`
                             )
                           }
                         >

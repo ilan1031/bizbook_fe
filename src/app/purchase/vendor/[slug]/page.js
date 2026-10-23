@@ -401,22 +401,8 @@ const menuItems = [
     border: true,
   },
   {
-    text: "Preferences",
-    icon: <Settings className="menu-icon" />,
-    hasArrow: false,
-    primary: false,
-    border: true,
-  },
-  {
     text: "Refresh List",
     icon: <RefreshCcw className="menu-icon" />,
-    hasArrow: false,
-    primary: false,
-    border: false,
-  },
-  {
-    text: "Reset Column Width",
-    icon: <RotateCcw className="menu-icon" />,
     hasArrow: false,
     primary: false,
     border: false,
@@ -987,50 +973,8 @@ const Vendor = () => {
                     )}
                   </Box>
 
-                  {/* New Custom View Fixed at Bottom */}
                   <Divider />
-                  <MenuItem
-                    onClick={handleNewCustomView}
-                    sx={{
-                      display: "flex",
-                      alignItems: "center",
-                      px: 2,
-                      py: 1,
-                      position: "sticky",
-                      bottom: 0,
-                      backgroundColor: "white", // Ensure it stays on top
-                      zIndex: 1,
-                      "&:hover": {
-                        backgroundColor: "#E6F1FF",
-                      },
-                    }}
-                  >
-                    <Button
-                      size="small"
-                      sx={{
-                        backgroundColor: "primary.main",
-                        width: 15,
-                        height: 15,
-                        borderRadius: "50%",
-                        marginRight: 1,
-                      }}
-                    >
-                      <AddIcon
-                        sx={{
-                          fontSize: 10,
-                          color: "menu.text.normal",
-                        }}
-                      />
-                    </Button>
-                    <Typography
-                      sx={{
-                        fontSize: "14px",
-                        color: "primary.main",
-                      }}
-                    >
-                      New Custom View
-                    </Typography>
-                  </MenuItem>
+                  
                 </Menu>
 
                 <Box>

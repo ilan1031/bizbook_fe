@@ -43,8 +43,15 @@ import Image from "next/image";
 import { useRouter } from "next/navigation";
 import apiService from "../services/axiosService";
 import { usePermissions } from "../services/PermissionProvider";
+import {
+  AppsMenu,
+  GlobalSearch,
+  NotificationsMenu,
+  QuickCreateMenu,
+  RefreshButton,
+  SettingsMenu,
+} from "./navbar/TopBarMenus";
 const Navbar = () => {
-  const [sidebarOpen, setSidebarOpen] = useState(false);
   const [orgDropdownOpen, setOrgDropdownOpen] = useState(false);
   const [open, setOpen] = useState(false); // This is for the organization drawer
   const [profileOpen, setProfileOpen] = useState(false); // Add this new state for profile popover
@@ -99,6 +106,8 @@ const Navbar = () => {
   const switchOrg = (orgId) => {
     if (String(orgId) === String(currentOrgId)) return setOpen(false);
     localStorage.setItem("organization_id", orgId);
+    // A full reload, so every page and cache starts over in the new organisation.
+    // eslint-disable-next-line @next/next/no-location-assign-relative-destination
     window.location.assign("/home");
   };
 
@@ -129,6 +138,7 @@ const Navbar = () => {
   };
   return (
     <AppBar
+      data-rbac-ignore
       position="static"
       sx={(theme) => ({
         background: `linear-gradient(
@@ -158,32 +168,8 @@ const Navbar = () => {
         </Box>
         {/* Center - Refresh & Search */}
         <Box display="flex" alignItems="center" flex={1} ml={6}>
-          <IconButton size="small" sx={{ color: "menu.text.normal", mr: 3 }}>
-            <Update fontSize="small" />
-          </IconButton>
-          {/* Search Box */}
-          <Box
-            sx={{
-              display: "flex",
-              alignItems: "center",
-              backgroundColor: "menu.text.normal",
-              border: "1px solid menu.text.normal",
-              borderRadius: "6px",
-              px: 1,
-              width: 300,
-            }}
-          >
-            <Search fontSize="small" sx={{ color: "#94a3b8" }} />
-            <InputBase
-              placeholder="Search in Customers ( / )"
-              sx={{
-                color: "menu.text.default",
-                ml: 1,
-                fontSize: 14,
-                flex: 1,
-              }}
-            />
-          </Box>
+          <RefreshButton />
+          {perms?.can("globalSearch") && <GlobalSearch />}
         </Box>
         {/* Right Side Controls */}
         <Box display="flex" alignItems="center" ml={4}>
@@ -231,9 +217,16 @@ const Navbar = () => {
               >
                 <Typography fontWeight={600}>Organizations</Typography>
                 <Box display="flex" alignItems="center" gap={1}>
-                  <a onClick={() => router.push("/organization-list")}>
+                  <Button
+                    size="small"
+                    sx={{ textTransform: "none" }}
+                    onClick={() => {
+                      setOpen(false);
+                      router.push("/organization-list");
+                    }}
+                  >
                     Manage
-                  </a>
+                  </Button>
                   <IconButton
                     onClick={toggleDrawer(false)}
                     size="small"
@@ -319,23 +312,7 @@ const Navbar = () => {
             {/* </Paper>
             </Popper> */}
           </Box>
-          {/* Add Button */}
-          <Button
-            onClick={() => setSidebarOpen(true)}
-            sx={{
-              minWidth: 0,
-              width: 32,
-              height: 32,
-              borderRadius: "6px",
-              backgroundColor: "primary.main",
-              color: "menu.text.normal",
-              fontSize: 20,
-              mr: 1.5,
-              "&:hover": { backgroundColor: "primary.main" },
-            }}
-          >
-            +
-          </Button>
+          {perms?.can("quickCreate") && <QuickCreateMenu />}
           {perms?.canAccessPath("/bot") && (
             <Button
               data-rbac-ignore
@@ -353,12 +330,8 @@ const Navbar = () => {
             </Button>
           )}
           {/* Icons */}
-          <IconButton size="small" sx={{ color: "menu.text.normal" }}>
-            <NotificationsNoneIcon />
-          </IconButton>
-          <IconButton size="small" sx={{ color: "menu.text.normal" }}>
-            <SettingsOutlinedIcon />
-          </IconButton>
+          {perms?.can("notifications") && <NotificationsMenu />}
+          <SettingsMenu />
           {/* Avatar */}
           <Box
             sx={{
@@ -414,11 +387,21 @@ const Navbar = () => {
             }}
           >
             <List dense>
-              <ListItemButton onClick={handleProfileClose}>
-                <ListItemText primary="Profile" />
+              <ListItemButton
+                onClick={() => {
+                  handleProfileClose();
+                  router.push("/profile");
+                }}
+              >
+                <ListItemText primary="My profile" secondary={userName || null} />
               </ListItemButton>
-              <ListItemButton onClick={handleProfileClose}>
-                <ListItemText primary="My account" />
+              <ListItemButton
+                onClick={() => {
+                  handleProfileClose();
+                  router.push("/organization-list");
+                }}
+              >
+                <ListItemText primary="Organizations" />
               </ListItemButton>
               <ListItemButton onClick={handleLogout}>
                 <ListItemText primary="Logout" />
@@ -441,93 +424,10 @@ const Navbar = () => {
               fontWeight: 600,
             }}
           >{userName.slice(0, 1)}</Avatar>*/}
-          <IconButton size="small" sx={{ color: "menu.text.normal" }}>
-            <AppsIcon />
-          </IconButton>
+          <AppsMenu />
         </Box>
-        {/* Sidebar Drawer */}
-        <Drawer
-          anchor="right"
-          open={sidebarOpen}
-          onClose={() => setSidebarOpen(false)}
-          sx={{
-            "& .MuiDrawer-paper": {
-              width: 400,
-              backgroundColor: "#1a1f36",
-              color: "white",
-            },
-          }}
-        >
-          <Box sx={{ p: 3 }}>
-            <Box display="flex" justifyContent="space-between" mb={2}>
-              <Typography variant="h6">Add New Record</Typography>
-              <IconButton
-                onClick={() => setSidebarOpen(false)}
-                sx={{ color: "white" }}
-              >
-                <Close />
-              </IconButton>
-            </Box>
-            <TextField
-              label="Title"
-              fullWidth
-              margin="dense"
-              sx={textFieldStyles}
-            />
-            <TextField
-              label="Description"
-              fullWidth
-              margin="dense"
-              multiline
-              rows={3}
-              sx={textFieldStyles}
-            />
-            <TextField
-              label="Date"
-              type="date"
-              fullWidth
-              margin="dense"
-              InputLabelProps={{ shrink: true }}
-              sx={textFieldStyles}
-            />
-            <Select
-              fullWidth
-              defaultValue="category"
-              margin="dense"
-              sx={{
-                ...textFieldStyles,
-                "& .MuiSelect-select": { color: "white" },
-              }}
-            >
-              <MenuItem value="category">Category</MenuItem>
-              <MenuItem value="books">Books</MenuItem>
-              <MenuItem value="reports">Reports</MenuItem>
-            </Select>
-            <Button
-              variant="contained"
-              fullWidth
-              sx={{
-                mt: 2,
-                backgroundColor: "#4f46e5",
-                "&:hover": { backgroundColor: "#3730a3" },
-              }}
-            >
-              Save
-            </Button>
-          </Box>
-        </Drawer>
       </Toolbar>
     </AppBar>
   );
 };
 export default Navbar;
-// Common input style
-const textFieldStyles = {
-  "& .MuiOutlinedInput-root": {
-    "& fieldset": { borderColor: "#3a3f51" },
-    "&:hover fieldset": { borderColor: "#4f46e5" },
-    "&.Mui-focused fieldset": { borderColor: "#4f46e5" },
-  },
-  "& .MuiInputLabel-root": { color: "#94a3b8" },
-  "& .MuiOutlinedInput-input": { color: "white" },
-};

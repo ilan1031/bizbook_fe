@@ -240,7 +240,7 @@
 //   };
 
 //   const handleBack = () => {
-//     router.push("/creation");
+//     router.push("/tally/creation");
 //   };
 
 //   const toggleMode = () => {
@@ -887,7 +887,7 @@ export default function Print() {
   };
 
   const handleBack = () => {
-    router.push("/creation");
+    router.push("/tally/creation");
   };
 
   const toggleMode = () => {
@@ -952,7 +952,7 @@ export default function Print() {
             onClick={toggleMode}
           >
             <Typography variant="body1" sx={{ fontWeight: 600, ml: 1 }}>
-              Tally
+              Classic
             </Typography>
             {isZoho ? (
               <ToggleOffIcon sx={{ color: "grey.500", fontSize: 32 }} />
@@ -1071,7 +1071,7 @@ export default function Print() {
                   borderBottom: "1px solid #ccc",
                 }}
               >
-                <Button
+                <Button onClick={() => window.scrollBy({ top: -window.innerHeight * 0.9, behavior: "smooth" })}
                   sx={{
                     minWidth: "auto",
                     px: 1,
@@ -1083,7 +1083,7 @@ export default function Print() {
                 >
                   PgUp
                 </Button>
-                <Button
+                <Button onClick={() => window.scrollBy({ top: window.innerHeight * 0.9, behavior: "smooth" })}
                   sx={{
                     minWidth: "auto",
                     px: 1,
@@ -1095,7 +1095,7 @@ export default function Print() {
                 >
                   PgDn
                 </Button>
-                <Button
+                <Button onClick={() => window.scrollBy({ left: window.innerWidth * 0.9, behavior: "smooth" })}
                   sx={{
                     minWidth: "auto",
                     px: 1,
@@ -1107,7 +1107,7 @@ export default function Print() {
                 >
                   PgRight »
                 </Button>
-                <Button
+                <Button onClick={() => window.scrollBy({ left: -window.innerWidth * 0.9, behavior: "smooth" })}
                   sx={{
                     minWidth: "auto",
                     px: 1,
@@ -1119,7 +1119,7 @@ export default function Print() {
                 >
                   PgLeft «
                 </Button>
-                <Button
+                <Button onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })}
                   sx={{
                     minWidth: "auto",
                     px: 1,
@@ -1131,7 +1131,7 @@ export default function Print() {
                 >
                   Home
                 </Button>
-                <Button
+                <Button onClick={() => window.scrollTo({ top: document.body.scrollHeight, behavior: "smooth" })}
                   sx={{
                     minWidth: "auto",
                     px: 1,
@@ -1159,19 +1159,8 @@ export default function Print() {
                   <Typography variant="body2" sx={{ fontSize: "0.75rem" }}>
                     In Inches
                   </Typography>
-                  <Button
-                    sx={{
-                      minWidth: "auto",
-                      px: 1,
-                      py: 0.25,
-                      fontSize: "0.75rem",
-                      color: "#000",
-                      fontWeight: "bold",
-                    }}
-                  >
-                    Mail
-                  </Button>
-                  <Button
+                  
+                  <Button onClick={() => window.print()}
                     sx={{
                       minWidth: "auto",
                       px: 1,
@@ -1183,7 +1172,7 @@ export default function Print() {
                   >
                     Print
                   </Button>
-                  <Button
+                  <Button onClick={() => { document.body.style.zoom = document.body.style.zoom === "1.25" ? "1" : "1.25"; }}
                     sx={{
                       minWidth: "auto",
                       px: 1,

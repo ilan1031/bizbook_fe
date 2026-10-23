@@ -1285,6 +1285,7 @@
 
 
 "use client";
+import { CloseReportButton, ReportsMenuButton, ShareReportButton } from "../ReportControls";
 import React, { useState, useEffect } from "react";
 import {
   Box,
@@ -1827,9 +1828,7 @@ const ProfitAndLoss = () => {
                 height: "30px",
               }}
             >
-              <IconButton size="small" sx={{ color: "#333", padding: "2px" }}>
-                <MenuIcon fontSize="small" sx={{ fontsize: "8px" }} />
-              </IconButton>
+              <ReportsMenuButton />
             </Box>
             <Box>
               <Box>
@@ -1855,9 +1854,7 @@ const ProfitAndLoss = () => {
 
           {/*Right Box*/}
           <Box sx={{ display: "flex", alignItems: "center", gap: 2 }}>
-            <IconButton size="small">
-              <Settings2 sx={{ fontSize: "16px" }} height="20px" />
-            </IconButton>
+            
 
             <Box
               display="flex"
@@ -1870,7 +1867,7 @@ const ProfitAndLoss = () => {
               sx={{ borderRadius: "6px" }}
             >
               <Box px={1} display="flex" alignItems="center" bgcolor="#f5f5f5">
-                <IconButton size="small">
+                <IconButton aria-label="Reload report" onClick={fetchProfitLossData} size="small">
                   <ReplayIcon sx={{ fontSize: "16px" }} />
                 </IconButton>
               </Box>
@@ -1878,9 +1875,7 @@ const ProfitAndLoss = () => {
               <Box width="1px" height="24px" bgcolor="grey.400" />
 
               <Box px={1} display="flex" alignItems="center" bgcolor="#f5f5f5">
-                <IconButton size="small">
-                  <ShareIcon sx={{ fontSize: "16px" }} />
-                </IconButton>
+                <ShareReportButton />
               </Box>
             </Box>
 
@@ -1949,17 +1944,7 @@ const ProfitAndLoss = () => {
               </MenuItem>
             </Menu>
 
-            <IconButton
-              size="small"
-              sx={{
-                color: "#d32f2f",
-                "&:hover": {
-                  backgroundColor: "rgba(211, 47, 47, 0.04)",
-                },
-              }}
-            >
-              <CloseIcon fontSize="small" />
-            </IconButton>
+            <CloseReportButton />
           </Box>
         </Box>
         <Divider />

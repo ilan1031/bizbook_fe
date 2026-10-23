@@ -21,7 +21,7 @@ export default function EInvoiceDetails() {
   const handleKeyDown = (e) => {
     if (e.key === 'Enter') {
       // Navigate to the "voucher" page when Enter is pressed
-      router.push('/voucher');
+      router.push('/tally/voucher');
     }
   };
 

@@ -782,7 +782,7 @@ const ExpenseViewComponent = () => {
             >
               Delete
             </MenuItem>
-            <MenuItem
+            <MenuItem onClick={() => document.getElementById("journal-section")?.scrollIntoView({ behavior: "smooth" })}
               sx={{
                 fontSize: "13px",
                 "&:hover": {
@@ -915,7 +915,7 @@ const ExpenseViewComponent = () => {
             }}
             onClick={generatePDF}
           >
-            <IconButton
+            <IconButton aria-label="Print" onClick={() => window.print()}
               size="small"
               sx={{
                 color: "",
@@ -961,9 +961,7 @@ const ExpenseViewComponent = () => {
                 paddingRight: 1,
               }}
             >
-              <IconButton size="small">
-                <QuestionAnswerRoundedIcon fontSize="small" />
-              </IconButton>
+              
             </Box>
           </Box>
         </Box>
@@ -1422,35 +1420,9 @@ const ExpenseViewComponent = () => {
                 justifyContent: "center",
               }}
             >
-              <Button
-                variant="outlined"
-                startIcon={
-                  <FileUploadOutlinedIcon
-                    sx={{ color: "#8d91a6 !important" }}
-                  />
-                }
-                component="label"
-                size="small"
-                sx={{
-                  color: "#2e3b44 !important",
-                  border: "none",
-                  fontSize: "13px !important",
-                  fontWeight: "200 !important",
-                }}
-              >
-                Upload File
-                <input
-                  type="file"
-                  name="documents"
-                  hidden
-                  accept=".pdf, .jpeg, .jpg, .png"
-                  // onChange={handleFileUpload}
-                />
-              </Button>
+              
 
-              <IconButton size="small">
-                <KeyboardArrowDownIcon />
-              </IconButton>
+              
             </Box>
           </Box>
         </Box>
@@ -1460,6 +1432,7 @@ const ExpenseViewComponent = () => {
 
   const BillSection = () => (
     <Paper
+      id="journal-section"
       elevation={0}
       sx={{ px: 2, mb: 6, boxShadow: "none", border: "2px solid #f9f9fb" }}
     >

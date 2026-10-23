@@ -1065,9 +1065,7 @@ const PaymentViewComponent = (data) => {
                 paddingRight: 1,
               }}
             >
-              <IconButton size="small">
-                <QuestionAnswerRoundedIcon fontSize="small" />
-              </IconButton>
+              
             </Box>
           </Box>
         </Box>

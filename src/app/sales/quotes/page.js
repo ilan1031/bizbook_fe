@@ -49,6 +49,7 @@ import {
 } from "lucide-react";
 import CustomFilterMenu from "../../common/customFilterMenu";
 import QuotesHomePage from "./homepage/page";
+import BulkActionsBar from "../../common/BulkActionsBar";
 
 const dummyDefaultFilters = [
   {
@@ -245,13 +246,6 @@ const menuItems = [
   },
   // { text: "Import Debit Notes", icon: <ReceiptIcon className="menu-icon" /> },
   {
-    text: "Preferences",
-    icon: <Settings className="menu-icon" />,
-    hasArrow: false,
-    primary: false,
-    border: false,
-  },
-  {
     text: "Manage Custom Fields",
     icon: <ListAltIcon className="menu-icon" />,
     hasArrow: false,
@@ -262,13 +256,6 @@ const menuItems = [
   {
     text: "Refresh List",
     icon: <RefreshCcw className="menu-icon" />,
-    hasArrow: false,
-    primary: false,
-    border: false,
-  },
-  {
-    text: "Reset Column Width",
-    icon: <RotateCcw className="menu-icon" />,
     hasArrow: false,
     primary: false,
     border: false,
@@ -285,138 +272,7 @@ const columns = [
   // { key: "receivablesBCY", label: "RECEIVABLES (BCY)" },
 ];
 
-const SelectionToolbar = ({ selectedCount, onClearSelection }) => {
-  return (
-    <Box
-      sx={{
-        display: "flex",
-        alignItems: "center",
-        width: "100%",
-        bgcolor: "#f5f5f5", // Grey background
-        borderBottom: "1px solid #e0e0e0",
-        px: 2,
-        py: 1,
-      }}
-    >
-      <Button
-        variant="text"
-        size="small"
-        sx={{
-          textTransform: "none",
-          fontWeight: 500,
-          color: "#333",
-          mr: 1,
-          border: "1px solid #ddd",
-          bgcolor: "white",
-          "&:hover": { bgcolor: "#f8f8f8" },
-        }}
-      >
-        Mark As Sent
-      </Button>
 
-      <Button
-        variant="text"
-        size="small"
-        sx={{
-          textTransform: "none",
-          fontWeight: 500,
-          color: "#333",
-          mr: 1,
-          border: "1px solid #ddd",
-          bgcolor: "white",
-          "&:hover": { bgcolor: "#f8f8f8" },
-        }}
-      >
-        Associate with Sales Orders
-      </Button>
-
-      <IconButton
-        size="small"
-        sx={{ mx: 0.5, bgcolor: "white", border: "1px solid #ddd" }}
-      >
-        <FileDownloadIcon fontSize="small" />
-      </IconButton>
-
-      <IconButton
-        size="small"
-        sx={{ mx: 0.5, bgcolor: "white", border: "1px solid #ddd" }}
-      >
-        <FileUploadIcon fontSize="small" />
-      </IconButton>
-
-      <IconButton
-        size="small"
-        sx={{ mx: 0.5, bgcolor: "white", border: "1px solid #ddd" }}
-      >
-        <ReceiptIcon fontSize="small" />
-      </IconButton>
-
-      <Box sx={{ display: "flex", alignItems: "center", ml: "auto" }}>
-        <Button
-          variant="outlined"
-          size="small"
-          endIcon={<KeyboardArrowDownIcon />}
-          sx={{
-            textTransform: "none",
-            borderColor: "#ddd",
-            color: "#333",
-            mr: 1,
-            paddingLeft: "8px",
-            bgcolor: "white",
-            "&:hover": { bgcolor: "#f8f8f8" },
-          }}
-        >
-          Send
-        </Button>
-
-        <Button
-          variant="outlined"
-          size="small"
-          sx={{
-            textTransform: "none",
-            borderColor: "#ddd",
-            color: "#333",
-            mr: 1,
-            bgcolor: "white",
-            "&:hover": { bgcolor: "#f8f8f8" },
-          }}
-        >
-          Bulk Update
-        </Button>
-
-        <IconButton
-          size="small"
-          sx={{ bgcolor: "white", border: "1px solid #ddd" }}
-        >
-          <MoreVertIcon />
-        </IconButton>
-
-        <Divider orientation="vertical" flexItem sx={{ mx: 2 }} />
-
-        <Box
-          sx={{
-            display: "flex",
-            alignItems: "center",
-            color: "primary.main",
-            fontWeight: 500,
-            "& .dot": {
-              width: 8,
-              height: 8,
-              borderRadius: "50%",
-              backgroundColor: "primary.main",
-              mr: 1,
-            },
-          }}
-        >
-          <span className="dot"></span>
-          <Typography variant="body2" fontWeight={500}>
-            {selectedCount} Quote(s) Selected
-          </Typography>
-        </Box>
-      </Box>
-    </Box>
-  );
-};
 
 // Only modify the Customer component to include the SelectionToolbar
 const Quotes = () => {
@@ -517,12 +373,17 @@ const Quotes = () => {
   const handleCloseSearchDialog = () => setOpenSearchDialog(false);
 
   const handleMenuItemClick = (item) => {
+    if (typeof item === "string") item = menuItems.find((m) => m.text === item) || { text: item };
+    if (/^Import /.test(item.text) && item.route !== "/import-files") {
+      const type = { "Import Customers": "customers", "Import Vendors": "vendors", "Import Items": "items", "Import Quotes": "quote", "Import Bills": "bills", "Import Purchase Orders": "purchase-order" }[item.text];
+      router.push(type ? `/import-files?type=${type}&organization_id=${localStorage.getItem("organization_id")}` : "/import");
+    }
     console.log("Selected menu item:", item);
     const OrgId = localStorage.getItem("organization_id");
     if (item.route === "/import-files") {
       router.push(`/import-files?type=quote&organization_id=${OrgId}`);
     }
-    if (item.text === "Export Quotes") {
+    if ((item.text === "Export Quotes" || item.text === "Export Current View")) {
       setOpen(true);
     } else if (item.text === "Refresh List") {
       fetchQuoteList(filterBy, sortColumn, sortOrder);
@@ -596,9 +457,12 @@ const Quotes = () => {
               <>
                 {selected.length > 0 ? (
                   // Show selection toolbar when items are selected
-                  <SelectionToolbar
-                    selectedCount={selected.length}
-                    onClearSelection={handleClearSelection}
+                  <BulkActionsBar
+                    module="quotes"
+                    rows={quoteList.filter((r) => selected.includes(r._id))}
+                    columns={columns}
+                    onClear={handleClearSelection}
+                    onDone={() => fetchQuoteList(filterBy, sortColumn, sortOrder)}
                   />
                 ) : (
                   // Show regular toolbar when no items are selected
@@ -667,7 +531,7 @@ const Quotes = () => {
                         gap: "8px",
                       }}
                     >
-                      <div
+                      <div data-rbac-feature="tally"
                         style={{
                           display: "flex",
                           alignItems: "center",
@@ -931,7 +795,7 @@ const Quotes = () => {
                         onClose={handleClose}
                       />
 
-                      <IconButton
+                      <IconButton aria-label="Help" onClick={() => window.dispatchEvent(new Event("bizbooks:help"))}
                         sx={{
                           backgroundColor: "#ff9800",
                           color: "white",

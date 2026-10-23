@@ -1,289 +1,69 @@
-// pages/invoices/import.js
-'use client';
-import React, { useState } from 'react';
-import { 
-  Box, 
-  Typography, 
-  Button, 
-  Checkbox, 
-  FormControlLabel, 
-  Container, 
-  Paper, 
-  Select, 
-  MenuItem, 
-  IconButton,
-  Stepper,
-  Step,
-  StepLabel,
-  Link,
-  FormHelperText,
-  Divider
-} from '@mui/material';
-import CloudUploadIcon from '@mui/icons-material/CloudUpload';
-import InfoOutlinedIcon from '@mui/icons-material/InfoOutlined';
-import LightbulbOutlinedIcon from '@mui/icons-material/LightbulbOutlined';
-import CloseIcon from '@mui/icons-material/Close';
-import ArrowForwardIcon from '@mui/icons-material/ArrowForward';
+"use client";
 
-export default function InvoiceImport() {
-  const [encoding, setEncoding] = useState('UTF-8 (Unicode)');
-  const [autoGenerateInvoice, setAutoGenerateInvoice] = useState(false);
-  const [linkInvoices, setLinkInvoices] = useState(false);
-  const [mapCustomers, setMapCustomers] = useState(false);
+// Import Data: pick what to import; the upload, mapping and preview happen
+// in /import-files, which posts the rows to the matching backend importer.
+import React from "react";
+import { useRouter } from "next/navigation";
+import { Box, Card, CardActionArea, CardContent, Typography } from "@mui/material";
+import PeopleOutlineIcon from "@mui/icons-material/PeopleOutline";
+import StorefrontOutlinedIcon from "@mui/icons-material/StorefrontOutlined";
+import Inventory2OutlinedIcon from "@mui/icons-material/Inventory2Outlined";
+import RequestQuoteOutlinedIcon from "@mui/icons-material/RequestQuoteOutlined";
+import ReceiptLongOutlinedIcon from "@mui/icons-material/ReceiptLongOutlined";
+import ShoppingCartOutlinedIcon from "@mui/icons-material/ShoppingCartOutlined";
+import { usePermissions } from "../../services/PermissionProvider";
 
-  const handleEncodingChange = (event) => {
-    setEncoding(event.target.value);
-  };
+// [type for /import-files, label, what it creates, page whose "create" it needs]
+const TARGETS = [
+  ["customers", "Customers", "Names, contact details and GST numbers", "customers", PeopleOutlineIcon],
+  ["vendors", "Vendors", "Suppliers you buy from", "vendors", StorefrontOutlinedIcon],
+  ["items", "Items", "Goods and services with rates and HSN/SAC", "items", Inventory2OutlinedIcon],
+  ["quote", "Quotes", "Estimates with their line items", "quotes", RequestQuoteOutlinedIcon],
+  ["purchase-order", "Purchase Orders", "Orders placed with vendors", "purchaseOrders", ShoppingCartOutlinedIcon],
+  ["bills", "Bills", "Vendor bills with their line items", "bills", ReceiptLongOutlinedIcon],
+];
+
+export default function ImportHubPage() {
+  const router = useRouter();
+  const perms = usePermissions();
+  const available = TARGETS.filter(([, , , page]) => perms?.can(page, "create"));
 
   return (
-    <Container maxWidth="md" sx={{ 
-      width: '100%', py: 1,
-      position: 'relative',
-      borderRadius: 1,
-      maxHeight: '90vh', // Set max height for scrollable area
-      // overflowY: 'auto',  // Enable vertical scrolling
-    }}>
-      <Paper 
-        elevation={0} 
-      
-      >
-        <Box sx={{ 
-          display: 'flex', 
-          justifyContent: 'space-between', 
-          alignItems: 'center',
-          p: 2,
-          borderBottom: '1px solid #e0e0e0'
-        }}>
-          <Typography variant="h6" component="h1">
-            Invoices - Select File
-          </Typography>
-          <IconButton aria-label="close">
-            <CloseIcon />
-          </IconButton>
-        </Box>
-
-        <Box sx={{ width: '100%', px: 2, py: 3 }}>
-          <Stepper activeStep={0} sx={{ mb: 4 }}>
-            <Step key="configure">
-              <StepLabel>
-                <Typography 
-                  sx={{ 
-                    fontWeight: 'bold', 
-                    color: '#1976d2'
-                  }}
-                >
-                  Configure
-                </Typography>
-              </StepLabel>
-            </Step>
-            <Step key="map-fields">
-              <StepLabel>
-                <Typography sx={{ color: '#9e9e9e' }}>Map Fields</Typography>
-              </StepLabel>
-            </Step>
-            <Step key="preview">
-              <StepLabel>
-                <Typography sx={{ color: '#9e9e9e' }}>Preview</Typography>
-              </StepLabel>
-            </Step>
-          </Stepper>
-
-          <Paper 
-            variant="outlined" 
-            sx={{ 
-              p: 4, 
-              mb: 3, 
-              display: 'flex', 
-              flexDirection: 'column', 
-              alignItems: 'center',
-              backgroundColor: '#f5f5f5',
-              border: '1px solid #e0e0e0',
-              borderRadius: 1
-            }}
-          >
-            <CloudUploadIcon sx={{ fontSize: 40, color: '#9e9e9e', mb: 2 }} />
-            
-            <Typography variant="body1" sx={{ mb: 2 }}>
-              Drag and drop file to import
-            </Typography>
-            
-            <Button 
-              variant="contained" 
-              component="label"
-              sx={{ 
-                mb: 2,
-                textTransform: 'none'
-              }}
-              endIcon={<ArrowForwardIcon />}
-            >
-              Choose Files
-              <input
-                type="file"
-                hidden
-              />
-            </Button>
-            
-            <Typography variant="body2" color="text.secondary">
-              Maximum File Size: 25 MB • File Format: CSV or TSV or XLS
-            </Typography>
-          </Paper>
-
-          <Box sx={{ mb: 3 }}>
-            <Typography variant="body2">
-              Download a <Link href="#" underline="hover">sample csv file</Link> or <Link href="#" underline="hover">sample xls file</Link> and compare it to your import file to ensure you have the file perfect for the import.
-            </Typography>
-          </Box>
-
-          {/* <Box sx={{ mb: 3, display: 'flex', alignItems: 'center' }}>
-            <Typography variant="body1" sx={{ mr: 1 }}>
-              Character Encoding
-            </Typography>
-            <InfoOutlinedIcon fontSize="small" color="action" />
-            <Box sx={{ flexGrow: 1 }} />
-            <Select
-              value={encoding}
-              onChange={handleEncodingChange}
-              displayEmpty
-              sx={{ 
-                minWidth: 250,
-                '& .MuiOutlinedInput-notchedOutline': {
-                  borderColor: '#e0e0e0',
+    <Box sx={{ p: 3, maxWidth: 960 }}>
+      <Typography variant="h5" fontSize={22} fontWeight={600}>
+        Import data
+      </Typography>
+      <Typography color="text.secondary" mb={3}>
+        Upload a CSV or Excel file, match its columns to BizBooks fields, check the preview and import. Records whose
+        name already exists are skipped.
+      </Typography>
+      {available.length === 0 ? (
+        <Typography color="text.secondary">
+          You can import into pages where you&apos;re allowed to create records. Ask your administrator to switch one on.
+        </Typography>
+      ) : (
+        <Box sx={{ display: "grid", gridTemplateColumns: { xs: "1fr", sm: "1fr 1fr", md: "1fr 1fr 1fr" }, gap: 2 }}>
+          {available.map(([type, label, hint, , Icon]) => (
+            <Card key={type} variant="outlined">
+              <CardActionArea
+                onClick={() =>
+                  router.push(`/import-files?type=${type}&organization_id=${localStorage.getItem("organization_id")}`)
                 }
-              }}
-            >
-              <MenuItem value="UTF-8 (Unicode)">UTF-8 (Unicode)</MenuItem>
-              <MenuItem value="ASCII">ASCII</MenuItem>
-              <MenuItem value="ISO-8859-1">ISO-8859-1</MenuItem>
-            </Select>
-          </Box> */}
-
-          {/* <Box sx={{ mb: 3 }}>
-            <FormControlLabel
-              control={
-                <Checkbox 
-                  checked={autoGenerateInvoice}
-                  onChange={(e) => setAutoGenerateInvoice(e.target.checked)}
-                />
-              }
-              label={
-                <Typography variant="body1" fontWeight="medium">
-                  Auto-generate Invoice Numbers
-                </Typography>
-              }
-            />
-            <Box sx={{ pl: 4 }}>
-              <Typography variant="body2" color="text.secondary">
-                Invoice numbers will be generated automatically according to your settings. Any invoice 
-                numbers in the import file will be ignored.
-              </Typography>
-            </Box>
-          </Box> */}
-
-          {/* <Box sx={{ mb: 3 }}>
-            <FormControlLabel
-              control={
-                <Checkbox 
-                  checked={linkInvoices}
-                  onChange={(e) => setLinkInvoices(e.target.checked)}
-                />
-              }
-              label={
-                <Typography variant="body1" fontWeight="medium">
-                  Link Invoices to its corresponding Sales Orders.
-                </Typography>
-              }
-            />
-            <Box sx={{ pl: 4 }}>
-              <Typography variant="body2" color="text.secondary">
-                If you enable this option, you must map the Sales Order field with the appropriate column
-                containing the Sales Order Number in the next page.
-              </Typography>
-            </Box>
-          </Box> */}
-
-          {/* <Box sx={{ mb: 4 }}>
-            <FormControlLabel
-              control={
-                <Checkbox 
-                  checked={mapCustomers}
-                  onChange={(e) => setMapCustomers(e.target.checked)}
-                />
-              }
-              label={
-                <Typography variant="body1" fontWeight="medium">
-                  Map the customers addresses in the import file to their
-                  customer record in Biz Books.
-                </Typography>
-              }
-            />
-            <Box sx={{ pl: 4 }}>
-              <Typography variant="body2" color="text.secondary">
-                If you enable this option, your customer`s name from the import file will be used to check if the same customer
-                already exists in Biz Books. If the customer exists in Biz Books, the address from the invoice will be mapped
-                to their customer record. If the customer does not exist, a new customer record will be created using the
-                corresponding address from the import file.
-              </Typography>
-            </Box>
-          </Box> */}
-
-          <Paper
-            elevation={0}
-            sx={{
-              p: 3,
-              mb: 3,
-              backgroundColor: '#f9f9f9',
-              border: '1px solid #e0e0e0',
-              borderRadius: 1
-            }}
-          >
-            <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
-              <LightbulbOutlinedIcon sx={{ color: '#f9a825', mr: 1 }} />
-              <Typography variant="h6" fontWeight="medium">
-                Page Tips
-              </Typography>
-            </Box>
-            
-            <Box component="ul" sx={{ pl: 2, mb: 0 }}>
-              <Typography component="li" variant="body2" sx={{ mb: 1 }}>
-                Import data with the details of GST Treatment by referring these <Link href="#" underline="hover">accepted formats</Link>.
-              </Typography>
-              
-              <Typography component="li" variant="body2" sx={{ mb: 1 }}>
-                You can download the <Link href="#" underline="hover">sample xls file</Link> to get detailed information about the data fields used
-                while importing.
-              </Typography>
-              
-              <Typography component="li" variant="body2" sx={{ mb: 1 }}>
-                If you have files in other formats, you can convert it to an accepted file format using any
-                online/offline converter.
-              </Typography>
-              
-              <Typography component="li" variant="body2">
-                You can configure your import settings and save them for future too!
-              </Typography>
-            </Box>
-          </Paper>
-          
-          <Box sx={{ display: 'flex', justifyContent: 'space-between', mt: 4 }}>
-            <Button 
-              variant="contained" 
-              color="primary"
-              endIcon={<ArrowForwardIcon />}
-              sx={{ textTransform: 'none' }}
-            >
-              Next
-            </Button>
-            
-            <Button 
-              variant="text" 
-              color="inherit"
-              sx={{ textTransform: 'none' }}
-            >
-              Cancel
-            </Button>
-          </Box>
+              >
+                <CardContent>
+                  <Icon color="primary" />
+                  <Typography fontWeight={600} mt={1}>
+                    {label}
+                  </Typography>
+                  <Typography fontSize={13} color="text.secondary">
+                    {hint}
+                  </Typography>
+                </CardContent>
+              </CardActionArea>
+            </Card>
+          ))}
         </Box>
-      </Paper>
-    </Container>
+      )}
+    </Box>
   );
 }

@@ -55,7 +55,7 @@ const SalesSidebar = ({
           borderBottom: "1px solid #eee",
         }}
       >
-        <button
+        <button onClick={() => window.open("/sales/customer/create", "_blank")}
           style={{
             backgroundColor: "#4a7ebb",
             color: "white",

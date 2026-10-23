@@ -1531,7 +1531,7 @@ const InvoiceView = ({
         </Box>
 
         <Box sx={{ display: "flex", alignItems: "center", gap: 2 }}>
-          <div
+          <div data-rbac-feature="tally"
             style={{ display: "flex", alignItems: "center", cursor: "pointer" }}
             onClick={toggleMode}
           >
@@ -2082,6 +2082,15 @@ const InvoiceView = ({
             >
               <FileText width="13px" style={{ marginRight: "5px" }} />
               PDF
+            </MenuItem>
+            <MenuItem
+              onClick={() => {
+                handleClose();
+                router.push(`/print/invoice/${data?.invoice_id}`);
+              }}
+              sx={{ fontSize: "13px" }}
+            >
+              Print (template)
             </MenuItem>
 
             <MenuItem

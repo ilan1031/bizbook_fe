@@ -154,6 +154,9 @@ const UploadPreview = () => {
         purchase: { endpoint: "purchase-order", list: "/purchase/purchaseorder" },
         "purchase-order": { endpoint: "purchase-order", list: "/purchase/purchaseorder" },
         quote: { endpoint: "quote", list: "/sales/quotes" },
+        customers: { endpoint: "customers", list: "/sales/customer" },
+        vendors: { endpoint: "vendors", list: "/purchase/vendor" },
+        items: { endpoint: "items", list: "/items/itemtable" },
       };
       const target = IMPORT_TARGETS[fileType];
       if (!target) {
@@ -397,7 +400,17 @@ const UploadPreview = () => {
                       variant="outlined"
                       onClick={() => {
                         // Navigate to the main page for the imported data type
-                        router.push(`/${fileType}`);
+                        router.push(
+                          {
+                            bills: "/purchase/bills",
+                            purchase: "/purchase/purchaseorder",
+                            "purchase-order": "/purchase/purchaseorder",
+                            quote: "/sales/quotes",
+                            customers: "/sales/customer",
+                            vendors: "/purchase/vendor",
+                            items: "/items/itemtable",
+                          }[fileType] || "/home"
+                        );
                       }}
                     >
                       View Imported Data

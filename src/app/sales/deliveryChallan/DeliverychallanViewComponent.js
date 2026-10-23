@@ -1,4 +1,5 @@
 "use client";
+import Link from "next/link";
 import React, { useState } from "react";
 import {
   Box,
@@ -1375,66 +1376,18 @@ const DeliveryChallanViewComponent = ({ data, callViewAPI , organizationData }) 
                       </TableRow>
                     </TableHead>
                     <TableBody>
-                      <TableRow sx={{ height: 20 }}>
-                        {/* Reduced row height */}
-                        <TableCell
-                          align="left"
-                          sx={{ color: "black !important" }}
-                        >
-                          12/01/2025
-                        </TableCell>
-                        <TableCell
-                          align="left"
-                          sx={{ color: "black !important" }}
-                        >
-                          PR0001
-                        </TableCell>
-                        <TableCell
-                          align="left"
-                          sx={{ color: "black !important" }}
-                        >
-                          SO-00001
-                        </TableCell>
-                        <TableCell align="left" sx={{ color: "black" }}>
-                          <span style={{ fontSize: "15px" }}>&#8226;</span> Cash
-                        </TableCell>
-                        <TableCell
-                          align="left"
-                          sx={{ color: "black !important" }}
-                        >
-                          ₹ 45,000
-                        </TableCell>
-                        <TableCell align="right">
-                          <Box
-                            sx={{
-                              display: "flex",
-                              gap: 2,
-                              justifyContent: "flex-end",
-                            }}
-                          >
-                            <Box
-                              sx={{
-                                display: "flex",
-                                alignItems: "center",
-                                color: "#408dfb !important",
-                              }}
-                            >
-                              <IconButton
-                                size="small"
-                                sx={{ color: "inherit" }}
-                              >
-                                <EditIcon fontSize="small" />
-                              </IconButton>
-                              <Box sx={{ fontSize: 14 }}>Edit</Box>
-                            </Box>
-                            <Box>
-                              <IconButton size="small">
-                                <DeleteOutlinedIcon fontSize="small" />
-                              </IconButton>
-                            </Box>
-                          </Box>
-                        </TableCell>
-                      </TableRow>
+                      {(data?.payments || []).map((p) => (
+                        <TableRow key={p.payment_id || p._id} sx={{ height: 20 }}>
+                          <TableCell align="left">{p.date_formatted || p.date || "-"}</TableCell>
+                          <TableCell align="left">
+                            <Link href={`/sales/paymentsReceived/${p.payment_id}`}>{p.payment_number || p.payment_id}</Link>
+                          </TableCell>
+                          <TableCell align="left">{p.reference_number || "-"}</TableCell>
+                          <TableCell align="left">{p.payment_mode || "-"}</TableCell>
+                          <TableCell align="left">₹ {Number(p.amount || 0).toLocaleString("en-IN")}</TableCell>
+                          <TableCell align="right" />
+                        </TableRow>
+                      ))}
                     </TableBody>
                   </Table>
                 </TableContainer>

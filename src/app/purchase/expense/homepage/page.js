@@ -202,13 +202,6 @@ const menuItems = [
     border: true,
   },
   {
-    text: "Preferences",
-    icon: <Settings className="menu-icon" />,
-    hasArrow: false,
-    primary: false,
-    border: false,
-  },
-  {
     text: "Manage Custom Fields",
     icon: <ListAlt className="menu-icon" />,
     hasArrow: false,
@@ -218,13 +211,6 @@ const menuItems = [
   {
     text: "Refresh List",
     icon: <RefreshCcw className="menu-icon" />,
-    hasArrow: false,
-    primary: false,
-    border: false,
-  },
-  {
-    text: "Reset Column Width",
-    icon: <RotateCcw className="menu-icon" />,
     hasArrow: false,
     primary: false,
     border: false,
@@ -531,50 +517,8 @@ const ExpenseHome = () => {
             )}
           </Box>
 
-          {/* New Custom View Fixed at Bottom */}
           <Divider />
-          <MenuItem
-            onClick={handleNewCustomView}
-            sx={{
-              display: "flex",
-              alignItems: "center",
-              px: 2,
-              py: 1,
-              position: "sticky",
-              bottom: 0,
-              backgroundColor: "white",
-              zIndex: 1,
-              "&:hover": {
-                backgroundColor: "#E6F1FF",
-              },
-            }}
-          >
-            <IconButton
-              size="small"
-              sx={{
-                backgroundColor: "#4285F4",
-                width: 20,
-                height: 20,
-                borderRadius: "50%",
-                marginRight: 1,
-              }}
-            >
-              <AddIcon
-                sx={{
-                  fontSize: 14,
-                  color: "white",
-                }}
-              />
-            </IconButton>
-            <Typography
-              sx={{
-                fontSize: "14px",
-                color: "#4285F4",
-              }}
-            >
-              New Custom View
-            </Typography>
-          </MenuItem>
+          
         </Menu>
 
         <Box sx={{ display: "flex", alignItems: "center", gap: 1.2 }}>
@@ -737,7 +681,7 @@ const ExpenseHome = () => {
       </Box>
 
       <Box sx={{ display: "flex", justifyContent: "center", mb: 3 }}>
-        <Button variant="contained" sx={{ px: 4 }}>
+        <Button onClick={() => router.push("/purchase/expense/newexpense")} variant="contained" sx={{ px: 4 }}>
           RECORD EXPENSE
         </Button>
       </Box>

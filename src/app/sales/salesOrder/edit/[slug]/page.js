@@ -918,29 +918,14 @@ const SalesOrderCreation = () => {
                 </FormControl>
 
                 {/* Search Button */}
-                <IconButton sx={searchButtonStyle}>
+                <IconButton aria-label="Choose customer" onClick={handleOpen} sx={searchButtonStyle}>
                   <SearchOutlinedIcon fontSize="medium" />
                 </IconButton>
 
                 {/* Currency Button - Only Visible if Currency Exists */}
                 {customerData?.currency_code && (
                   <Box sx={{ ml: 1 }}>
-                    <IconButton
-                      sx={{
-                        border: "1px solid #ccc",
-                        borderRadius: "4px",
-                        px: 2,
-                        fontSize: "13px",
-                        fontWeight: "600",
-                        color: "#222",
-                        backgroundColor: "#f5f5f5",
-                        cursor: "default",
-                        "&:hover": { backgroundColor: "#f5f5f5" },
-                      }}
-                      disableRipple
-                    >
-                      {customerData.currency_code.split("-")[0].trim()}
-                    </IconButton>
+                    <Box sx={{ border: "1px solid #ccc", borderRadius: "4px", px: 2, py: 0.75, fontSize: "13px", fontWeight: 600, color: "#222", backgroundColor: "#f5f5f5" }}>{customerData.currency_code.split("-")[0].trim()}</Box>
                   </Box>
                 )}
               </Grid>
@@ -966,19 +951,7 @@ const SalesOrderCreation = () => {
                       }}
                     >
                       Billing Address{" "}
-                      {customerData?.billing_address && (
-                        <IconButton
-                          size="small"
-                          sx={{
-                            p: 0.5,
-                            height: "fit-content",
-                            color: "#757575",
-                          }}
-                          // onClick={(e) => handleClickBA(e, "edit")}
-                        >
-                          <EditIcon sx={{ fontSize: "16px" }} />
-                        </IconButton>
-                      )}
+                      {null}
                     </Typography>
                     <Box
                       sx={{
@@ -1089,19 +1062,7 @@ const SalesOrderCreation = () => {
                       }}
                     >
                       Shipping Address{" "}
-                      {customerData?.shipping_address && (
-                        <IconButton
-                          size="small"
-                          sx={{
-                            p: 0.5,
-                            height: "fit-content",
-                            color: "#757575",
-                          }}
-                          // onClick={(e) => handleClickBA(e, "edit")}
-                        >
-                          <EditIcon sx={{ fontSize: "16px" }} />
-                        </IconButton>
-                      )}
+                      {null}
                     </Typography>
                     <Box
                       sx={{
@@ -1393,12 +1354,7 @@ const SalesOrderCreation = () => {
                 InputProps={{
                   endAdornment: (
                     <InputAdornment position="end">
-                      <IconButton
-                        // onClick={handleSettingsClick}
-                        sx={{ color: "primary.main", p: 0 }}
-                      >
-                        <SettingsOutlinedIcon fontSize="small" />
-                      </IconButton>
+                      
                     </InputAdornment>
                   ),
                 }}

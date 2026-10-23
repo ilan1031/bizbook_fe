@@ -94,19 +94,7 @@ const formatDate = (dateString) => {
         >
           System Mails
         </Typography>
-        <Button
-          startIcon={<EmailIcon />}
-          endIcon={<ArrowDropDownIcon />}
-          size="small"
-          sx={{
-            fontSize: "13px",
-            color: "#3174F1",
-            border: "1px solid #E0E0E0",
-            p: "4px 10px",
-          }}
-        >
-          Link Email account
-        </Button>
+        
       </Box>
 
       <Box

@@ -42,6 +42,7 @@ import {
   convertFromHTML,
 } from "draft-js";
 import { stateToHTML } from "draft-js-export-html";
+import { imageBlockRenderer, insertImage, insertLink } from "../draftInsert";
 import "draft-js/dist/Draft.css";
 import { useParams, useSearchParams, useRouter } from "next/navigation";
 import axios from "axios";
@@ -659,7 +660,7 @@ Best regards,
               <FormatAlignRight />
             </IconButton>
 
-            <IconButton size="small">
+            <IconButton aria-label="Insert link" onClick={() => setEditorState(insertLink(editorState))} size="small">
               <LinkIcon />
             </IconButton>
           </Box>
@@ -667,7 +668,7 @@ Best regards,
           {/* Text editor */}
           <Box sx={styles.editorContainer} onClick={focusEditor}>
             <Box sx={styles.editor}>
-              <Editor
+              <Editor blockRendererFn={imageBlockRenderer}
                 ref={editorRef}
                 editorState={editorState}
                 onChange={setEditorState}

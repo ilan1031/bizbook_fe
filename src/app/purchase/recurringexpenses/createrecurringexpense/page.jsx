@@ -3993,7 +3993,7 @@ const RecurringExpense = () => {
               passHref
               style={{ textDecoration: "none" }}
             >
-              <Button variant="outlined">Cancel</Button>
+              <Button onClick={() => router.push("/purchase/recurringexpenses")} variant="outlined">Cancel</Button>
             </Link>
           </Paper>
         </Box>

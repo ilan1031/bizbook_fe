@@ -169,25 +169,11 @@ const menuItems = [
     border: true,
   },
   {
-    text: "Preferences",
-    icon: <Settings className="menu-icon" />,
-    hasArrow: false,
-    primary: false,
-    border: false,
-  },
-  {
     text: "Refresh List",
     icon: <RefreshCcw className="menu-icon" />,
     hasArrow: false,
     primary: false,
     border: true,
-  },
-  {
-    text: "Reset Column Width",
-    icon: <RotateCcw className="menu-icon" />,
-    hasArrow: false,
-    primary: false,
-    border: false,
   },
 ];
 
@@ -223,13 +209,18 @@ const Customer = () => {
 
 
   const handleMenuItemClick = (item) => {
+    if (typeof item === "string") item = menuItems.find((m) => m.text === item) || { text: item };
+    if (/^Import /.test(item.text) && item.route !== "/import-files") {
+      const type = { "Import Customers": "customers", "Import Vendors": "vendors", "Import Items": "items", "Import Quotes": "quote", "Import Bills": "bills", "Import Purchase Orders": "purchase-order" }[item.text];
+      router.push(type ? `/import-files?type=${type}&organization_id=${localStorage.getItem("organization_id")}` : "/import");
+    }
     const OrgId = localStorage.getItem("organization_id");
     if (item.route === "/import-files") {
       router.push(`/import-files?type=customers&organization_id=${OrgId}`);
     }
-    if (item.text === "Export Customers") {
+    if ((item.text === "Export Customers" || item.text === "Export Current View")) {
       setOpen(true);
-    } else if (item === "Refresh List") {
+    } else if (item.text === "Refresh List") {
       fetchCustomerList(filterBy, sortColumn, sortOrder);
     }
     setMenuAnchorEl(null);

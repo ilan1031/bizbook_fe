@@ -1769,12 +1769,7 @@ const CustomerAdvance = () => {
                   InputProps={{
                     endAdornment: (
                       <InputAdornment position="end">
-                        <IconButton size="small">
-                          <SettingsIcon
-                            fontSize="small"
-                            sx={{ marginRight: "-12px" }}
-                          />
-                        </IconButton>
+                        
                       </InputAdornment>
                     ),
                   }}

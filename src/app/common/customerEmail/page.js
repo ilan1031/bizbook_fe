@@ -33,6 +33,7 @@ import {
 } from "@mui/icons-material";
 import { Editor, EditorState, RichUtils } from "draft-js";
 import { stateToHTML } from "draft-js-export-html";
+import { imageBlockRenderer, insertImage, insertLink } from "../draftInsert";
 import "draft-js/dist/Draft.css";
 import { useSearchParams, useRouter } from "next/navigation";
 import apiService from "../../../../src/services/axiosService";
@@ -1054,12 +1055,12 @@ const EmailComposer = () => {
                 <Divider orientation="vertical" flexItem sx={dividerSx} />
 
                 {/** Link */}
-                <IconButton size="small" sx={buttonSx}>
+                <IconButton aria-label="Insert link" onClick={() => setEditorState(insertLink(editorState))} size="small" sx={buttonSx}>
                   <LinkIcon sx={iconSx} />
                 </IconButton>
 
                 {/** Image */}
-                <IconButton size="small" sx={buttonSx}>
+                <IconButton aria-label="Insert image" onClick={() => setEditorState(insertImage(editorState))} size="small" sx={buttonSx}>
                   <ImageOutlined sx={iconSx} />
                 </IconButton>
               </Box>
@@ -1067,7 +1068,7 @@ const EmailComposer = () => {
               {/* Text editor */}
               <Box sx={styles.editorContainer} onClick={focusEditor}>
                 <Box sx={styles.editor}>
-                  <Editor
+                  <Editor blockRendererFn={imageBlockRenderer}
                     ref={editorRef}
                     editorState={editorState}
                     onChange={setEditorState}

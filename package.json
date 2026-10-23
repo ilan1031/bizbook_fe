@@ -10,7 +10,7 @@
     "dev": "next dev --turbopack",
     "build": "next build",
     "start": "next start",
-    "lint": "eslint src tests",
+    "lint": "node --max-old-space-size=8192 node_modules/eslint/bin/eslint.js --cache --cache-location node_modules/.cache/eslint/ src tests",
     "test": "node --test \"tests/**/*.test.js\""
   },
   "dependencies": {

@@ -268,27 +268,7 @@ const Transactions = ({ customerId, moduleKey }) => {
     <Box sx={{ p: 2, backgroundColor: "#ffffff", borderRadius: "16px" }}>
       {/* Global Expand/Collapse Button */}
       <Box sx={{ mb: 3, display: "flex", justifyContent: "space-between" }}>
-        <Button
-          endIcon={<KeyboardArrowDown />}
-          // variant="outlined"
-          size="small"
-          sx={{
-            fontSize: "16px",
-            px: 2,
-            py: 0.5,
-            color: "#21263c",
-            "&:hover": {
-              background: "transparent",
-            },
-            "& svg": {
-              color: "#408dfb",
-            },
-            // borderColor: "#1976d2",
-            textTransform: "none",
-          }}
-        >
-          Go to transactions
-        </Button>
+        
       </Box>
 
       {moduleKey === "Customer" && (

@@ -95,14 +95,14 @@ const Navbar = ({ onMenuItemClick }) => {
   const handlePrintOptionClick = (option) => {
     setPrintMenuOpen(false);
     if (option === "current") {
-      router.push("/print");
+      window.print();
     }
   };
 
   const handleGoToOptionClick = (option) => {
     setGoToDialogOpen(false);
     if (option === "Order Vouchers") {
-      router.push("/goto");
+      router.push("/tally/voucher");
     }
   };
 

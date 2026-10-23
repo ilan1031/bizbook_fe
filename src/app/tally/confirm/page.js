@@ -36,7 +36,7 @@ export default function AccountingVoucher() {
           <Typography variant="subtitle1" component="div" sx={{ color: 'white' }}>
             National Enterprises
           </Typography>
-          <IconButton edge="end" color="inherit" aria-label="close">
+          <IconButton onClick={() => router.push("/tally/creation")} edge="end" color="inherit" aria-label="close">
             <CloseIcon />
           </IconButton>
         </Toolbar>
@@ -50,8 +50,8 @@ export default function AccountingVoucher() {
         </Box>
         
         <Box>
-          <Button variant="contained" sx={{ mr: 2, bgcolor: '#3a6ea5' }}>Save</Button>
-          <Button variant="contained" sx={{ bgcolor: '#3a6ea5' }}>Cancel</Button>
+          <Button onClick={() => router.push("/tally/preview")} variant="contained" sx={{ mr: 2, bgcolor: '#3a6ea5' }}>Save</Button>
+          <Button onClick={() => router.push("/tally/creation")} variant="contained" sx={{ bgcolor: '#3a6ea5' }}>Cancel</Button>
         </Box>
       </Box>
       

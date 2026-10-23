@@ -1850,6 +1850,7 @@ const BillManagementApp = ({ journalId }) => {
 
   const BillSection = () => (
     <Paper
+      id="journal-section"
       elevation={0}
       sx={{ px: 2, mb: 6, boxShadow: "none", border: "2px solid #f9f9fb" }}
     >
@@ -2309,7 +2310,7 @@ const BillManagementApp = ({ journalId }) => {
         </Box>
 
         <Box sx={{ display: "flex", alignItems: "center", gap: 2 }}>
-          <div
+          <div data-rbac-feature="tally"
             style={{ display: "flex", alignItems: "center", cursor: "pointer" }}
             onClick={toggleMode}
           >
@@ -2518,20 +2519,7 @@ const BillManagementApp = ({ journalId }) => {
                 Void
               </MenuItem>
 
-              <MenuItem
-                sx={{
-                  fontSize: "13px",
-                  "&:hover": {
-                    backgroundColor: "#408dfb",
-                    color: "white",
-                    borderRadius: 2,
-                    fontSize: "13px",
-                  },
-                  borderBottom: "1px solid #ddd",
-                }}
-              >
-                Expected Payment Date
-              </MenuItem>
+              
               <MenuItem
                 onClick={handleClone}
                 sx={{
@@ -2546,7 +2534,7 @@ const BillManagementApp = ({ journalId }) => {
               >
                 Clone
               </MenuItem>
-              <MenuItem
+              <MenuItem onClick={() => router.push("/purchase/recurringbills/newRecurringBill")}
                 sx={{
                   fontSize: "13px",
                   "&:hover": {
@@ -2559,7 +2547,7 @@ const BillManagementApp = ({ journalId }) => {
               >
                 Make Recurring
               </MenuItem>
-              <MenuItem
+              <MenuItem onClick={() => router.push("/purchase/vendorcredits/new")}
                 sx={{
                   fontSize: "13px",
                   "&:hover": {
@@ -2572,7 +2560,7 @@ const BillManagementApp = ({ journalId }) => {
               >
                 Create Vendor Credits
               </MenuItem>
-              <MenuItem
+              <MenuItem onClick={() => { handleClose?.(); document.getElementById("journal-section")?.scrollIntoView({ behavior: "smooth" }); }}
                 sx={{
                   fontSize: "13px",
                   "&:hover": {
@@ -2700,7 +2688,7 @@ const BillManagementApp = ({ journalId }) => {
               },
             }}
           >
-            <IconButton
+            <IconButton aria-label="Print" onClick={() => window.print()}
               size="small"
               sx={{
                 color: "",
@@ -2815,9 +2803,7 @@ const BillManagementApp = ({ journalId }) => {
                 paddingRight: 1,
               }}
             >
-              <IconButton size="small">
-                <QuestionAnswerRoundedIcon fontSize="small" />
-              </IconButton>
+              
             </Box>
           </Box>
         </Box>

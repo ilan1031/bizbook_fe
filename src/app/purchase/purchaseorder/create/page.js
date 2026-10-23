@@ -401,6 +401,72 @@ const PurchaseOrderForm = () => {
 
   const [isZoho, setIsZoho] = useState(true);
 
+  // Editing an existing purchase order: /purchase/purchaseorder/create?purchase_id=PO-...
+  const [editId, setEditId] = useState(null);
+  const [editVendor, setEditVendor] = useState(null);
+  useEffect(() => {
+    const query = new URLSearchParams(window.location.search);
+    // ?clone_id= copies another PO into a new one (keeps the new number).
+    const cloneId = query.get("clone_id");
+    const id = query.get("purchase_id") || cloneId;
+    if (!id) return;
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    if (!cloneId) setEditId(id);
+    (async () => {
+      try {
+        const orgId = localStorage.getItem("organization_id");
+        const response = await apiService({
+          method: "GET",
+          url: `api/v1/purchase-orders/get-individual-purchase-order?org_id=${orgId}&po_id=${id}`,
+        });
+        const po = response.data?.data;
+        if (!po || !formikRef.current) return;
+        const vendor = po.vendor_id && typeof po.vendor_id === "object" ? po.vendor_id : null;
+        setEditVendor(vendor);
+        if (po.address_type) setAddressType(po.address_type);
+        formikRef.current.setValues({
+          ...formikRef.current.values,
+          vendor_id: vendor?._id || po.vendor_id || "",
+          vendorName: vendor?.contact_name || "",
+          ...(cloneId ? {} : { purchase_number: po.purchase_number, purchaseOrderNumber: po.purchase_number }),
+          reference_number: po.reference_number || "",
+          referenceNumber: po.reference_number || "",
+          date: po.date ? String(po.date).slice(0, 10) : formikRef.current.values.date,
+          deliveryDate: po.delivery_date || po.due_date || null,
+          paymentTerm: po.payment_terms || "Due On Receipt",
+          shipmentPreference: po.shipment_preference || "",
+          termsAndConditions: po.terms_and_conditions || "",
+          addressType: po.address_type || "Organization",
+          organizationName: po.organization_name || formikRef.current.values.organizationName,
+          customer_id: po.customer_id || "",
+          items: (po.items || []).map((item, i) => ({
+            item_id: item.item_id || Date.now() + i,
+            details: item.details || "",
+            quantity: item.quantity ?? 1,
+            rate: item.rate ?? 0,
+            tax: item.tax || "",
+            amount: item.amount ?? 0,
+            sku: item.sku || "",
+            itemName: item.item_name || "",
+          })),
+          subtotal: po.subtotal ?? 0,
+          discount: po.discount ?? 0,
+          tdsOrTcs: po.tds_tcs || "TDS",
+          commission: po.commission ?? 0,
+          taxCategory: po.tax_category || "",
+          taxAmount: po.tax_amount ?? 0,
+          adjustment: po.adjustment ?? 0,
+          total: po.total ?? 0,
+          notes: po.notes || "",
+          status: Number(po.status) || 0,
+        });
+      } catch (error) {
+        showMessage(error?.message || "Couldn't load the purchase order.", "error");
+      }
+    })();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
   // Add useEffect to initialize the mode state
   useEffect(() => {
     // Initialize fromTally flag if it doesn't exist
@@ -538,6 +604,17 @@ const PurchaseOrderForm = () => {
       };
 
       const organization_id = localStorage.getItem("organization_id");
+      if (editId) {
+        await apiService({
+          method: "PUT",
+          url: `api/v1/purchase-orders/update-individual-purchase-order?org_id=${organization_id}&po_id=${editId}`,
+          data: { ...purchaseOrderData, purchaseOrderNumber: editId },
+          file: true,
+        });
+        showMessage("Purchase Order updated", "success");
+        router.push(`/purchase/purchaseorder/${editId}`);
+        return;
+      }
       const params = {
         method: "POST",
         url: `api/v1/purchaseorders/createpurchaseorder?org_id=${organization_id}`,
@@ -698,7 +775,7 @@ const PurchaseOrderForm = () => {
                       <Box component="span" sx={{ mr: 2, mt: "5px" }}>
                         <ShoppingBagOutlinedIcon />
                       </Box>
-                      New Purchase Order
+                      {editId ? `Edit Purchase Order ${editId}` : "New Purchase Order"}
                     </Typography>
                     <div
                       style={{
@@ -707,7 +784,7 @@ const PurchaseOrderForm = () => {
                         gap: "15px",
                       }}
                     >
-                      <div
+                      <div data-rbac-feature="tally"
                         style={{
                           display: "flex",
                           alignItems: "center",
@@ -744,7 +821,7 @@ const PurchaseOrderForm = () => {
                       >
                         <CloseIcon />
                       </IconButton>
-                      <IconButton
+                      <IconButton aria-label="Help" onClick={() => window.dispatchEvent(new Event("bizbooks:help"))}
                         sx={{
                           backgroundColor: "#ff9800",
                           color: "white",
@@ -768,7 +845,7 @@ const PurchaseOrderForm = () => {
                       py: 4,
                     }}
                   >
-                    <VendorSelector formik={formik} />
+                    <VendorSelector formik={formik} details={editVendor} />
 
                     {/* Show error only if touched and error exists */}
                     {formik.touched.vendor_id && formik.errors.vendor_id && (

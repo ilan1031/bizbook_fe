@@ -1775,9 +1775,7 @@ doc.line(titleXStart, dateY + 2, titleXEnd, dateY + 2);
     <Container maxWidth="md" >
       {/* Top Action Bar */}
       <Box sx={{ display: "flex", justifyContent: "space-between", mb: 3 }}>
-        <Button variant="outlined" size="small" endIcon={<ArrowDropDownIcon />}>
-          THIS MONTH
-        </Button>
+        
         <Box>
         <IconButton
   sx={{ fontSize: 20, padding: '6px' }} // smaller padding and icon size

@@ -137,14 +137,6 @@ const menuItems = [
     border: true,
   },
   {
-    text: "Preferences",
-    icon: <Settings className="menu-icon" />,
-    // route: "/import-files",
-    hasArrow: false,
-    primary: false,
-    border: true,
-  },
-  {
     text: "Refresh List",
     icon: <RefreshCcw className="menu-icon" />,
     // route: "/import-files",
@@ -324,13 +316,18 @@ const BillsList = () => {
   };
 
   const handleMenuItemClick = (item) => {
+    if (typeof item === "string") item = menuItems.find((m) => m.text === item) || { text: item };
+    if (/^Import /.test(item.text) && item.route !== "/import-files") {
+      const type = { "Import Customers": "customers", "Import Vendors": "vendors", "Import Items": "items", "Import Quotes": "quote", "Import Bills": "bills", "Import Purchase Orders": "purchase-order" }[item.text];
+      router.push(type ? `/import-files?type=${type}&organization_id=${localStorage.getItem("organization_id")}` : "/import");
+    }
     const OrgId = localStorage.getItem("organization_id");
     if (item.route === "/import-files") {
       router.push(`/import-files?type=bills&organization_id=${OrgId}`);
     }
     if (item.text === "Refresh List") {
       getBills(filterBy, sortColumn, sortOrder);
-    } else if (item.text === "Export Bills") {
+    } else if ((item.text === "Export Bills" || item.text === "Export Current View")) {
       setOpen(true);
     }
     setMenuAnchorEl(null);
@@ -640,50 +637,8 @@ const BillsList = () => {
                       )}
                     </Box>
 
-                    {/* New Custom View Fixed at Bottom */}
                     <Divider />
-                    <MenuItem
-                      onClick={handleNewCustomView}
-                      sx={{
-                        display: "flex",
-                        alignItems: "center",
-                        px: 2,
-                        py: 1,
-                        position: "sticky",
-                        bottom: 0,
-                        backgroundColor: "white", // Ensure it stays on top
-                        zIndex: 1,
-                        "&:hover": {
-                          backgroundColor: "#E6F1FF",
-                        },
-                      }}
-                    >
-                      <IconButton
-                        size="small"
-                        sx={{
-                          backgroundColor: "primary.main",
-                          width: 15,
-                          height: 15,
-                          borderRadius: "50%",
-                          marginRight: 1,
-                        }}
-                      >
-                        <AddIcon
-                          sx={{
-                            fontSize: 10,
-                            color: "menu.text.normal",
-                          }}
-                        />
-                      </IconButton>
-                      <Typography
-                        sx={{
-                          fontSize: "14px",
-                          color: "primary.main",
-                        }}
-                      >
-                        New Custom View
-                      </Typography>
-                    </MenuItem>
+                    
                   </Menu>
 
                   <Box sx={{ display: "flex", alignItems: "center", gap: 1.2 }}>

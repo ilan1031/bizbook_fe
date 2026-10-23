@@ -65,7 +65,7 @@ const TallyUi = () => {
   const handleItemClick = (item) => {
     setSelectedItem(item);
     if (item === "Voucher Type") {
-      router.push("/vouchertype");
+      router.push("/tally/voucher");
       handleCloseDialog();
     }
   };
@@ -83,13 +83,13 @@ const TallyUi = () => {
   };
 
   const handleOrderVouchersClick = () => {
-    router.push("/voucher");
+    router.push("/tally/voucher");
     handleCloseVoucherDialog();
   };
 
   const handleFunctionKeyClick = (key) => {
     if (key === "F10") {
-      router.push("/voucher");
+      router.push("/tally/voucher");
     }
   };
 
@@ -175,7 +175,7 @@ const TallyUi = () => {
                   lineHeight: "18px",
                 }}
               >
-                {"Tally"}
+                {"Classic"}
               </span>
               {isZoho ? (
                 <ToggleOffIcon

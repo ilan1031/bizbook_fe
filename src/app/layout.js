@@ -12,6 +12,7 @@ import { styled } from "@mui/material/styles";
 import AuthGuard from "../services/AuthGuard";
 import { PermissionProvider } from "../services/PermissionProvider";
 import RbacButtonGuard from "../services/RbacButtonGuard";
+import { HelpHost } from "./common/helpAndSupport/HelpAndSupport";
 import { ThemeProvider } from "@mui/material/styles";
 import { AppRouterCacheProvider } from "@mui/material-nextjs/v15-appRouter";
 import theme from "./theme"; // adjust path if needed
@@ -35,12 +36,11 @@ export default function RootLayout({ children }) {
   };
 
   // Define paths where Sidebar, Navbar, and Footer should be hidden
-  const hideLayout = [
-    "/organisation",
-    "/organisation/organisationsetuppage",
-    "/organisation/login",
-    "/organization-list",
-  ].includes(pathname);
+  // The customer portal (/portal/...) has its own layout and sign-in.
+  const isPortal = pathname.startsWith("/portal");
+  const hideLayout =
+    isPortal ||
+    ["/organisation", "/organisation/organisationsetuppage", "/organisation/login", "/organization-list"].includes(pathname);
   
   return (
     <html lang="en">
@@ -51,6 +51,7 @@ export default function RootLayout({ children }) {
     <ThemeProvider theme={theme}>
     <PermissionProvider>
       <RbacButtonGuard />
+      {!hideLayout && <HelpHost />}
       <CssBaseline />
       <Box sx={{ display: "flex", flexDirection: "column", height: "100vh" }}>
         {!hideLayout && showSidebar && <Navbar />}
@@ -79,9 +80,7 @@ export default function RootLayout({ children }) {
             }}
           >
             <SnackbarProvider>
-              <AuthGuard>
-                {children}
-              </AuthGuard>
+              {isPortal ? children : <AuthGuard>{children}</AuthGuard>}
             </SnackbarProvider>
           </Box>
         </Box>

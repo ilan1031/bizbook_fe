@@ -807,6 +807,7 @@
 
 
 "use client";
+import { CloseReportButton, ReportsMenuButton, ShareReportButton } from "../ReportControls";
 import React, { useState, useEffect } from "react";
 import {
   Box,
@@ -1090,9 +1091,7 @@ const JournalReport = () => {
                 height: "30px",
               }}
             >
-              <IconButton size="small" sx={{ color: "#333", padding: "2px" }}>
-                <MenuIcon fontSize="small" sx={{ fontsize: "8px" }} />
-              </IconButton>
+              <ReportsMenuButton />
             </Box>
             <Box>
               <Box>
@@ -1117,9 +1116,7 @@ const JournalReport = () => {
 
           {/*Right Box*/}
           <Box sx={{ display: "flex", alignItems: "center", gap: 2 }}>
-            <IconButton size="small">
-              <Settings2 sx={{ fontSize: "16px" }} height="20px" />
-            </IconButton>
+            
 
             <Box
               display="flex"
@@ -1140,9 +1137,7 @@ const JournalReport = () => {
               <Box width="1px" height="24px" bgcolor="grey.400" />
 
               <Box px={1} display="flex" alignItems="center" bgcolor="#f5f5f5">
-                <IconButton size="small">
-                  <ShareIcon sx={{ fontSize: "16px" }} />
-                </IconButton>
+                <ShareReportButton />
               </Box>
             </Box>
 
@@ -1211,17 +1206,7 @@ const JournalReport = () => {
               </MenuItem>
             </Menu>
 
-            <IconButton
-              size="small"
-              sx={{
-                color: "#d32f2f",
-                "&:hover": {
-                  backgroundColor: "rgba(211, 47, 47, 0.04)",
-                },
-              }}
-            >
-              <CloseIcon fontSize="small" />
-            </IconButton>
+            <CloseReportButton />
           </Box>
         </Box>
         <Divider />

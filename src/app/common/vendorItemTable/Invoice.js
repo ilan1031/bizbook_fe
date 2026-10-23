@@ -461,18 +461,7 @@ const Invoice = () => {
           sx={{ fontSize: "16px", fontWeight: "500", mb: 2 }}
         >
           Item Table
-          <Button
-            sx={{
-              float: "right",
-              textTransform: "none",
-              borderRadius: "3px",
-              color: "#3a86ff",
-              backgroundColor: "rgba(58, 134, 255, 0.1)",
-            }}
-            startIcon={<AddIcon />}
-          >
-            Bulk Actions
-          </Button>
+          
         </Typography>
 
         <TableContainer

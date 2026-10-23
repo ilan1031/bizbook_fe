@@ -163,15 +163,6 @@ const menuItems = [
     border: true,
   },
   {
-    text: "Preferences",
-    icon: <Settings className="menu-icon" />,
-    route: "/import-files",
-    query: { type: "purchase-order" },
-    hasArrow: false,
-    primary: false,
-    border: false,
-  },
-  {
     text: "Manage Custom Fields",
     icon: <ListAlt className="menu-icon" />,
     route: "/import-files",
@@ -414,6 +405,11 @@ const PurchaseOrderList = () => {
   };
 
   const handleMenuItemClick = (item) => {
+    if (typeof item === "string") item = menuItems.find((m) => m.text === item) || { text: item };
+    if (/^Import /.test(item.text) && item.route !== "/import-files") {
+      const type = { "Import Customers": "customers", "Import Vendors": "vendors", "Import Items": "items", "Import Quotes": "quote", "Import Bills": "bills", "Import Purchase Orders": "purchase-order" }[item.text];
+      router.push(type ? `/import-files?type=${type}&organization_id=${localStorage.getItem("organization_id")}` : "/import");
+    }
     console.log("item handleMenuItemClick-------", item);
     const OrgId = localStorage.getItem("organization_id");
 
@@ -421,7 +417,7 @@ const PurchaseOrderList = () => {
       router.push(`/import-files?type=purchase-order&organization_id=${OrgId}`);
     }
     // Implement specific actions based on menu item
-    if (item.text === "Export Purchase Orders") {
+    if ((item.text === "Export Purchase Orders" || item.text === "Export Current View")) {
       setOpen(true);
     } else if (item.text === "Refresh List") {
       getPurchaseOrder(filterBy, sortColumn, sortOrder);
@@ -738,50 +734,8 @@ const PurchaseOrderList = () => {
                       )}
                     </Box>
 
-                    {/* New Custom View Fixed at Bottom */}
                     <Divider />
-                    <MenuItem
-                      onClick={handleNewCustomView}
-                      sx={{
-                        display: "flex",
-                        alignItems: "center",
-                        px: 2,
-                        py: 1,
-                        position: "sticky",
-                        bottom: 0,
-                        backgroundColor: "white", // Ensure it stays on top
-                        zIndex: 1,
-                        "&:hover": {
-                          backgroundColor: "#E6F1FF",
-                        },
-                      }}
-                    >
-                      <IconButton
-                        size="small"
-                        sx={{
-                          backgroundColor: "primary.main",
-                          width: 15,
-                          height: 15,
-                          borderRadius: "50%",
-                          marginRight: 1,
-                        }}
-                      >
-                        <AddIcon
-                          sx={{
-                            fontSize: 10,
-                            color: "menu.text.normal",
-                          }}
-                        />
-                      </IconButton>
-                      <Typography
-                        sx={{
-                          fontSize: "14px",
-                          color: "primary.main",
-                        }}
-                      >
-                        New Custom View
-                      </Typography>
-                    </MenuItem>
+                    
                   </Menu>
 
                   <Box sx={{ display: "flex", alignItems: "center", gap: 1.2 }}>

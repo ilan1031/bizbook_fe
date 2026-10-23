@@ -436,7 +436,7 @@ const SalesView = ({ data, organizationData, callViewAPI, loading }) => {
       const dataResponse = response.data;
       showMessage(dataResponse.message, "success");
       setOpenDelete(false);
-      router.push(`/sales/orders`);
+      router.push("/sales/salesOrder");
     } catch (err) {
       console.error("Failed to delete sales order:", err);
       showMessage(err.message || "Error deleting sales order", "error");
@@ -2176,7 +2176,7 @@ const SalesView = ({ data, organizationData, callViewAPI, loading }) => {
               </>
             ) : (
               <>
-                <Button
+                <Button onClick={() => router.push(`/sales/salesOrder/${data?.salesorder_id}/email`)}
                   variant="contained"
                   sx={{
                     ml: 2,
@@ -2532,7 +2532,7 @@ const SalesView = ({ data, organizationData, callViewAPI, loading }) => {
 
         <Box sx={{ display: "flex", alignItems: "center", gap: 2 }}>
           {/* Toggle Button */}
-          <div
+          <div data-rbac-feature="tally"
             style={{ display: "flex", alignItems: "center", cursor: "pointer" }}
             onClick={toggleMode}
           >
@@ -2961,22 +2961,7 @@ const SalesView = ({ data, organizationData, callViewAPI, loading }) => {
                   </MenuItem>
                 )}
 
-                <MenuItem
-                  sx={{
-                    backgroundColor: "transparent",
-                    fontSize: "12px",
-                    "&:hover": {
-                      backgroundColor: "#408dfb",
-                      color: "white",
-                      borderRadius: "6px",
-                      "& .menu-icon": {
-                        color: "white !important",
-                      },
-                    },
-                  }}
-                >
-                  Convert to Purchase Order
-                </MenuItem>
+                
 
                 {(data?.order_status === "confirmed" ||
                   data?.order_status === "closed") && (

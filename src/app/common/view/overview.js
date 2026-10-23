@@ -2390,29 +2390,8 @@ const Overview = ({ details, callAPI, moduleKey }) => {
                 flexWrap: "wrap",
               }}
             >
-              <Button
-                size="small"
-                sx={{
-                  mr: 1,
-                  fontSize: "12px",
-                  color: "#363636",
-                  padding: "4px 8px",
-                }}
-                endIcon={<ArrowDropDownIcon />}
-              >
-                Last 6 Months
-              </Button>
-              <Button
-                size="small"
-                sx={{
-                  fontSize: "12px",
-                  color: "#363636",
-                  padding: "4px 8px",
-                }}
-                endIcon={<ArrowDropDownIcon />}
-              >
-                Accrual
-              </Button>
+              
+              
             </Box>
           </Box>
 

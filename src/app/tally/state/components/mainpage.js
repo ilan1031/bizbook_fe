@@ -63,7 +63,7 @@ export default function Home() {
   const selectSupply = (state) => {
     setSelectedSupply(state);
     setIsSupplyOpen(false);
-    router.push("/voucher");
+    router.push("/tally/voucher");
   };
 
   const handleClickOutside = (event) => {

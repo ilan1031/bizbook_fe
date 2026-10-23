@@ -184,21 +184,7 @@ const CustomFilterMenu = ({
     </List>
 
     {/* Footer */}
-    <ListItem 
-      // button
-      alignItems="center"
-      sx={{ py: 1.5, px: 2, position: 'sticky', bottom: 0, borderTop: '1px solid #f0f0f0', backgroundColor: '#fff', '&:hover': { backgroundColor: '#f5f5f5' }, zIndex: 10 }}
-    >
-      <IconButton
-        size="small"
-        sx={{ mr: 2, bgcolor: 'transparent', color: 'primary.main', '&:hover': { bgcolor: 'transparent' } }}
-      >
-        <AddCircleOutlinedIcon fontSize="inherit" />
-      </IconButton>
-      <Typography variant="subtitle2" color="primary">
-        New Custom View
-      </Typography>
-    </ListItem>
+    
   </Box>
 </Menu>
 

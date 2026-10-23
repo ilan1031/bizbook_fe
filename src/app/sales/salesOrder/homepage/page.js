@@ -196,13 +196,6 @@ const menuItems = [
   },
   // { text: "Import Debit Notes", icon: <ReceiptIcon className="menu-icon" /> },
   {
-    text: "Preferences",
-    icon: <Settings className="menu-icon" />,
-    hasArrow: false,
-    primary: false,
-    border: false,
-  },
-  {
     text: "Manage Custom Fields",
     icon: <ListAltIcon className="menu-icon" />,
     hasArrow: false,
@@ -442,38 +435,7 @@ const CustomFilterMenu = ({
       </List>
 
       {/* Sticky Footer with "+ New Custom View" Button */}
-      <ListItemButton
-        alignItems="center"
-        sx={{
-          py: 1.5,
-          px: 2,
-          position: "sticky",
-          bottom: 0,
-          borderTop: "1px solid #f0f0f0",
-          backgroundColor: "#fff",
-          "&:hover": {
-            backgroundColor: "#f5f5f5",
-          },
-          zIndex: 10,
-        }}
-      >
-        <IconButton
-          size="small"
-          sx={{
-            mr: 2,
-            bgcolor: "#e3f2fd",
-            color: "#1976d2",
-            "&:hover": {
-              bgcolor: "#bbdefb",
-            },
-          }}
-        >
-          <AddCircleOutlinedIcon fontSize="inherit" />
-        </IconButton>
-        <Typography variant="subtitle2" color="primary">
-          New Custom View
-        </Typography>
-      </ListItemButton>
+      
     </Menu>
   );
 };
@@ -550,7 +512,7 @@ const SalesOrderHomePage = () => {
           <IconButton sx={{ color: "#555" }} onClick={handleMoreMenuClick}>
             <MoreVertIcon />
           </IconButton>
-          <IconButton
+          <IconButton aria-label="Help" onClick={() => window.dispatchEvent(new Event("bizbooks:help"))}
             sx={{
               backgroundColor: "#ff9800",
               color: "white",

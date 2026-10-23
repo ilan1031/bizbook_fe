@@ -2136,27 +2136,7 @@ const RecordExpense = () => {
                     </Box>
                   </Box>
 
-                  <Button
-                    // onClick={handleGetTaxpayerDetails}
-                    // variant="text"
-                    // size="small"
-                    sx={{
-                      mt: 1,
-                      p: 0,
-                      textTransform: "none",
-                      color: "#1976d2",
-                      fontSize: "13px",
-                      ml: "20px",
-                      fontWeight: "normal",
-                      minWidth: "auto",
-                      "&:hover": {
-                        backgroundColor: "transparent",
-                        textDecoration: "underline",
-                      },
-                    }}
-                  >
-                    Get Taxpayer details
-                  </Button>
+                  
                 </Box>
               </>
             )}
@@ -3189,7 +3169,7 @@ const RecordExpense = () => {
             >
               <Button
                 variant="outlined"
-                onClick={() => router.push("/")}
+                onClick={() => router.push("/purchase/expense")}
               >
                 Cancel
               </Button>

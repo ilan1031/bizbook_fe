@@ -84,6 +84,14 @@ test("superadmin can open everything, including the admin screen", () => {
   assert.equal(h.firstAllowedRoute(), "/home");
 });
 
+test("modules without screens are closed to everyone, the superadmin included", () => {
+  const planned = { planned_routes: ["/time/timesheets", "/time/projects"] };
+  const sa = buildPermissionHelpers(me({}, { is_superadmin: true, ...planned }));
+  assert.ok(!sa.canAccessPath("/time/projects"));
+  assert.ok(sa.canAccessPath("/sales/invoices"));
+  assert.ok(!buildPermissionHelpers(me({ invoices: ["view"] }, planned)).canAccessPath("/time/timesheets/new"));
+});
+
 test("firstAllowedRoute picks the first permitted page in catalog order", () => {
   assert.equal(buildPermissionHelpers(me({ profitAndLoss: ["view"], invoices: ["view"] })).firstAllowedRoute(), "/sales/invoices");
   assert.equal(buildPermissionHelpers(me({ home: ["view"] })).firstAllowedRoute(), "/home");

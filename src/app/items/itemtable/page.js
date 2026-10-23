@@ -793,6 +793,8 @@
 
 // export default ItemsTable;
 "use client";
+import { downloadCsv } from "../../common/BulkActionsBar";
+import BulkActionsBar from "../../common/BulkActionsBar";
 import { useEffect, useRef, useState } from "react";
 import {
   Toolbar,
@@ -905,31 +907,9 @@ const menuItems = [
     primary: false,
   },
   {
-    text: "Preferences",
-    icon: (
-      <SettingsIcon
-        className="menu-icon"
-        sx={{ fontSize: 14, color: "#408dfb" }}
-      />
-    ),
-    hasArrow: false,
-    primary: false,
-  },
-  {
     text: "Refresh List",
     icon: (
       <RefreshIcon
-        className="menu-icon"
-        sx={{ fontSize: 14, color: "#408dfb" }}
-      />
-    ),
-    hasArrow: false,
-    primary: false,
-  },
-  {
-    text: "Reset Column Width",
-    icon: (
-      <SwapHorizIcon
         className="menu-icon"
         sx={{ fontSize: 14, color: "#408dfb" }}
       />
@@ -1147,26 +1127,12 @@ const ItemsTable = () => {
           <Box sx={{ display: "flex", alignItems: "center" }}>
             {selected.length > 0 && (
               <>
-                <ButtonGroup
-                  variant="contained"
-                  aria-label="Basic button group"
-                  className="group-btn"
-                  sx={{ mr: 1 }}
-                >
-                  <Button className="bulk-update-btn">
-                    <MailOutlineIcon className="bulk-update-btn-icon" />
-                  </Button>
-                  <Button className="bulk-update-btn">
-                    <PrintOutlinedIcon className="bulk-update-btn-icon" />
-                  </Button>
-                </ButtonGroup>
-                <Button
-                  variant="contained"
-                  className="bulk-update-btn"
-                  sx={{ mr: 1 }}
-                >
-                  Bulk Update
-                </Button>
+                <BulkActionsBar
+                      module="items"
+                      rows={itemsList.filter((r) => selected.some((id) => id === r._id || id === r.id || id === r.item_id))}
+                      onClear={() => setSelected([])}
+                      onDone={() => fetchItemsList(filterBy)}
+                    />
                 <IconButton
                   className="more-icon"
                   onClick={(e) => setMenuAnchorEl(e.currentTarget)}
@@ -1189,7 +1155,7 @@ const ItemsTable = () => {
                   }}
                 >
                   {menuItems.map((item) => (
-                    <MenuItem
+                    <MenuItem onClick={() => { if (item.hasArrow) return; setMenuAnchorEl(null); if (item.text === "Import Items") router.push(`/import-files?type=items&organization_id=${localStorage.getItem("organization_id")}`); else if (/^Export/.test(item.text)) downloadCsv("Items", itemsList, [["Name", "name"], ["SKU", "sku"], ["Type", "item_type_formatted"], ["Rate", "rate"], ["Unit", "unit"], ["Status", "status"]]); else if (item.text === "Refresh List") fetchItemsList(filterBy); }}
                       key={item.text}
                       sx={{
                         fontSize: "13px",
@@ -1421,38 +1387,7 @@ const ItemsTable = () => {
                     )}
                   </Box>
                   <Divider />
-                  <MenuItem
-                    onClick={handleNewCustomView}
-                    sx={{
-                      display: "flex",
-                      alignItems: "center",
-                      px: 2,
-                      py: 1,
-                      position: "sticky",
-                      bottom: 0,
-                      backgroundColor: "white",
-                      zIndex: 1,
-                      "&:hover": {
-                        backgroundColor: "#E6F1FF",
-                      },
-                    }}
-                  >
-                    <IconButton
-                      size="small"
-                      sx={{
-                        backgroundColor: "#4285F4",
-                        width: 20,
-                        height: 20,
-                        borderRadius: "50%",
-                        marginRight: 1,
-                      }}
-                    >
-                      <AddIcon sx={{ fontSize: 14, color: "white" }} />
-                    </IconButton>
-                    <Typography sx={{ fontSize: "13px", color: "#4285F4" }}>
-                      New Custom View
-                    </Typography>
-                  </MenuItem>
+                  
                 </Menu>
               </>
             )}
@@ -1492,7 +1427,7 @@ const ItemsTable = () => {
                 }}
               >
                 {menuItems.map((item) => (
-                  <MenuItem
+                  <MenuItem onClick={() => { if (item.hasArrow) return; setMenuAnchorEl(null); if (item.text === "Import Items") router.push(`/import-files?type=items&organization_id=${localStorage.getItem("organization_id")}`); else if (/^Export/.test(item.text)) downloadCsv("Items", itemsList, [["Name", "name"], ["SKU", "sku"], ["Type", "item_type_formatted"], ["Rate", "rate"], ["Unit", "unit"], ["Status", "status"]]); else if (item.text === "Refresh List") fetchItemsList(filterBy); }}
                     key={item.text}
                     sx={{
                       fontSize: "13px",
@@ -1517,7 +1452,7 @@ const ItemsTable = () => {
                   </MenuItem>
                 ))}
               </Menu>
-              <IconButton
+              <IconButton aria-label="Help" onClick={() => window.dispatchEvent(new Event("bizbooks:help"))}
                 sx={{
                   backgroundColor: "#ff9800",
                   color: "white",

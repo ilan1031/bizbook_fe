@@ -1544,7 +1544,7 @@ const InvoiceCreationPage = () => {
           </Typography>
           <Box>
             <div style={{ display: "flex", alignItems: "center", gap: "15px" }}>
-              <div
+              <div data-rbac-feature="tally"
                 style={{
                   display: "flex",
                   alignItems: "center",
@@ -1579,7 +1579,7 @@ const InvoiceCreationPage = () => {
               >
                 <CloseIcon />
               </IconButton>
-              <IconButton
+              <IconButton aria-label="Help" onClick={() => window.dispatchEvent(new Event("bizbooks:help"))}
                 sx={{
                   backgroundColor: "#ff9800",
                   color: "white",
@@ -1724,29 +1724,14 @@ const InvoiceCreationPage = () => {
               </FormControl>
 
               {/* Search Button */}
-              <IconButton sx={searchButtonStyle}>
+              <IconButton aria-label="Choose customer" onClick={handleOpen} sx={searchButtonStyle}>
                 <SearchOutlinedIcon fontSize="medium" />
               </IconButton>
 
               {/* Currency Button - Only Visible if Currency Exists */}
               {customerData?.currency_code && (
                 <Box sx={{ ml: 1 }}>
-                  <IconButton
-                    sx={{
-                      border: "1px solid #ccc",
-                      borderRadius: "4px",
-                      px: 2,
-                      fontSize: "13px",
-                      fontWeight: "600",
-                      color: "#222",
-                      backgroundColor: "#f5f5f5",
-                      cursor: "default",
-                      "&:hover": { backgroundColor: "#f5f5f5" },
-                    }}
-                    disableRipple
-                  >
-                    {customerData.currency_code.split("-")[0].trim()}
-                  </IconButton>
+                  <Box sx={{ border: "1px solid #ccc", borderRadius: "4px", px: 2, py: 0.75, fontSize: "13px", fontWeight: 600, color: "#222", backgroundColor: "#f5f5f5" }}>{customerData.currency_code.split("-")[0].trim()}</Box>
                 </Box>
               )}
             </Grid>

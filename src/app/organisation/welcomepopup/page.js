@@ -174,17 +174,7 @@ const WelcomeScreen = () => {
                 }
               />
               <Box sx={{ ml: "auto" }}>
-                <Button
-                  variant="outlined"
-                  sx={{
-                    textTransform: "none",
-                    borderColor: "#2d62ed",
-                    color: "#2d62ed",
-                    "&:hover": { borderColor: "#1a48c9", color: "#1a48c9" },
-                  }}
-                >
-                  View Live Webinar
-                </Button>
+                
               </Box>
             </Box>
           </CardContent>

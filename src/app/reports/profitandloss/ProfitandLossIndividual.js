@@ -1,3 +1,4 @@
+import { CloseReportButton, ReportsMenuButton, ShareReportButton } from "../ReportControls";
 import React, { useState, useEffect } from "react";
 import {
   Box,
@@ -161,9 +162,7 @@ const AccountTransactions = ({
                 height: "30px",
               }}
             >
-              <IconButton size="small" sx={{ color: "#333", padding: "2px" }}>
-                <Menu fontSize="small" sx={{ fontSize: "8px" }} />
-              </IconButton>
+              <ReportsMenuButton />
             </Box>
             <Box>
               <Typography
@@ -186,9 +185,7 @@ const AccountTransactions = ({
 
           {/* Right Box */}
           <Box sx={{ display: "flex", alignItems: "center", gap: 2 }}>
-            <IconButton size="small">
-              <Settings2 sx={{ fontSize: "16px" }} height="20px" />
-            </IconButton>
+            
 
             <Box
               display="flex"
@@ -201,15 +198,13 @@ const AccountTransactions = ({
               sx={{ borderRadius: "6px" }}
             >
               <Box px={1} display="flex" alignItems="center" bgcolor="#f5f5f5">
-                <IconButton size="small">
+                <IconButton aria-label="Reload report" onClick={() => window.location.reload()} size="small">
                   <ReplayIcon sx={{ fontSize: "16px" }} />
                 </IconButton>
               </Box>
               <Box width="1px" height="24px" bgcolor="grey.400" />
               <Box px={1} display="flex" alignItems="center" bgcolor="#f5f5f5">
-                <IconButton size="small">
-                  <ShareIcon sx={{ fontSize: "16px" }} />
-                </IconButton>
+                <ShareReportButton />
               </Box>
             </Box>
 
@@ -253,7 +248,7 @@ const AccountTransactions = ({
               >
                 EXPORT AS
               </Box>
-              <MenuItem>
+              <MenuItem onClick={() => window.print()}>
                 <ListItemText
                   primaryTypographyProps={{
                     fontSize: "13px",
@@ -361,7 +356,7 @@ const AccountTransactions = ({
             </Box>
           </Box>
 
-          <Button
+          <Button onClick={() => window.location.reload()}
             variant="contained"
             size="small"
             sx={{ ml: 3, borderRadius: "6px", zIndex: 0 }}

@@ -51,6 +51,16 @@ const headerCellSx = {
   bgcolor: "#f6f6fa",
 };
 const fmt = (d) => (d ? dayjs(d).format("DD-MM-YYYY HH:mm") : "—");
+const usageText = (used, limit) => `${used ?? 0}${Number.isInteger(limit) ? ` (${limit})` : ""}`;
+
+// Create limits the superadmin sets per user; empty means no limit.
+const LIMIT_FIELDS = [
+  ["per_day", "New records per day"],
+  ["per_month", "New records per month"],
+  ["per_year", "New records per year"],
+  ["max_organizations", "Organisations allowed"],
+];
+const limitError = (v) => (v === "" || (/^\d+$/.test(v) && Number(v) <= 1000000) ? "" : "Whole number, or empty");
 
 export default function UsersAccessPage() {
   const { showMessage } = useSnackbar();
@@ -165,6 +175,7 @@ export default function UsersAccessPage() {
                 <TableCell sx={headerCellSx}>Status</TableCell>
                 <TableCell sx={headerCellSx}>Pages</TableCell>
                 <TableCell sx={headerCellSx}>Devices</TableCell>
+                <TableCell sx={headerCellSx}>Created (day · month · year)</TableCell>
                 <TableCell sx={headerCellSx}>Last sign-in</TableCell>
                 <TableCell sx={headerCellSx} align="right">
                   Actions
@@ -174,13 +185,13 @@ export default function UsersAccessPage() {
             <TableBody>
               {loading ? (
                 <TableRow>
-                  <TableCell colSpan={7} align="center" sx={{ py: 5 }}>
+                  <TableCell colSpan={8} align="center" sx={{ py: 5 }}>
                     <CircularProgress size={24} />
                   </TableCell>
                 </TableRow>
               ) : users.length === 0 ? (
                 <TableRow>
-                  <TableCell colSpan={7} align="center" sx={{ py: 5, color: "#6c718a" }}>
+                  <TableCell colSpan={8} align="center" sx={{ py: 5, color: "#6c718a" }}>
                     No users here.
                   </TableCell>
                 </TableRow>
@@ -207,6 +218,18 @@ export default function UsersAccessPage() {
                       <TableCell>{isSuper ? "All" : pageCount}</TableCell>
                       <TableCell>
                         {isSuper ? "Any" : `${(u.allowed_ips || []).length} / ${u.ip_limit ?? 2}`}
+                      </TableCell>
+                      <TableCell sx={{ whiteSpace: "nowrap" }}>
+                        {isSuper ? (
+                          "No limit"
+                        ) : (
+                          <Tooltip title="Records created today / this month / this year (limit in brackets)">
+                            <span>
+                              {usageText(u.usage?.day, u.limits?.per_day)} · {usageText(u.usage?.month, u.limits?.per_month)} ·{" "}
+                              {usageText(u.usage?.year, u.limits?.per_year)}
+                            </span>
+                          </Tooltip>
+                        )}
                       </TableCell>
                       <TableCell>{fmt(u.last_login_at)}</TableCell>
                       <TableCell align="right" sx={{ whiteSpace: "nowrap" }}>
@@ -288,6 +311,9 @@ function ManageUserDialog({ user, catalog, onClose, onSave, onRemoveIp }) {
   const [status, setStatus] = useState(user.status || "pending");
   const [ipLimit, setIpLimit] = useState(String(user.ip_limit ?? 2));
   const [perms, setPerms] = useState(() => ({ ...(user.permissions || {}) }));
+  const [limits, setLimits] = useState(() =>
+    Object.fromEntries(LIMIT_FIELDS.map(([k]) => [k, Number.isInteger(user.limits?.[k]) ? String(user.limits[k]) : ""]))
+  );
   const [saving, setSaving] = useState(false);
 
   const groups = useMemo(() => {
@@ -326,7 +352,8 @@ function ManageUserDialog({ user, catalog, onClose, onSave, onRemoveIp }) {
     });
 
   const limitNum = Number(ipLimit);
-  const limitValid = Number.isInteger(limitNum) && limitNum >= 0 && limitNum <= 50;
+  const limitValid =
+    Number.isInteger(limitNum) && limitNum >= 0 && limitNum <= 50 && LIMIT_FIELDS.every(([k]) => !limitError(limits[k]));
 
   return (
     <Dialog open onClose={onClose} maxWidth="md" fullWidth>
@@ -360,6 +387,28 @@ function ManageUserDialog({ user, catalog, onClose, onSave, onRemoveIp }) {
             helperText={limitValid ? "How many IP addresses this user may sign in from" : "0 to 50"}
             sx={{ width: 220 }}
           />
+        </Box>
+
+        <Typography sx={{ fontSize: "14px", fontWeight: 600, mb: 0.5 }}>Create limits</Typography>
+        <Typography sx={{ fontSize: "12px", color: "#6c718a", mb: 1.5 }}>
+          How many new records (customers, invoices, bills, items, imports...) this user may create, and how many
+          organisations they may have. Leave empty for no limit. So far: {user.usage?.day ?? 0} today,{" "}
+          {user.usage?.month ?? 0} this month, {user.usage?.year ?? 0} this year, {user.usage?.organizations ?? 0}{" "}
+          organisation(s).
+        </Typography>
+        <Box sx={{ display: "grid", gridTemplateColumns: { xs: "1fr", sm: "repeat(4, 1fr)" }, gap: 1.5, mb: 3 }}>
+          {LIMIT_FIELDS.map(([key, label]) => (
+            <TextField
+              key={key}
+              size="small"
+              label={label}
+              placeholder="No limit"
+              value={limits[key]}
+              onChange={(e) => setLimits({ ...limits, [key]: e.target.value.replace(/[^\d]/g, "") })}
+              error={Boolean(limitError(limits[key]))}
+              helperText={limitError(limits[key]) || " "}
+            />
+          ))}
         </Box>
 
         <Typography sx={{ fontSize: "14px", fontWeight: 600, mb: 1 }}>
@@ -444,6 +493,11 @@ function ManageUserDialog({ user, catalog, onClose, onSave, onRemoveIp }) {
                   <TableRow key={page.key} hover>
                     <TableCell sx={{ fontSize: "13px", pl: 3 }}>
                       {page.label}
+                      {page.group === "Features" && page.apiOnly && page.key !== "customerPortal" && (
+                        <Typography component="span" sx={{ display: "block", fontSize: "11px", color: "#6c718a" }}>
+                          Shown in other screens; off hides it everywhere
+                        </Typography>
+                      )}
                       {page.key === "customerPortal" && (
                         <Typography component="span" sx={{ display: "block", fontSize: "11px", color: "#6c718a" }}>
                           Off: their customers can&apos;t use the portal
@@ -496,7 +550,12 @@ function ManageUserDialog({ user, catalog, onClose, onSave, onRemoveIp }) {
           disabled={saving || !limitValid}
           onClick={async () => {
             setSaving(true);
-            await onSave({ status, ip_limit: limitNum, permissions: perms });
+            await onSave({
+              status,
+              ip_limit: limitNum,
+              permissions: perms,
+              limits: Object.fromEntries(LIMIT_FIELDS.map(([k]) => [k, limits[k] === "" ? null : Number(limits[k])])),
+            });
             setSaving(false);
           }}
           sx={{ textTransform: "none", fontWeight: 600 }}

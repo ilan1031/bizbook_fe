@@ -128,7 +128,7 @@ const SearchComponent = () => {
 </Box>
 
         {/* Sticky New Customer button with hover effect */}
-        <ListItemButton
+        <ListItemButton onClick={() => window.open("/sales/customer/create", "_blank")}
           alignItems="center"
           sx={{
             py: 1.5,

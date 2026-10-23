@@ -125,22 +125,12 @@ const menuItems = [
     icon: <FileDownloadIcon color="primary" style={{ fontSize: "20px" }} />,
   },
   {
-    text: "Preferences",
-    icon: <SettingsIcon color="primary" style={{ fontSize: "20px" }} />,
-  },
-  {
     text: "Manage Custom Fields",
     icon: <ListAltIcon color="primary" style={{ fontSize: "20px" }} />,
   },
   {
     text: "Refresh List",
     icon: <RefreshIcon color="primary" style={{ fontSize: "20px" }} />,
-  },
-  {
-    text: "Reset Column Width",
-    icon: (
-      <FormatLineSpacingIcon color="primary" style={{ fontSize: "20px" }} />
-    ),
   },
 ];
 
@@ -206,138 +196,7 @@ const staticData = [
   },
 ];
 
-const SelectionToolbar = ({ selectedCount, onClearSelection }) => {
-  return (
-    <Box
-      sx={{
-        display: "flex",
-        alignItems: "center",
-        width: "100%",
-        bgcolor: "#f5f5f5",
-        borderBottom: "1px solid #e0e0e0",
-        px: 2,
-        py: 1,
-      }}
-    >
-      <Button
-        variant="text"
-        size="small"
-        sx={{
-          textTransform: "none",
-          fontWeight: 500,
-          color: "#333",
-          mr: 1,
-          border: "1px solid #ddd",
-          bgcolor: "white",
-          "&:hover": { bgcolor: "#f8f8f8" },
-        }}
-      >
-        Mark As Sent
-      </Button>
 
-      <Button
-        variant="text"
-        size="small"
-        sx={{
-          textTransform: "none",
-          fontWeight: 500,
-          color: "#333",
-          mr: 1,
-          border: "1px solid #ddd",
-          bgcolor: "white",
-          "&:hover": { bgcolor: "#f8f8f8" },
-        }}
-      >
-        Associate with Sales Orders
-      </Button>
-
-      <IconButton
-        size="small"
-        sx={{ mx: 0.5, bgcolor: "white", border: "1px solid #ddd" }}
-      >
-        <FileDownloadIcon fontSize="small" />
-      </IconButton>
-
-      <IconButton
-        size="small"
-        sx={{ mx: 0.5, bgcolor: "white", border: "1px solid #ddd" }}
-      >
-        <FileUploadIcon fontSize="small" />
-      </IconButton>
-
-      <IconButton
-        size="small"
-        sx={{ mx: 0.5, bgcolor: "white", border: "1px solid #ddd" }}
-      >
-        {/* <ReceiptIcon fontSize="small" /> */}
-      </IconButton>
-
-      <Box sx={{ display: "flex", alignItems: "center", ml: "auto" }}>
-        <Button
-          variant="outlined"
-          size="small"
-          endIcon={<KeyboardArrowDownIcon />}
-          sx={{
-            textTransform: "none",
-            borderColor: "#ddd",
-            color: "#333",
-            mr: 1,
-            paddingLeft: "8px",
-            bgcolor: "white",
-            "&:hover": { bgcolor: "#f8f8f8" },
-          }}
-        >
-          Send
-        </Button>
-
-        <Button
-          variant="outlined"
-          size="small"
-          sx={{
-            textTransform: "none",
-            borderColor: "#ddd",
-            color: "#333",
-            mr: 1,
-            bgcolor: "white",
-            "&:hover": { bgcolor: "#f8f8f8" },
-          }}
-        >
-          Bulk Update
-        </Button>
-
-        <IconButton
-          size="small"
-          sx={{ bgcolor: "white", border: "1px solid #ddd" }}
-        >
-          <MoreVertIcon />
-        </IconButton>
-
-        <Divider orientation="vertical" flexItem sx={{ mx: 2 }} />
-
-        <Box
-          sx={{
-            display: "flex",
-            alignItems: "center",
-            color: "primary.main",
-            fontWeight: 500,
-            "& .dot": {
-              width: 8,
-              height: 8,
-              borderRadius: "50%",
-              backgroundColor: "primary.main",
-              mr: 1,
-            },
-          }}
-        >
-          <span className="dot"></span>
-          <Typography variant="body2" fontWeight={500}>
-            {selectedCount} Invoice(s) Selected
-          </Typography>
-        </Box>
-      </Box>
-    </Box>
-  );
-};
 
 const CustomFilterMenu = ({
   anchorEl,
@@ -552,38 +411,7 @@ const CustomFilterMenu = ({
       </List>
 
       {/* Sticky Footer with "+ New Custom View" Button */}
-      <ListItemButton
-        alignItems="center"
-        sx={{
-          py: 1.5,
-          px: 2,
-          position: "sticky",
-          bottom: 0,
-          borderTop: "1px solid #f0f0f0",
-          backgroundColor: "#fff",
-          "&:hover": {
-            backgroundColor: "#f5f5f5",
-          },
-          zIndex: 10,
-        }}
-      >
-        <IconButton
-          size="small"
-          sx={{
-            mr: 2,
-            bgcolor: "#e3f2fd",
-            color: "#1976d2",
-            "&:hover": {
-              bgcolor: "#bbdefb",
-            },
-          }}
-        >
-          <AddCircleOutlinedIcon fontSize="inherit" />
-        </IconButton>
-        <Typography variant="subtitle2" color="primary">
-          New Custom View
-        </Typography>
-      </ListItemButton>
+      
     </Menu>
   );
 };
@@ -663,7 +491,7 @@ const PaymentReceivedHomePage = () => {
           <IconButton sx={{ color: "#555" }} onClick={handleMoreMenuClick}>
             <MoreVertIcon />
           </IconButton>
-          <IconButton
+          <IconButton aria-label="Help" onClick={() => window.dispatchEvent(new Event("bizbooks:help"))}
             sx={{
               backgroundColor: "#ff9800",
               color: "white",
@@ -732,7 +560,7 @@ const PaymentReceivedHomePage = () => {
         </Box>
 
         <Box sx={{ display: "flex", justifyContent: "center", mb: 3 }}>
-          <Button
+          <Button onClick={() => router.push("/sales/invoices")}
             variant="contained"
             sx={{ px: 3 }}
             // onClick={handleUnpaidInvoices}

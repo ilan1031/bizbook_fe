@@ -357,11 +357,11 @@ const COAviewComponent = () => {
   }, []);
 
   const handleTableView = useCallback(() => {
-    router.push("/finance/chart-of-accounts");
+    router.push("/accountant/chartOfAccounts");
   }, [router]);
 
   const handleEdit = useCallback(() => {
-    router.push(`/finance/chart-of-accounts/edit/${accountId}`);
+    router.push("/accountant/chartOfAccounts");
   }, [router, accountId]);
 
   const handleMenuToggle = useCallback((event) => {

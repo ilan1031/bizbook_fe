@@ -1,4 +1,5 @@
 "use client";
+import { downloadCsv } from "../../common/BulkActionsBar";
 import { useEffect, useState } from "react";
 import {
   Box,
@@ -53,9 +54,7 @@ const itemOptions = [
 const menuItems = [
   { text: "Import Items", icon: <FileUploadIcon sx={{ fontSize: 14, color: "#408dfb" }} /> },
   { text: "Export Items", icon: <FileDownloadIcon sx={{ fontSize: 14, color: "#408dfb" }} /> },
-  { text: "Preferences", icon: <SettingsIcon sx={{ fontSize: 14, color: "#408dfb" }} /> },
   { text: "Refresh List", icon: <RefreshIcon sx={{ fontSize: 14, color: "#408dfb" }} /> },
-  { text: "Reset Column Width", icon: <SwapHorizIcon sx={{ fontSize: 14, color: "#408dfb" }} /> },
 ];
 
 const ItemSplitView = () => {
@@ -453,38 +452,7 @@ const ItemSplitView = () => {
               )}
             </Box>
             <Divider />
-            <MenuItem
-              onClick={() => router.push("/common/newitem")}
-              sx={{
-                display: "flex",
-                alignItems: "center",
-                px: 2,
-                py: 1,
-                position: "sticky",
-                bottom: 0,
-                backgroundColor: "white",
-                zIndex: 1,
-                "&:hover": {
-                  backgroundColor: "#E6F1FF",
-                },
-              }}
-            >
-              <IconButton
-                size="small"
-                sx={{
-                  backgroundColor: "#4285F4",
-                  width: 20,
-                  height: 20,
-                  borderRadius: "50%",
-                  marginRight: 1,
-                }}
-              >
-                <AddIcon sx={{ fontSize: 14, color: "white" }} />
-              </IconButton>
-              <Typography sx={{ fontSize: "13px", color: "#4285F4" }}>
-                New Custom View
-              </Typography>
-            </MenuItem>
+            
           </Menu>
           
           {/* Right Side - Menu and Add Icons */}
@@ -510,7 +478,7 @@ const ItemSplitView = () => {
               }}
             >
               {menuItems.map((item) => (
-                <MenuItem
+                <MenuItem onClick={() => { setMenuAnchorEl(null); if (item.text === "Import Items") router.push(`/import-files?type=items&organization_id=${localStorage.getItem("organization_id")}`); else if (item.text === "Export Items") downloadCsv("Items", items, [["Name", "name"], ["SKU", "sku"], ["Rate", "rate"], ["Unit", "unit"], ["Status", "status"]]); else window.location.reload(); }}
                   key={item.text}
                   sx={{
                     fontSize: "13px",

@@ -40,6 +40,7 @@ export const buildPermissionHelpers = (me) => {
 
   const canAccessPath = (path) => {
     if (!me) return false;
+    if ((me.planned_routes || []).some((r) => matchesRoute(path, r))) return false;
     if (isSuperadmin) return true;
     if (path.startsWith("/admin")) return false;
     if ((me.always_allowed_routes || []).some((r) => matchesRoute(path, r))) return true;

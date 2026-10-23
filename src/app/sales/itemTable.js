@@ -2158,18 +2158,7 @@ export default function InvoiceItemTable({formik}) {
           <Typography sx={{ fontWeight: 600, fontSize: "16px", p: 2 }}>
             Item Table
           </Typography>
-          <Button
-            variant="text"
-            startIcon={<CheckCircleOutlineIcon sx={{ color: "#3b82f6" }} />}
-            sx={{
-              color: "#3b82f6",
-              textTransform: "none",
-              fontWeight: 400,
-              p: 2,
-            }}
-          >
-            Bulk Actions
-          </Button>
+          
         </Box>
         <Box
           sx={{
@@ -2297,16 +2286,7 @@ export default function InvoiceItemTable({formik}) {
               >
                 Add New Row
               </Button>
-              <IconButton
-                size="small"
-                sx={{
-                  ml: -1,
-                }}
-              >
-                <KeyboardArrowDownIcon
-                  sx={{ color: "#3b82f6", fontSize: "18px" }}
-                />
-              </IconButton>
+              
             </Box>
             {/* Button to open the popup */}
             <Button
@@ -2411,21 +2391,7 @@ export default function InvoiceItemTable({formik}) {
         InputProps={{
           endAdornment: (
             <InputAdornment position="end">
-              <IconButton
-                size="small"
-                // onClick={handleSymbolMenuOpen}
-                sx={{
-                  bgcolor: "action.hover",
-                  px: 1,
-                  borderLeft: "1px solid",
-                  borderColor: "divider",
-                  height: "100%",
-                  borderRadius: 0,
-                }}
-              >
-                {selectedSymbol}
-                {/* <ArrowDropDown fontSize="small" /> */}
-              </IconButton>
+              <Box component="span" sx={{ px: 1, borderLeft: "1px solid #ddd", color: "text.secondary" }}>{selectedSymbol}</Box>
             </InputAdornment>
           ),
           sx: {
@@ -2661,23 +2627,7 @@ export default function InvoiceItemTable({formik}) {
         }}
       >
         <Box sx={{ display: "flex", alignItems: "center" }}>
-          <Button
-            variant="outlined"
-            size="small"
-            sx={{
-              borderColor: "#cbd5e1",
-              color: "#475569",
-              bgcolor: "white",
-              textTransform: "none",
-              borderStyle: "dashed",
-              height: "36px",
-              px: 2,
-              borderRadius: "7px",
-              maxWidth: 150,
-            }}
-          >
-            Adjustment
-          </Button>
+          <Box sx={{ border: "1px dashed #cbd5e1", borderRadius: 1, px: 1.5, py: 0.5, fontSize: 13, color: "#475569" }}>Adjustment</Box>
         </Box>
         <TextField
           size="small"
@@ -2698,7 +2648,7 @@ export default function InvoiceItemTable({formik}) {
             },
           }}
         />
-        <IconButton size="small" sx={{  }}>
+        <IconButton aria-label="Help" onClick={() => window.dispatchEvent(new Event("bizbooks:help"))} size="small" sx={{  }}>
           <HelpOutlineIcon fontSize="small" sx={{ color: "#94a3b8" }} />
         </IconButton>
         <Typography variant="body2">{(formik.values.adjustment || 0).toFixed(2)}</Typography>
@@ -2716,23 +2666,7 @@ export default function InvoiceItemTable({formik}) {
         }}
       >
         <Box sx={{ display: "flex", alignItems: "center" }}>
-          <Button
-            variant="outlined"
-            size="small"
-            sx={{
-              borderColor: "#cbd5e1",
-              color: "#475569",
-              bgcolor: "white",
-              textTransform: "none",
-              borderStyle: "dashed",
-              height: "36px",
-              px: 2,
-              borderRadius: "7px",
-              maxWidth: 150,
-            }}
-          >
-            Adjustment
-          </Button>
+          <Box sx={{ border: "1px dashed #cbd5e1", borderRadius: 1, px: 1.5, py: 0.5, fontSize: 13, color: "#475569" }}>Adjustment</Box>
         </Box>
         <TextField
           size="small"
@@ -2753,7 +2687,7 @@ export default function InvoiceItemTable({formik}) {
             },
           }}
         />
-        <IconButton size="small" sx={{ ml: 0.5 }}>
+        <IconButton aria-label="Help" onClick={() => window.dispatchEvent(new Event("bizbooks:help"))} size="small" sx={{ ml: 0.5 }}>
           <HelpOutlineIcon fontSize="small" sx={{ color: "#94a3b8" }} />
         </IconButton>
         <Typography variant="body2">{(formik.values.adjustment || 0).toFixed(2)}</Typography>
@@ -2985,7 +2919,7 @@ export default function InvoiceItemTable({formik}) {
        },
      }}
    />
-   <IconButton size="small" sx={{  }}>
+   <IconButton aria-label="Help" onClick={() => window.dispatchEvent(new Event("bizbooks:help"))} size="small" sx={{  }}>
      <HelpOutlineIcon fontSize="small" sx={{ color: "#94a3b8" }} />
    </IconButton>
    <Typography variant="body2">{(formik.values.adjustment || 0).toFixed(2)}</Typography>

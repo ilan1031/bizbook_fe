@@ -1852,23 +1852,7 @@ const Items = ({ formik }) => {
                       }}
                     >
                       <Box sx={{ display: "flex", alignItems: "center" }}>
-                        <Button
-                          variant="outlined"
-                          size="small"
-                          sx={{
-                            borderColor: "#cbd5e1",
-                            color: "#475569",
-                            bgcolor: "white",
-                            textTransform: "none",
-                            borderStyle: "dashed",
-                            height: "36px",
-                            px: 2,
-                            borderRadius: "7px",
-                            maxWidth: 150,
-                          }}
-                        >
-                          Adjustment
-                        </Button>
+                        <Box sx={{ border: "1px dashed #cbd5e1", borderRadius: 1, px: 1.5, py: 0.5, fontSize: 13, color: "#475569" }}>Adjustment</Box>
                       </Box>
                       <TextField
                         size="small"
@@ -1889,7 +1873,7 @@ const Items = ({ formik }) => {
                           },
                         }}
                       />
-                      <IconButton size="small">
+                      <IconButton aria-label="Help" onClick={() => window.dispatchEvent(new Event("bizbooks:help"))} size="small">
                         <HelpOutlineIcon
                           fontSize="small"
                           sx={{ color: "#94a3b8" }}
@@ -1912,23 +1896,7 @@ const Items = ({ formik }) => {
                       }}
                     >
                       <Box sx={{ display: "flex", alignItems: "center" }}>
-                        <Button
-                          variant="outlined"
-                          size="small"
-                          sx={{
-                            borderColor: "#cbd5e1",
-                            color: "#475569",
-                            bgcolor: "white",
-                            textTransform: "none",
-                            borderStyle: "dashed",
-                            height: "36px",
-                            px: 2,
-                            borderRadius: "7px",
-                            maxWidth: 150,
-                          }}
-                        >
-                          Adjustment
-                        </Button>
+                        <Box sx={{ border: "1px dashed #cbd5e1", borderRadius: 1, px: 1.5, py: 0.5, fontSize: 13, color: "#475569" }}>Adjustment</Box>
                       </Box>
                       <TextField
                         size="small"
@@ -1949,7 +1917,7 @@ const Items = ({ formik }) => {
                           },
                         }}
                       />
-                      <IconButton size="small" sx={{ ml: 0.5 }}>
+                      <IconButton aria-label="Help" onClick={() => window.dispatchEvent(new Event("bizbooks:help"))} size="small" sx={{ ml: 0.5 }}>
                         <HelpOutlineIcon
                           fontSize="small"
                           sx={{ color: "#94a3b8" }}
@@ -2152,7 +2120,7 @@ const Items = ({ formik }) => {
                       },
                     }}
                   />
-                  <IconButton size="small">
+                  <IconButton aria-label="Help" onClick={() => window.dispatchEvent(new Event("bizbooks:help"))} size="small">
                     <HelpOutlineIcon
                       fontSize="small"
                       sx={{ color: "#94a3b8" }}

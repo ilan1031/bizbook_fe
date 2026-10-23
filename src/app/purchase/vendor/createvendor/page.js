@@ -895,12 +895,7 @@ const VendorForm = () => {
               placeholder="Enter GSTIN/UIN"
               size="small"
             />
-            <Button
-              variant="contained"
-              sx={{ bgcolor: "#4285F4", textTransform: "none", px: 2 }}
-            >
-              Fetch Vendor Details
-            </Button>
+            
           </Box>
         </Paper>
       </Modal>

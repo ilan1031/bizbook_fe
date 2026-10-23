@@ -157,7 +157,7 @@ const NewItemSchema = Yup.object().shape({
   openingStockRate: Yup.number(),
 });
 
-const NewItemForm = () => {
+const NewItemForm = ({ onClose } = {}) => {
   const { showMessage } = useSnackbar();
   const organization_id = localStorage.getItem("organization_id");
   const checkType = localStorage.getItem("addItem");
@@ -273,7 +273,7 @@ const NewItemForm = () => {
       if(checkType === "page"){
         router.push("/items/itemtable");
       }else{
-        // onClose();
+        onClose?.();
       }
     } catch (error) {
       showMessage("Error submitting the form", "error");
@@ -289,7 +289,7 @@ const NewItemForm = () => {
       router.back();
     }else{
       localStorage.removeItem("addItem");
-      // onClose();    
+      onClose?.();    
     }
   }
 
@@ -306,7 +306,8 @@ const NewItemForm = () => {
           New Item
         </Typography>
         <Button
-              // onClick={onClose}
+              onClick={() => (onClose ? onClose() : router.back())}
+              aria-label="Close"
               sx={{ mt: 3,mb: 5, color: "RED" }}
               data-testid="close-new-item-modal"
             >
@@ -353,7 +354,7 @@ const NewItemForm = () => {
                       Type
                     </Typography>
                     <Tooltip title="Select if this is a physical product (Goods) or a service you provide">
-                      <IconButton size="small">
+                      <IconButton aria-label="Help" onClick={() => window.dispatchEvent(new Event("bizbooks:help"))} size="small">
                         <HelpOutlineIcon fontSize="small" />
                       </IconButton>
                     </Tooltip>
@@ -1286,7 +1287,7 @@ const NewItemForm = () => {
                         }
                       />
                       <Tooltip title="Track quantity and value of this item in inventory">
-                        <IconButton size="small">
+                        <IconButton aria-label="Help" onClick={() => window.dispatchEvent(new Event("bizbooks:help"))} size="small">
                           <HelpOutlineIcon fontSize="small" />
                         </IconButton>
                       </Tooltip>

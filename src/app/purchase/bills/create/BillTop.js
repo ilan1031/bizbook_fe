@@ -94,7 +94,7 @@ const BillHeader = ({
           </Typography>
         </Box>
         <div style={{ display: "flex", alignItems: "center", gap: "15px" }}>
-          <div
+          <div data-rbac-feature="tally"
             style={{
               display: "flex",
               alignItems: "center",
@@ -129,7 +129,7 @@ const BillHeader = ({
           >
             <CloseIcon />
           </IconButton>
-          <IconButton
+          <IconButton aria-label="Help" onClick={() => window.dispatchEvent(new Event("bizbooks:help"))}
             sx={{
               backgroundColor: "#ff9800",
               color: "white",

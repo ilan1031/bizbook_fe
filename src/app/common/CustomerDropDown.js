@@ -433,7 +433,7 @@ const CustomerDropDown = ({ handleCustomerChange, onClose }) => {
           }}
           onClick={handleNewCustomerClick}
         >
-          <IconButton
+          <IconButton aria-label="New customer" onClick={() => window.open("/sales/customer/create", "_blank")}
             size="small"
             sx={{
               mr: 2,
