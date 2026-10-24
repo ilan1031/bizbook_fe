@@ -60,6 +60,7 @@ const Navbar = () => {
   const router = useRouter();
   const perms = usePermissions();
   const [userName, setUserName] = useState("");
+  const [profileImage, setProfileImage] = useState("");
   const [orgData, setOrgData] = useState([]);
   const theme = useTheme();
   const [anchorEl, setAnchorEl] = React.useState(null);
@@ -97,6 +98,24 @@ const Navbar = () => {
     // eslint-disable-next-line react-hooks/set-state-in-effect
     setUserName(localStorage.getItem("user_name") || "");
     getOrg();
+    apiService({ method: "GET", url: "api/v1/user/profile" })
+      .then((response) => setProfileImage(response.data?.data?.profile_image || ""))
+      .catch((error) => console.error("Couldn't load the profile photo:", error));
+    const updateProfileImage = (event) => setProfileImage(event.detail || "");
+    const updateOrganizationImage = (event) =>
+      setOrgData((current) =>
+        current.map((organization) =>
+          String(organization.organization_id) === String(event.detail?.organization_id)
+            ? { ...organization, org_image: event.detail.org_image || "" }
+            : organization
+        )
+      );
+    window.addEventListener("profile-image-updated", updateProfileImage);
+    window.addEventListener("organization-image-updated", updateOrganizationImage);
+    return () => {
+      window.removeEventListener("profile-image-updated", updateProfileImage);
+      window.removeEventListener("organization-image-updated", updateOrganizationImage);
+    };
   }, []);
   // The org button shows the organisation being worked in, not the user.
   const currentOrgId = typeof window !== "undefined" ? localStorage.getItem("organization_id") : null;
@@ -262,23 +281,19 @@ const Navbar = () => {
                           }}
                           mb={1}
                         >
-                          <Box
+                          <Avatar
+                            src={data.org_image || undefined}
+                            alt={`${data.org_name} logo`}
                             sx={{
                               width: 30,
                               height: 30,
                               borderRadius: "6px",
                               backgroundColor: "#e2e8f0",
-                              display: "flex",
-                              alignItems: "center",
-                              justifyContent: "center",
-                              fontSize: 16,
-                              fontWeight: 600,
-                              color: "#334155",
                               mr: 2,
                             }}
                           >
                             <GroupOutlinedIcon fontSize="small" />
-                          </Box>
+                          </Avatar>
                           <Box flex={1}>
                             <Typography fontSize={14} fontWeight={500}>
                               {data.org_name}
@@ -333,7 +348,9 @@ const Navbar = () => {
           {perms?.can("notifications") && <NotificationsMenu />}
           <SettingsMenu />
           {/* Avatar */}
-          <Box
+          <Avatar
+            src={profileImage || undefined}
+            alt="Profile photo"
             sx={{
               width: 32,
               height: 32,
@@ -348,10 +365,9 @@ const Navbar = () => {
               cursor: "pointer",
             }}
             onClick={handleAvatarClick}
-            // onClick={handleClick}
           >
             {userName.slice(0, 1)}
-          </Box>
+          </Avatar>
 
           {/* <Popover
             open={open}

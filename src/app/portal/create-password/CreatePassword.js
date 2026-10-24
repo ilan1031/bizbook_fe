@@ -6,6 +6,7 @@ import {
   TextField,
   Button,
   Card,
+  CircularProgress,
   CardContent,
   Divider,
   InputAdornment,
@@ -19,7 +20,7 @@ import {
 import { Visibility, VisibilityOff } from "@mui/icons-material";
 import PersonIcon from "@mui/icons-material/Person";
 import FiberManualRecordIcon from "@mui/icons-material/FiberManualRecord";
-import apiService, { portalGet, savePortalSession, clearPortalSession, portalLoginPath, decodeJwt } from "../portalApi";
+import apiService, { savePortalSession } from "../portalApi";
 import { useFormik } from "formik";
 import * as Yup from "yup";
 import { useRouter, useSearchParams } from "next/navigation";
@@ -33,8 +34,9 @@ const CreatePassword = () => {
   const [isPasswordFocused, setIsPasswordFocused] = useState(false);
   const searchParams = useSearchParams();
   const token = searchParams.get("token");
-  const [decodeData, setDecodeData] = useState(null);
-  const [isExpired, setIsExpired] = useState(false);
+  // What the invitation link can still be used for (see GET /client/invite-status):
+  // pending | registered | expired | revoked | invalid; null while checking.
+  const [invite, setInvite] = useState(null);
   const route = useRouter();
   const { showMessage } = useSnackbar();
 
@@ -45,8 +47,7 @@ const CreatePassword = () => {
   const validationSchema = Yup.object({
     password: Yup.string()
       .min(8, "Password must be at least 8 characters")
-      .max(15, "Password must not exceed 15 characters")
-      .notOneOf(["Manoj"], "Password cannot be same as your username")
+      .max(64, "Password must not exceed 64 characters")
       .matches(/[A-Z]/, "Password must contain at least one uppercase letter")
       .matches(/[a-z]/, "Password must contain at least one lowercase letter")
       .matches(/[0-9]/, "Password must contain at least one number")
@@ -62,27 +63,20 @@ const CreatePassword = () => {
 
   const formik = useFormik({
     initialValues: {
-      email: decodeData?.email,
+      email: "",
       password: "",
       confirmPassword: "",
       role: "client",
-      clientId: decodeData?.clientId,
-      clientPersonId: decodeData?.clientPersonId,
+      clientId: "",
+      clientPersonId: "",
     },
     validationSchema: validationSchema,
     onSubmit: async (values) => {
       try {
-        const formData = {
-          email: values?.email,
-          password: values?.password,
-          role: "client",
-          clientId: values?.clientId,
-          clientPersonId: values?.clientPersonId,
-        };
         const response = await apiService({
           method: "POST",
-          url: `/api/v1/client/register `,
-          data: formData,
+          url: "/api/v1/client/register",
+          data: { token, password: values?.password },
         });
         const data = response.data;
         if (data?.status) {
@@ -97,33 +91,44 @@ const CreatePassword = () => {
           showMessage(data?.message, "error");
         }
       } catch (error) {
+        // Someone else (or an earlier visit) already set the password.
+        if (error?.code === "ALREADY_REGISTERED") {
+          route.replace(`/portal/${error.organization_id}/login?notice=registered`);
+          return;
+        }
         showMessage(error?.message, "error");
-        console.log("Error in Customer Portal Login", error);
       }
     },
   });
 
-  const isTokenExpired = (token) => {
-    if (!token) return true;
-    try {
-      const decoded = decodeJwt(token);
-      formik.setFieldValue("email", decoded.email);
-      formik.setFieldValue("clientId", decoded.clientId);
-      formik.setFieldValue("clientPersonId", decoded.clientPersonId);
-      setDecodeData(decoded);
-      const currentTime = Date.now() / 1000; // in seconds
-      return decoded.exp < currentTime;
-    } catch (e) {
-      console.error("Invalid token:", e);
-      return true;
-    }
-  };
-
   useEffect(() => {
-    // Reads the invitation token once the page is in the browser.
-    // eslint-disable-next-line react-hooks/set-state-in-effect
-    setIsExpired(isTokenExpired(token));
-  }, []);
+    let cancelled = false;
+    (async () => {
+      let result = { state: "invalid" };
+      try {
+        const res = await apiService({
+          method: "GET",
+          url: "/api/v1/client/invite-status",
+          params: { token },
+        });
+        result = res.data?.data || result;
+      } catch {
+        result = { state: "invalid" };
+      }
+      if (cancelled) return;
+      // Already set up: this link is now just the way to the sign-in page.
+      if (result.state === "registered" && result.organization_id) {
+        route.replace(`/portal/${result.organization_id}/login?notice=registered`);
+        return;
+      }
+      if (result.email) formik.setFieldValue("email", result.email);
+      setInvite(result);
+    })();
+    return () => {
+      cancelled = true;
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [token]);
 
   const isPasswordValid = {
     length: formik.values.password.length >= 8,
@@ -166,31 +171,39 @@ const CreatePassword = () => {
               mb: 1,
             }}
           >
-            {decodeData?.org_name}
+            {invite?.org_name}
           </Typography>
 
           <Divider sx={{ my: 2 }} />
 
+          {invite?.state === "pending" && (
+            <>
           <Typography
-            variant="body1"
-            component="div"
-            align="center"
-            sx={{
-              fontWeight: 600,
-              mb: 1,
-            }}
-          >
-            Create Password
-          </Typography>
-
-          <Typography
-            variant="body2"
-            align="center"
-            sx={{ mb: 3, fontWeight: 600, fontSize: "14px" }}
-          >
-            Enter a password that you wish to use for this service
-          </Typography>
-          {!isExpired ? (
+              variant="body1"
+              component="div"
+              align="center"
+              sx={{
+                fontWeight: 600,
+                mb: 1,
+              }}
+            >
+              Create Password
+            </Typography>
+  
+            <Typography
+              variant="body2"
+              align="center"
+              sx={{ mb: 3, fontWeight: 600, fontSize: "14px" }}
+            >
+              Enter a password that you wish to use for this service
+            </Typography>
+            </>
+          )}
+          {!invite ? (
+            <Box sx={{ py: 6, textAlign: "center" }}>
+              <CircularProgress size={24} />
+            </Box>
+          ) : invite.state === "pending" ? (
             <form onSubmit={formik.handleSubmit}>
               <Box sx={{ mb: 3 }}>
                 <TextField
@@ -518,12 +531,22 @@ const CreatePassword = () => {
             <Box sx={{ mt: 4, textAlign: "center" }}>
               <Image src={ErrorImage} alt="error-image" priority />
               <Typography variant="h6" fontSize="600">
-                Invalid Invitation
+                {invite.state === "expired" ? "Invitation expired" : "Invitation not available"}
               </Typography>
-              <Box sx={{ my: 6, fontSize: "14px" }}>
-                This invitation is either invalid or has expired.
-                <br /> Please contact divya.s.ihub for clarification.
+              <Box sx={{ my: 4, fontSize: "14px" }}>
+                {invite.state === "expired"
+                  ? "This invitation has expired."
+                  : invite.state === "revoked"
+                    ? "This invitation is no longer active."
+                    : "This invitation link isn't valid."}
+                <br />
+                Please ask {invite.org_name || "the business"} to send you a new invitation.
               </Box>
+              {invite.organization_id && (
+                <Button variant="outlined" onClick={() => route.push(`/portal/${invite.organization_id}/login`)}>
+                  Go to sign in
+                </Button>
+              )}
             </Box>
           )}
         </CardContent>

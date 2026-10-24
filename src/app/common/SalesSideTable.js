@@ -243,6 +243,7 @@ export default function SalesSideTable({
                           )}
                           <Box sx={{ display: "flex", alignItems: "center" }}>
                             <Typography
+                              component="div"
                               variant="body1"
                               sx={{
                                 fontWeight: 600,

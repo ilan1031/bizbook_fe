@@ -36,6 +36,7 @@ import { parse, formatDistanceToNowStrict } from "date-fns";
 const QuoteView = () => {
   const route = useRouter();
   const [quoteData, setQuoteData] = useState(null);
+  const [business, setBusiness] = useState({});
   const organization_id = portalGet("orgId");
   const customer_id = portalGet("clientId");
   const [loading, setLoading] = useState(false);
@@ -109,6 +110,17 @@ const QuoteView = () => {
         setVisibleComment(false);
       }
       setQuoteData(data);
+      // The business the quote is from (name, address, contact, GSTIN).
+      try {
+        const contact = await apiService({
+          method: "GET",
+          url: `/api/v1/contact/${customer_id}`,
+          params: { organization_id },
+        });
+        setBusiness({ ...(contact.data?.data?.organization || {}), admin_email: contact.data?.data?.admin_email });
+      } catch {
+        setBusiness({});
+      }
       setLoading(false);
     } catch (error) {
       console.error("Failed to fetch quote list:", error);
@@ -473,20 +485,22 @@ const QuoteView = () => {
                                 style={{ fontWeight: "bold" }}
                                 className="pcs-orgname"
                               >
-                                Divyas & SK
+                                {business.org_name}
                                 <br />
                               </span>
                               <span
                                 style={{ whiteSpace: "pre-wrap" }}
                                 id="tmp_org_address"
                               >
-                                Andaman and Nicobar Islands <br />
-                                India
+                                {[business.first_street, business.second_street].filter(Boolean).join(", ")}
+                                {(business.first_street || business.second_street) && <br />}
+                                {[business.city, business.state].filter(Boolean).join(", ")}
+                                {(business.city || business.state) && <br />}
+                                {business.country}
                                 <br />
-                                7449035414
-                                <br />
-                                divya.s.ihub@snsgroups.com <br />
-                                GSTIN: 35AAACI1681G1ZS
+                                {business.phone ? <>{business.phone}<br /></> : null}
+                                {business.email || business.admin_email ? <>{business.email || business.admin_email}<br /></> : null}
+                                {business.gst_in ? `GSTIN: ${business.gst_in}` : ""}
                               </span>
                             </div>
                           </td>

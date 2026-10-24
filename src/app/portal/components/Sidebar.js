@@ -10,7 +10,7 @@ import {
   LogOut as IoMdLogOut,
 } from "lucide-react";
 import ChangePasswordDialog from "./ChangePasswordDialog";
-import apiService, { portalGet, clearPortalSession, portalLoginPath } from "../portalApi";
+import apiService, { portalGet, clearPortalSession, portalLoginPath, asSignedInPerson } from "../portalApi";
 import {
   Box,
   List,
@@ -112,7 +112,7 @@ const Sidebar = ({ collapsed, toggleSidebar }) => {
           url: `/api/v1/contact/${client_id}?organization_id=${org_id}`,
         });
         console.log("the Response sidebar detail page", response);
-        setUserDetails(response.data.data);
+        setUserDetails(asSignedInPerson(response.data.data));
 
         // setLoading(false);
       } catch (error) {

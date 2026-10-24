@@ -31,10 +31,6 @@ const QuotesTable = () => {
   const [page, setPage] = useState(0); // MUI TablePagination is 0-based
   const [rowsPerPage, setRowsPerPage] = useState(10);
   const limit = useRef(10);
-  const [organization_id, setOrganizationId] = useState(null);
-  const [customer_id, setCustomerId] = useState(null);
-  // const organization_id = portalGet("orgId");
-  // const customer_id = portalGet("clientId");
   // eslint-disable-next-line react-hooks/refs
   const showPagination = totalCount > limit.current;
   const route = useRouter();
@@ -68,6 +64,10 @@ const QuotesTable = () => {
   ) => {
     setDotsAndSkeleton(true);
     setWelcomPg(false);
+    // Read from the session, not from state: on the first load the state
+    // hasn't been filled in yet and the request would be refused.
+    const sessionOrg = portalGet("orgId");
+    const sessionClient = portalGet("clientId");
     try {
       const response = await apiService({
         method: "GET",
@@ -75,9 +75,9 @@ const QuotesTable = () => {
           filter: filterValue,
           page: pageArg + 1, // API is 1-based
           per_page: perPageArg,
-          customer_id: customer_id,
+          customer_id: sessionClient,
           limit: perPageArg,
-          organization_id: organization_id,
+          organization_id: sessionOrg,
         },
         url: `/api/v1/clientestimates`,
         customBaseUrl: config.SO_Base_url,
@@ -93,16 +93,12 @@ const QuotesTable = () => {
       setHasMore(response.data.page_context.has_more_page);
     } catch (error) {
       console.error("Failed to fetch quote list:", error);
+      setDotsAndSkeleton(false);
+      setQuoteList([]);
     }
   };
 
   useEffect(() => {
-    if (typeof window !== "undefined") {
-      // Browser-only session values.
-      // eslint-disable-next-line react-hooks/set-state-in-effect
-      setOrganizationId(portalGet("orgId"));
-      setCustomerId(portalGet("clientId"));
-    }
     const initialFilter = tabValue === 0 ? "open" : "all";
     fetchQuoteList(initialFilter, 0, rowsPerPage);
     const timeoutId = setTimeout(() => {

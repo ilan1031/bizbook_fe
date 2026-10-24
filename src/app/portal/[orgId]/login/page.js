@@ -4,6 +4,7 @@ import {
   Box,
   Typography,
   TextField,
+  Alert,
   Button,
   Card,
   CardContent,
@@ -26,6 +27,14 @@ const Login = () => {
   const params = useParams();
   const router = useRouter();
   const org_id = params.orgId;
+  const [notice, setNotice] = useState("");
+  useEffect(() => {
+    // Sent here from an invitation link that was already used.
+    if (new URLSearchParams(window.location.search).get("notice") === "registered") {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
+      setNotice("You've already set your password. Sign in below.");
+    }
+  }, []);
 
   const handleClickShowPassword = () => setShowPassword(!showPassword);
 
@@ -66,6 +75,8 @@ const Login = () => {
         setLoading(false);
       } catch (error) {
         console.log(error, "Error in getting org id for sign in page");
+        // Show the sign-in form anyway, just without the business name.
+        setLoading(false);
       }
     };
     fetchOrg();
@@ -207,6 +218,12 @@ const Login = () => {
               >
                 Sign in
               </Typography>
+
+              {notice && (
+                <Alert severity="info" sx={{ mb: 2 }}>
+                  {notice}
+                </Alert>
+              )}
 
               <Typography
                 variant="body2"

@@ -20,9 +20,9 @@ import {
   Paper,
 } from "@mui/material";
 import Image from "next/image";
-import InfoOutlineIcon from "@mui/icons-material/InfoOutline";
+import InfoOutlinedIcon from "@mui/icons-material/InfoOutlined";
 import Footer from "../components/Footer"
-import apiService, { portalGet, savePortalSession, clearPortalSession, portalLoginPath, decodeJwt } from "../portalApi";
+import apiService, { portalGet, savePortalSession, clearPortalSession, portalLoginPath, decodeJwt, asSignedInPerson } from "../portalApi";
 
 
 const Home = () => {
@@ -42,7 +42,7 @@ const Home = () => {
           url: `/api/v1/contact/${client_id}?organization_id=${org_id}`,
         });
         console.log("the Response dashboard detail page", response);
-        setUserDetails(response.data.data);
+        setUserDetails(asSignedInPerson(response.data.data));
 
         // setLoading(false);
       } catch (error) {
@@ -268,7 +268,7 @@ const Home = () => {
                   mb: 1.5,
                 }}
               >
-                <InfoOutlineIcon sx={{ color: "#212529 !important", mr: 1 }} />{" "}
+                <InfoOutlinedIcon sx={{ color: "#212529 !important", mr: 1 }} />{" "}
                 Upload Documents
               </Box>
             </Box>

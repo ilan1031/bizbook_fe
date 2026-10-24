@@ -4,6 +4,7 @@
 import React, { useEffect, useState } from "react";
 import {
   Alert,
+  Avatar,
   Box,
   Button,
   Chip,
@@ -19,10 +20,24 @@ import {
   TextField,
   Typography,
 } from "@mui/material";
+import PhotoCameraOutlinedIcon from "@mui/icons-material/PhotoCameraOutlined";
 import apiService from "../../services/axiosService";
 import { usePermissions } from "../../services/PermissionProvider";
 
 const fmt = (d) => (d ? new Date(d).toLocaleString("en-IN", { dateStyle: "medium", timeStyle: "short" }) : "-");
+const MAX_IMAGE_SIZE = 1024 * 1024;
+const IMAGE_TYPES = ["image/jpeg", "image/png", "image/webp"];
+
+const readImage = (file) =>
+  new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = () => {
+      if (typeof reader.result === "string") resolve(reader.result);
+      else reject(new Error("Couldn't preview this image."));
+    };
+    reader.onerror = () => reject(new Error("Couldn't read this image."));
+    reader.readAsDataURL(file);
+  });
 
 function Section({ title, children, action }) {
   return (
@@ -41,9 +56,13 @@ function Section({ title, children, action }) {
 export default function ProfilePage() {
   const [profile, setProfile] = useState(null);
   const [error, setError] = useState("");
-  const [form, setForm] = useState({ company_name: "", mobile: "", country: "", state: "" });
+  const [form, setForm] = useState({ company_name: "", mobile: "", country: "", state: "", profile_image: "" });
   const [saving, setSaving] = useState(false);
   const [saved, setSaved] = useState("");
+  const [organization, setOrganization] = useState(null);
+  const [organizationForm, setOrganizationForm] = useState({});
+  const [organizationSaving, setOrganizationSaving] = useState(false);
+  const [organizationSaved, setOrganizationSaved] = useState("");
   const [pw, setPw] = useState({ current_password: "", new_password: "", confirm: "" });
   const [pwMsg, setPwMsg] = useState(null);
   const [pwBusy, setPwBusy] = useState(false);
@@ -54,7 +73,39 @@ export default function ProfilePage() {
       const res = await apiService({ method: "GET", url: "api/v1/user/profile" });
       const p = res.data?.data;
       setProfile(p);
-      setForm({ company_name: p.company_name, mobile: p.mobile, country: p.country, state: p.state });
+      setForm({
+        company_name: p.company_name || "",
+        mobile: p.mobile || "",
+        country: p.country || "",
+        state: p.state || "",
+        profile_image: p.profile_image || "",
+      });
+      const organizationId = localStorage.getItem("organization_id");
+      if (organizationId) {
+        const orgRes = await apiService({
+          method: "GET",
+          url: `api/v1/organization/${encodeURIComponent(organizationId)}`,
+        });
+        const org = orgRes.data?.data;
+        setOrganization(org);
+        setOrganizationForm({
+          org_name: org.org_name || "",
+          email: org.email || "",
+          phone: org.phone || "",
+          country: org.country || "",
+          state: org.state || "",
+          city: org.city || "",
+          first_street: org.first_street || "",
+          second_street: org.second_street || "",
+          zip: org.zip || "",
+          gst_in: org.gst_in || "",
+          industry_type: org.industry_type || org.industry_name || "",
+          org_image: org.org_image || "",
+        });
+      } else {
+        setOrganization(null);
+        setOrganizationForm({});
+      }
     } catch (e) {
       setError(e?.message || "Couldn't load your profile.");
     }
@@ -71,12 +122,59 @@ export default function ProfilePage() {
     setError("");
     try {
       await apiService({ method: "PATCH", url: "api/v1/user/profile", data: form });
+      window.dispatchEvent(new CustomEvent("profile-image-updated", { detail: form.profile_image }));
       setSaved("Profile saved.");
       await load();
     } catch (e) {
       setError(e?.message || "Couldn't save the profile.");
     } finally {
       setSaving(false);
+    }
+  };
+
+  const saveOrganization = async () => {
+    if (!organization?.organization_id) return;
+    setOrganizationSaving(true);
+    setOrganizationSaved("");
+    setError("");
+    try {
+      await apiService({
+        method: "PUT",
+        url: `api/v1/organization/${encodeURIComponent(organization.organization_id)}`,
+        data: organizationForm,
+      });
+      window.dispatchEvent(
+        new CustomEvent("organization-image-updated", {
+          detail: { organization_id: organization.organization_id, org_image: organizationForm.org_image },
+        })
+      );
+      setOrganizationSaved("Organization saved.");
+      await load();
+    } catch (e) {
+      setError(e?.message || "Couldn't save the organization.");
+    } finally {
+      setOrganizationSaving(false);
+    }
+  };
+
+  const handleImageChange = async (event, setter, fieldName, label) => {
+    const file = event.target.files?.[0];
+    event.target.value = "";
+    if (!file) return;
+    if (!IMAGE_TYPES.includes(file.type)) {
+      setError(`${label} must be a PNG, JPG or WebP image.`);
+      return;
+    }
+    if (file.size > MAX_IMAGE_SIZE) {
+      setError(`${label} must be smaller than 1 MB.`);
+      return;
+    }
+    setError("");
+    try {
+      const image = await readImage(file);
+      setter((current) => ({ ...current, [fieldName]: image }));
+    } catch (e) {
+      setError(e?.message || `Couldn't read the ${label.toLowerCase()}.`);
     }
   };
 
@@ -152,6 +250,118 @@ export default function ProfilePage() {
         <Typography fontSize={13} color="text.secondary">
           Member since {fmt(profile.created_at)} · Last sign-in {fmt(profile.last_login_at)}
         </Typography>
+      </Section>
+
+      <Section
+        title="Profile photo"
+        action={
+          <Button variant="contained" size="small" onClick={saveProfile} disabled={saving} sx={{ textTransform: "none" }}>
+            {saving ? "Saving..." : "Save"}
+          </Button>
+        }
+      >
+        {saved && <Alert severity="success" sx={{ mb: 2 }}>{saved}</Alert>}
+        <Stack direction={{ xs: "column", sm: "row" }} spacing={2} alignItems="center">
+          <Avatar src={form.profile_image || undefined} alt="Profile photo" sx={{ width: 88, height: 88 }} />
+          <Stack direction="row" spacing={1}>
+            <Button component="label" variant="outlined" startIcon={<PhotoCameraOutlinedIcon />} sx={{ textTransform: "none" }}>
+              Choose photo
+              <input
+                hidden
+                type="file"
+                accept="image/png,image/jpeg,image/webp"
+                onChange={(event) => handleImageChange(event, setForm, "profile_image", "Profile photo")}
+              />
+            </Button>
+            {form.profile_image && (
+              <Button onClick={() => setForm((current) => ({ ...current, profile_image: "" }))} sx={{ textTransform: "none" }}>
+                Remove
+              </Button>
+            )}
+          </Stack>
+          <Typography fontSize={13} color="text.secondary">PNG, JPG or WebP, up to 1 MB.</Typography>
+        </Stack>
+      </Section>
+
+      <Section
+        title="Organization"
+        action={
+          organization && (
+            <Button
+              variant="contained"
+              size="small"
+              onClick={saveOrganization}
+              disabled={organizationSaving}
+              sx={{ textTransform: "none" }}
+            >
+              {organizationSaving ? "Saving..." : "Save"}
+            </Button>
+          )
+        }
+      >
+        {!organization ? (
+          <Alert severity="info">Choose an organization to edit its details and logo.</Alert>
+        ) : (
+          <>
+            {organizationSaved && <Alert severity="success" sx={{ mb: 2 }}>{organizationSaved}</Alert>}
+            <Stack direction={{ xs: "column", sm: "row" }} spacing={2} alignItems="center" mb={3}>
+              <Avatar
+                variant="rounded"
+                src={organizationForm.org_image || undefined}
+                alt="Organization logo"
+                sx={{ width: 88, height: 88 }}
+              >
+                {(organizationForm.org_name || "O").slice(0, 1)}
+              </Avatar>
+              <Stack direction="row" spacing={1}>
+                <Button component="label" variant="outlined" startIcon={<PhotoCameraOutlinedIcon />} sx={{ textTransform: "none" }}>
+                  Choose logo
+                  <input
+                    hidden
+                    type="file"
+                    accept="image/png,image/jpeg,image/webp"
+                    onChange={(event) => handleImageChange(event, setOrganizationForm, "org_image", "Organization logo")}
+                  />
+                </Button>
+                {organizationForm.org_image && (
+                  <Button
+                    onClick={() => setOrganizationForm((current) => ({ ...current, org_image: "" }))}
+                    sx={{ textTransform: "none" }}
+                  >
+                    Remove
+                  </Button>
+                )}
+              </Stack>
+              <Typography fontSize={13} color="text.secondary">PNG, JPG or WebP, up to 1 MB.</Typography>
+            </Stack>
+            <Box sx={{ display: "grid", gridTemplateColumns: { xs: "1fr", sm: "1fr 1fr" }, gap: 2 }}>
+              {[
+                ["org_name", "Organization name"],
+                ["email", "Business email"],
+                ["phone", "Phone"],
+                ["country", "Country"],
+                ["state", "State"],
+                ["city", "City"],
+                ["first_street", "Address line 1"],
+                ["second_street", "Address line 2"],
+                ["zip", "Postal code"],
+                ["gst_in", "GSTIN"],
+                ["industry_type", "Industry"],
+              ].map(([key, label]) => (
+                <TextField
+                  key={key}
+                  label={label}
+                  size="small"
+                  fullWidth
+                  value={organizationForm[key] || ""}
+                  onChange={(event) =>
+                    setOrganizationForm((current) => ({ ...current, [key]: event.target.value }))
+                  }
+                />
+              ))}
+            </Box>
+          </>
+        )}
       </Section>
 
       {me && !me.is_superadmin && (

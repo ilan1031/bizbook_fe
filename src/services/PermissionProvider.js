@@ -56,6 +56,8 @@ export function PermissionProvider({ children }) {
   // Reload when the token changes (login/logout) - checked on navigation.
   useEffect(() => {
     const token = localStorage.getItem("token");
+    // The session token lives in the browser, so it can only be compared after render.
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     if (token !== state.token || (token && !state.me && !state.loading && !state.error)) load();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [pathname]);

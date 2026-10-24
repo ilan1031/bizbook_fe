@@ -171,7 +171,7 @@ const formatDate = (dateString) => {
                     primary={
                       <Box sx={{ display: "flex", justifyContent: "space-between" }}>
                         <Typography component="span" sx={{ fontWeight: 500, fontSize: "13px" }}>
-                          To {email.to_email || "bharathi.g.ihub@snsgroups.com"}
+                          To {email.to_email || ""}
                         </Typography>
                         <Typography component="span" sx={{ color: "#757575", fontSize: "12px" }}>
                           {formatDate(email.created_at || email.sent_at)}

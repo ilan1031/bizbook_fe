@@ -3,7 +3,7 @@ import { Box, Typography, Button } from "@mui/material";
 import PersonPinIcon from "@mui/icons-material/PersonPin";
 import EmailOutlinedIcon from "@mui/icons-material/EmailOutlined";
 import React, { useState, useEffect } from "react";
-import apiService, { portalGet, savePortalSession, clearPortalSession, portalLoginPath, decodeJwt } from "../portalApi";
+import apiService, { portalGet, savePortalSession, clearPortalSession, portalLoginPath, decodeJwt, asSignedInPerson } from "../portalApi";
 
 const Footer = () => {
   const [userDetails, setUserDetails] = useState({});
@@ -21,7 +21,7 @@ const Footer = () => {
           url: `/api/v1/contact/${client_id}?organization_id=${org_id}`,
         });
         console.log("the Response Footer page", response);
-        setUserDetails(response.data.data);
+        setUserDetails(asSignedInPerson(response.data.data));
 
         // setLoading(false);
       } catch (error) {
@@ -58,7 +58,7 @@ const Footer = () => {
         <Typography
           sx={{ fontWeight: "400", fontSize: "13px", color: "#212529" }}
         >
-          manoj.r.ihub@snsgroups.com
+          {userDetails?.organization?.email || userDetails?.admin_email}
         </Typography>
       </Box>
 
@@ -74,7 +74,7 @@ const Footer = () => {
           <Typography
             sx={{ fontSize: "12px", fontWeight: "400", color: "#5D678A" }}
           >
-            manoj.r.ihub@snsgroups.com
+            {userDetails?.email}
           </Typography>
         </Box>
       </Box>

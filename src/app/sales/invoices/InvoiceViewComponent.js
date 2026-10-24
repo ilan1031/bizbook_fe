@@ -1297,9 +1297,11 @@ const InvoiceView = ({
                       </TableRow>
                     </TableHead>
                     <TableBody>
-                      {data?.payments?.map((row) => (
-                        <>
-                          <TableRow sx={{ height: 20 }}>
+                      {data?.payments?.map((row, index) => (
+                          <TableRow
+                            key={row?.payment_id ?? index}
+                            sx={{ height: 20 }}
+                          >
                             <TableCell
                               align="left"
                               sx={{ color: "black !important" }}
@@ -1360,7 +1362,6 @@ const InvoiceView = ({
                           </Box>
                         </TableCell> */}
                           </TableRow>
-                        </>
                       ))}
                     </TableBody>
                   </Table>

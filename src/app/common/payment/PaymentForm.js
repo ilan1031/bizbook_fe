@@ -301,7 +301,6 @@ export default function PaymentForm({ callViewAPI, onCancel, invoiceData }) {
     if (!sendThankYouEmail || selectedEmails.length === 0) return;
     try {
       const emailPayload = {
-        from_email: "bharathi.g.ihub@snsgroups.com",
         to_email: selectedEmails.join(","),
         cc_emails: [],
         bcc_emails: [],

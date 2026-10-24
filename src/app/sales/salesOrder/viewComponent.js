@@ -1486,7 +1486,7 @@ const SalesView = ({ data, organizationData, callViewAPI, loading }) => {
                   fontFamily: "'Times New Roman', serif",
                 }}
               >
-                GTIN: 35AAACI1681G1ZS
+                {organizationData?.gst_in ? `GSTIN: ${organizationData.gst_in}` : ""}
               </Typography>
 
               {/* Bill To */}

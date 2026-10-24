@@ -384,14 +384,48 @@ const Overview = ({ details, callAPI, moduleKey }) => {
     }
   };
 
+  // The contact person to invite: the one passed in, else the primary (or
+  // first) person who has an email address. A click event passed by a plain
+  // link is not a contact person.
+  const pickInvitee = (data) => {
+    const people = Array.isArray(details?.contact_persons) ? details.contact_persons : [];
+    const person =
+      (data && data.contact_person_id ? data : null) ||
+      people.find((p) => p.is_primary_contact && p.email) ||
+      people.find((p) => p.email) ||
+      null;
+    // The person's own address wins; the contact record supplies the rest.
+    return person
+      ? {
+          ...details,
+          ...person,
+          contact_id: details?.contact_id || person.contact_id,
+          contact_name: details?.contact_name || person.contact_name,
+          company_name: details?.company_name,
+        }
+      : details;
+  };
+
   const handleInviteToPortal = async (data) => {
-    let inviteData = data ? data : details;
-    if (!inviteData?.email) {
-      showMessage("No email address available for this contact", "error");
+    if (inviteLoading) return;
+    data?.preventDefault?.();
+
+    const inviteData = pickInvitee(data);
+    if (
+      !inviteData?.email ||
+      !inviteData?.contact_id ||
+      !inviteData?.contact_person_id ||
+      !organizationId
+    ) {
+      showMessage(
+        !inviteData?.email
+          ? "No email address available for this contact"
+          : "Missing contact, contact person, or organization information",
+        "error"
+      );
       return;
     }
 
-    // Set loading state
     setInviteLoading(true);
 
     try {
@@ -403,55 +437,63 @@ const Overview = ({ details, callAPI, moduleKey }) => {
           contactId: inviteData.contact_id,
           contact_person_id: inviteData?.contact_person_id,
           email: inviteData.email,
-          name: inviteData.contact_name,
+          name:
+            [
+              inviteData.salutation,
+              inviteData.first_name,
+              inviteData.last_name,
+            ]
+              .filter(Boolean)
+              .join(" ") ||
+            inviteData.contact_name ||
+            details?.contact_name,
           organizationId: organizationId,
           companyName: inviteData.company_name || "Our Company",
         },
       });
 
-      // Clear loading state
-      setInviteLoading(false);
-
-      // Check response structure correctly
       if (response?.data?.status === true) {
         showMessage(
           response?.data?.message || "Portal invitation sent successfully",
           "success"
         );
 
-        // Update the UI to reflect the new status
-        const updatedDetails = customerDetailsData.map((item) => {
-          if (item.id === "portalStatus") {
-            return { ...item, value: "Invited" };
-          }
-          return item;
-        });
+        setCustomerDetailsData((previousData) =>
+          previousData.map((item) => {
+            if (item.id === "portalStatus") {
+              return { ...item, value: "Invited" };
+            }
+            return item;
+          })
+        );
 
-        setCustomerDetailsData(updatedDetails);
-        callAPI(details?.contact_id);
-        // Optionally refresh data if needed
-        // fetchContactDetails();
+        if (typeof callAPI === "function") {
+          try {
+            await callAPI(details?.contact_id);
+          } catch (refreshError) {
+            console.error("Portal invitation sent, but contact refresh failed:", refreshError);
+          }
+        }
       } else {
-        // Handle API success but business logic failure
         showMessage(
-          response?.data?.message || "Failed to send invitation",
+          response?.data?.message || response?.data?.error || "Failed to send invitation",
           "error"
         );
       }
     } catch (error) {
-      // Clear loading state
-      setInviteLoading(false);
-
       console.error("Invite to portal error:", error);
-
-      // Properly extract error message from response
       const errorMessage =
         error.response?.data?.message ||
         error.response?.data?.error ||
+        error.data?.message ||
+        error.data?.error ||
+        error.error ||
         error.message ||
-        "Unknown error";
+        (typeof error === "string" ? error : "Unable to send the portal invitation");
 
       showMessage(`Failed to send invitation: ${errorMessage}`, "error");
+    } finally {
+      setInviteLoading(false);
     }
   };
 
@@ -986,7 +1028,10 @@ const Overview = ({ details, callAPI, moduleKey }) => {
                         color="#408dfb"
                         underline="hover"
                         sx={{ fontSize: "13px", fontWeight: 300 }}
-                        onClick={() => handleInviteToPortal(primaryContact)}
+                        onClick={(event) => {
+                          event.preventDefault();
+                          handleInviteToPortal(primaryContact);
+                        }}
                       >
                         {inviteLoading ? <DotLoader /> : "Invite to Portal"}
                       </Link>
@@ -998,8 +1043,12 @@ const Overview = ({ details, callAPI, moduleKey }) => {
                         color="#408dfb"
                         underline="hover"
                         sx={{ fontSize: "13px", fontWeight: 300 }}
+                        onClick={(event) => {
+                          event.preventDefault();
+                          handleInviteToPortal(primaryContact);
+                        }}
                       >
-                        Re-invite
+                        {inviteLoading ? <DotLoader /> : "Re-invite"}
                       </Link>
                     ) : (
                       <Link
@@ -1007,8 +1056,12 @@ const Overview = ({ details, callAPI, moduleKey }) => {
                         color="#408dfb"
                         underline="hover"
                         sx={{ fontSize: "13px", fontWeight: 300 }}
+                        onClick={(event) => {
+                          event.preventDefault();
+                          handleInviteToPortal(primaryContact);
+                        }}
                       >
-                        Resend Portal Link
+                        {inviteLoading ? <DotLoader /> : "Resend Portal Link"}
                       </Link>
                     )}
 

@@ -66,6 +66,14 @@ const apiService = async ({ method, url, data, params, file, responseType = "jso
 
 export default apiService;
 
+// The customer record comes with all its contact persons; the person who is
+// signed in is the one whose name, email and phone belong on screen.
+export const asSignedInPerson = (customer) => {
+  const people = Array.isArray(customer?.contact_persons) ? customer.contact_persons : [];
+  const me = people.find((p) => p.contact_person_id === portalGet("clientPersonId"));
+  return me ? { ...customer, first_name: me.first_name, last_name: me.last_name, email: me.email, phone: me.phone || customer.phone } : customer;
+};
+
 // Reads a JWT's payload (no verification; the server checks it).
 export const decodeJwt = (token) => {
   const part = String(token || "").split(".")[1];
