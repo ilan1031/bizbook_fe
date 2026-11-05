@@ -6,7 +6,7 @@ import {
   actionForLabel,
   buildPermissionHelpers,
   matchesRoute,
-} from "../src/services/rbacUtils.js";
+} from "../src/services/rbacUtils.ts";
 
 // A slice of the backend catalog with the routes that are easy to confuse.
 const ALL = ["view", "create", "edit", "delete"];

@@ -2,7 +2,7 @@
 // (bizbooks-backend tests/unit/gst.test.js uses the same cases).  Run: npm test
 import test from "node:test";
 import assert from "node:assert/strict";
-import { priceDocument, stateCode } from "../src/services/gst.js";
+import { priceDocument, stateCode } from "../src/services/gst.ts";
 
 const values = (extra = {}) => ({
   line_items: [
