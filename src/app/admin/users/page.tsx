@@ -82,6 +82,37 @@ const LIMIT_FIELDS = [
 ];
 const limitError = (v) => (v === "" || (/^\d+$/.test(v) && Number(v) <= 1000000) ? "" : "Whole number, or empty");
 
+// A temporary sign-in code that couldn't be emailed: shown to the superadmin to
+// pass on. It expires after 5 minutes and works once.
+function WaitingCode({ item, onCopied }: { item: any; onCopied: () => void }) {
+  const copy = async () => {
+    try {
+      await navigator.clipboard.writeText(item.code);
+      onCopied();
+    } catch {
+      // Clipboard blocked: the code is on screen to read out.
+    }
+  };
+  return (
+    <Box sx={{ display: "flex", alignItems: "center", gap: 1, flexWrap: "wrap", mt: 0.5 }}>
+      {item.email && <Typography sx={{ fontSize: "13px" }}>{item.email}</Typography>}
+      <Box
+        component="span"
+        data-testid="waiting-code"
+        sx={{ fontFamily: "monospace", fontSize: "18px", fontWeight: 700, letterSpacing: "0.2em", bgcolor: "#fff", border: "1px dashed #b26a00", borderRadius: 1, px: 1 }}
+      >
+        {item.code}
+      </Box>
+      <Typography sx={{ fontSize: "12px", color: "#6c718a" }}>expires {dayjs(item.expires_at).format("HH:mm")}</Typography>
+      <Tooltip title="Copy the code">
+        <IconButton size="small" onClick={copy} aria-label="Copy sign-in code">
+          <ContentCopyIcon fontSize="small" />
+        </IconButton>
+      </Tooltip>
+    </Box>
+  );
+}
+
 export default function UsersAccessPage(_props?: any) {
   const { showMessage } = useSnackbar();
   const [tab, setTab] = useState<string>("pending");
@@ -89,14 +120,16 @@ export default function UsersAccessPage(_props?: any) {
   const [counts, setCounts] = useState<any>({});
   const [catalog, setCatalog] = useState<any>([]);
   const [mail, setMail] = useState<any>(null);
+  // Codes that couldn't be emailed and are waiting to be passed on (any tab).
+  const [waitingCodes, setWaitingCodes] = useState<any>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [editing, setEditing] = useState<any>(null);
   const [mailDialog, setMailDialog] = useState<boolean>(false);
   // The user whose one-time sign-in code is being made (the code itself lives only in that dialog).
   const [codeFor, setCodeFor] = useState<any>(null);
 
-  const load = useCallback(async () => {
-    setLoading(true);
+  const load = useCallback(async (silent = false) => {
+    if (!silent) setLoading(true);
     try {
       const res = await apiService({
         method: "GET",
@@ -107,12 +140,22 @@ export default function UsersAccessPage(_props?: any) {
       setCounts(res.data.counts || {});
       setCatalog(res.data.catalog || []);
       setMail(res.data.email || null);
+      setWaitingCodes(res.data.pending_codes || []);
     } catch (error) {
-      showMessage(error?.message || "Couldn't load users", "error");
+      if (!silent) showMessage(error?.message || "Couldn't load users", "error");
     } finally {
-      setLoading(false);
+      if (!silent) setLoading(false);
     }
   }, [tab]);
+
+  // A code appears here the moment someone's email fails, so look again
+  // every few seconds while the page is open and visible.
+  useEffect(() => {
+    const timer = setInterval(() => {
+      if (document.visibilityState === "visible") load(true);
+    }, 8000);
+    return () => clearInterval(timer);
+  }, [load]);
 
   useEffect(() => {
     // Fetch the list when the tab changes (load sets the loading state).
@@ -187,6 +230,17 @@ export default function UsersAccessPage(_props?: any) {
       </Box>
 
       <Box sx={{ p: 3 }}>
+        {waitingCodes.length > 0 && (
+          <Alert severity="warning" sx={{ mb: 2 }}>
+            <Typography sx={{ fontSize: "14px", fontWeight: 600, mb: 0.5 }}>
+              {waitingCodes.length === 1 ? "Someone is waiting" : `${waitingCodes.length} people are waiting`} for a sign-in code:
+              the email didn&apos;t go out. Tell them the code.
+            </Typography>
+            {waitingCodes.map((c) => (
+              <WaitingCode key={c.user_id} item={c} onCopied={() => showMessage("Code copied", "success")} />
+            ))}
+          </Alert>
+        )}
         <Tabs value={tab} onChange={(_, v) => setTab(v)} sx={{ mb: 2 }}>
           <Tab value="pending" label={`Pending approval (${counts.pending || 0})`} sx={{ textTransform: "none" as const }} />
           <Tab value="active" label={`Active (${counts.active || 0})`} sx={{ textTransform: "none" as const }} />
@@ -231,6 +285,9 @@ export default function UsersAccessPage(_props?: any) {
                     <TableRow key={u._id} hover sx={{ "& td": { fontSize: "13px" } }}>
                       <TableCell>
                         <Typography sx={{ fontSize: "13px", fontWeight: 500 }}>{u.email}</Typography>
+                        {u.pending_sign_in_code && (
+                          <WaitingCode item={{ ...u.pending_sign_in_code, email: "" }} onCopied={() => showMessage("Code copied", "success")} />
+                        )}
                         <Typography sx={{ fontSize: "12px", color: "#6c718a" }}>
                           {u.company_name || "—"} · joined {dayjs(u.createdAt).format("DD-MM-YYYY")}
                         </Typography>
