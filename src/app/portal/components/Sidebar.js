@@ -26,7 +26,9 @@ import {
 
 import { CalculatorIcon, Home } from "lucide-react";
 
-const SidebarContainer = styled(Box)(({ collapsedWidth }) => ({
+const SidebarContainer = styled(Box, {
+  shouldForwardProp: (prop) => prop !== "collapsedWidth",
+})(({ collapsedWidth }) => ({
   width: collapsedWidth ? "60px" : "240px",
   backgroundColor: "#f7f7fe",
   borderRight: "1px solid #e0e0e0",

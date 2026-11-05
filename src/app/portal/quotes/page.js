@@ -171,7 +171,11 @@ const QuotesTable = () => {
                     </TableCell>
                   </TableRow>
                 ) : dotsAndSkeleton ? (
-                  <DotLoader />
+                  <TableRow>
+                    <TableCell colSpan={5} align="center">
+                      <DotLoader />
+                    </TableCell>
+                  </TableRow>
                 ) : (
                   !dotsAndSkeleton &&
                   quoteList.map((quote) => (

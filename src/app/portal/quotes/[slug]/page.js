@@ -299,7 +299,7 @@ const QuoteView = () => {
                     )}
 
                   <Box
-                    classNameName="icon-button-view"
+                    className="icon-button-view"
                     onClick={() => generatePDF()}
                     sx={{ cursor: "pointer" }}
                   >
@@ -729,7 +729,15 @@ const QuoteView = () => {
                       </TableBody>
                     </Table>
                     <div style={{ clear: "both" }}></div>
-                    <Table size="small" borderAxis="both">
+                    <Table
+                      size="small"
+                      sx={{
+                        "& th, & td": {
+                          borderLeft: "1px solid #9e9e9e",
+                          borderRight: "1px solid #9e9e9e",
+                        },
+                      }}
+                    >
                       <TableHead>
                         <TableRow sx={{ height: 17 }}>
                           <TableCell

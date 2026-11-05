@@ -429,8 +429,9 @@ const Login = () => {
                 )}
                 <Box sx={{ display: "flex", gap: 0.5 }}>
                   <Typography sx={{ fontSize: "14px", fontWeight: "400", textAlign: "center" }}>
-                    Don&apos;t have an account? Ask {OrganisationDetails?.org_name || "the business"} to send you a portal
-                    invitation.
+                    This portal is only for customers of{" "}
+                    {OrganisationDetails?.org_name || "this business"}. If
+                    you&apos;re a customer, ask them to send you an invitation.
                   </Typography>
                 </Box>
               </Box>
