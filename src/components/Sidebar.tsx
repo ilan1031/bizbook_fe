@@ -42,6 +42,7 @@ import ChevronLeftIcon from "@mui/icons-material/ChevronLeft";
 import ChevronRightIcon from "@mui/icons-material/ChevronRight";
 import KeyboardIcon from "@mui/icons-material/Keyboard";
 import AdminPanelSettingsOutlinedIcon from "@mui/icons-material/AdminPanelSettingsOutlined";
+import GroupAddOutlinedIcon from "@mui/icons-material/GroupAddOutlined";
 import { usePermissions } from "../services/PermissionProvider";
 
 // Pages under each expandable section of the menu.
@@ -930,6 +931,8 @@ const Sidebar = ({ collapsed, toggleSidebar }: any) => {
           {renderMenuItem("/reports", "Reports", AssessmentOutlinedIcon)}
           {perms?.isSuperadmin &&
             renderMenuItem("/admin/users", "Users & Access", AdminPanelSettingsOutlinedIcon)}
+          {perms?.canAccessPath("/settings/users") &&
+            renderMenuItem("/settings/users", "Staff", GroupAddOutlinedIcon)}
 
           {/* Shortcuts section */}
           {/* {!collapsed && renderShortcutsList()} */}

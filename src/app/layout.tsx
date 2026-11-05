@@ -53,10 +53,13 @@ export default function RootLayout({ children }: any) {
       <RbacButtonGuard />
       {!hideLayout && <HelpHost />}
       <CssBaseline />
-      <Box sx={{ display: "flex" as const, flexDirection: "column" as const, height: "100vh" }}>
+      {/* One fixed-height shell: the window itself never scrolls, only the
+          content area below. (Before, the navbar plus a 90vh content box was
+          taller than the window, so the page showed two scrollbars.) */}
+      <Box sx={{ display: "flex" as const, flexDirection: "column" as const, height: "100vh", overflow: "hidden" as const }}>
         {!hideLayout && showSidebar && <Navbar />}
 
-        <Box sx={{ display: "flex" as const, flexGrow: 1 }}>
+        <Box sx={{ display: "flex" as const, flexGrow: 1, minHeight: 0 }}>
           {!hideLayout && showSidebar && (
             <Box
               sx={{
@@ -74,8 +77,9 @@ export default function RootLayout({ children }: any) {
             sx={{
               flexGrow: 1,
               transition: "margin-left 0.3s ease",
+              minWidth: 0,
+              minHeight: 0,
               overflow: "auto" as const,
-              maxHeight: pathname.startsWith("/tally") ? "none" : hideLayout ? "none" : "90vh",
               background:"white"
             }}
           >

@@ -40,9 +40,9 @@
 //   const [emailList, setEmailList] = useState<any[]>([
 //     {
 //       id: 1,
-//       name: "bharathi.g",
-//       email: "bharathi.gihub@snsgroups.com",
-//       initial: "B",
+//       name: "Abielan",
+//       email: "noreply@abielan.in",
+//       initial: "A",
 //       selected: true,
 //     },
 //   ]);

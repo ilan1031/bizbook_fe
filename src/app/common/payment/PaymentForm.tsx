@@ -251,7 +251,7 @@ export default function PaymentForm({ callViewAPI, onCancel, invoiceData }: any)
 
   //   try {
   //     const emailPayload = {
-  //       from_email: "bharathi.g.ihub@snsgroups.com", // Default from email
+  //       from_email: "noreply@abielan.in", // Default from email
   //       to_email: selectedEmails.join(","),
   //       cc_emails: [],
   //       bcc_emails: [],
@@ -302,7 +302,7 @@ export default function PaymentForm({ callViewAPI, onCancel, invoiceData }: any)
     if (!sendThankYouEmail || selectedEmails.length === 0) return;
     try {
       const emailPayload = {
-        from_email: "bharathi.g.ihub@snsgroups.com",
+        from_email: "noreply@abielan.in",
         to_email: selectedEmails.join(","),
         cc_emails: [] as any[],
         bcc_emails: [] as any[],

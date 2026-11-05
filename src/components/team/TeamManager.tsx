@@ -138,9 +138,9 @@ export default function TeamManager({ orgId }: { orgId: string }) {
     <Box sx={{ p: 3 }}>
       <Stack direction="row" justifyContent="space-between" alignItems="center" spacing={2} sx={{ mb: 2, flexWrap: "wrap" as const, gap: 1 }}>
         <Box>
-          <Typography variant="h5" fontWeight={600}>Users &amp; Roles</Typography>
+          <Typography variant="h5" fontWeight={600}>Staff &amp; Roles</Typography>
           <Typography variant="body2" color="text.secondary">
-            Invite people to work in {overview.organization.name}. Each person gets a role, and can never do more than you can.
+            Add staff to work in {overview.organization.name}. Each person gets a role, and can never do more than you can.
           </Typography>
         </Box>
         <Stack direction="row" spacing={1} alignItems="center">
@@ -148,7 +148,7 @@ export default function TeamManager({ orgId }: { orgId: string }) {
           <Tooltip title={full ? "Your team is full. Remove someone or ask the superadmin to raise the limit." : ""}>
             <span>
               <Button variant="contained" onClick={() => setInviteOpen(true)} disabled={full} sx={{ textTransform: "none" as const }}>
-                Invite member
+                Add staff
               </Button>
             </span>
           </Tooltip>
@@ -170,7 +170,7 @@ export default function TeamManager({ orgId }: { orgId: string }) {
             {overview.members.length === 0 && (
               <TableRow>
                 <TableCell colSpan={5} align="center" sx={{ py: 4, color: "#6c718a" }}>
-                  No team members yet. Invite someone to get started.
+                  No staff yet. Click "Add staff" to invite someone.
                 </TableCell>
               </TableRow>
             )}

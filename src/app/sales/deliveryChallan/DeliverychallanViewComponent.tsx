@@ -671,7 +671,7 @@ const DeliveryChallanViewComponent = ({ data, callViewAPI , organizationData }: 
               variant="body2"
               sx={{ fontSize: "13px", fontFamily: "'Times New Roman', serif" as const }}
             >
-              {/* divya.s.ihub@snsgroups.com */}
+              {/* noreply@abielan.in */}
             </Typography>
             <Typography
               variant="body2"

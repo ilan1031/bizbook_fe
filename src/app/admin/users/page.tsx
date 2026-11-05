@@ -530,6 +530,12 @@ function ManageUserDialog({ user, catalog, onClose, onSave, onRemoveIp }: any) {
         <Typography sx={{ fontSize: "14px", fontWeight: 600, mb: 1 }}>
           Approved IP addresses ({(user.allowed_ips || []).length} / {user.ip_limit ?? 2})
         </Typography>
+        {user.last_blocked_ip?.ip && (
+          <Alert severity="info" sx={{ mb: 1.5 }}>
+            Last sign-in turned away from <b style={{ fontFamily: "monospace" }}>{user.last_blocked_ip.ip}</b> ({fmt(user.last_blocked_ip.at)}) because the
+            limit was full. Remove an address below, or raise the limit above, then ask them to sign in again.
+          </Alert>
+        )}
         {(user.allowed_ips || []).length === 0 ? (
           <Typography sx={{ fontSize: "13px", color: "#6c718a", mb: 3 }}>
             None yet - the first IP is recorded when the user signs up or signs in.

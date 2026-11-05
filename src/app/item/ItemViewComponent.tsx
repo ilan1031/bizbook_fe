@@ -166,7 +166,7 @@ const ItemViewComponent = ({ itemId: propItemId }: any) => {
   }
 
   return (
-    <Box sx={{ height: "100vh", overflow: "auto" as const, display: "flex" as const, flexDirection: "column" as const }}>
+    <Box sx={{ height: "calc(100vh - 64px)", overflow: "auto" as const, display: "flex" as const, flexDirection: "column" as const }}>
       {/* Header */}
       <Paper sx={{ p: 3, borderBottom: 1, borderColor: "divider" }}>
         <Box sx={{ display: "flex" as const, alignItems: "center" as const, px: 1, py: 1 }}>

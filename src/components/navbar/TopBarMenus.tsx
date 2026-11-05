@@ -490,7 +490,7 @@ export function SettingsMenu(_props?: any) {
     ["My profile", "/profile"],
     ["Organizations", "/organization-list"],
     ["Users & Access", "/admin/users"],
-    ["Users & Roles", "/settings/users"],
+    ["Staff & Roles", "/settings/users"],
     ["Chart of Accounts", "/accountant/chartOfAccounts"],
     ["Invoice & Quote Templates", "/settings/templates"],
     ["Import data", "/import"],

@@ -73,7 +73,7 @@ const AddButton = styled(Button)(({ theme }) => ({
 
 // Main container with scrolling
 const ScrollableContainer = styled(Box)(({ theme }) => ({
-  height: "100vh",
+  height: "calc(100vh - 64px)",
   overflow: "auto" as const,
   padding: theme.spacing(3),
   maxWidth: 1200,

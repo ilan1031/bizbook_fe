@@ -56,7 +56,7 @@ export default function InviteDialog({ open, onClose, orgId, roles, onInvited }:
       maxWidth="sm"
       TransitionProps={{ onExited: reset }}
     >
-      <DialogTitle>Invite a team member</DialogTitle>
+      <DialogTitle>Add staff</DialogTitle>
       <DialogContent>
         <Stack spacing={2} sx={{ mt: 1 }}>
           {error && <Alert severity="error">{error}</Alert>}

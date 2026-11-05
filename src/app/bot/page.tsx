@@ -172,7 +172,7 @@ export default function ChatBot(_props?: any) {
   const [messages, setMessages] = useState<any[]>([
     {
       id: '1',
-      content: "Hello! I'm your SNS Finance assistant. How can I help you today?",
+      content: "Hello! I'm your Bizbook Finance assistant. How can I help you today?",
       role: 'assistant',
       timestamp: new Date(),
     },
@@ -1005,7 +1005,7 @@ if (conversationState === 'awaiting-return-choice') {
         <Card sx={{ width: '100%', height: '80vh', display: 'flex' as const, flexDirection: 'column' as const }}>
           <Box sx={{ background: '#408dfb', borderTopLeftRadius: theme.shape.borderRadius, borderTopRightRadius: theme.shape.borderRadius, padding: theme.spacing(2), color: 'white' }}>
             <Typography variant="h6" align="center" fontWeight="bold">
-              SNS Finance Assistant
+              Bizbook Finance Assistant
             </Typography>
           </Box>
 

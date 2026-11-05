@@ -92,7 +92,7 @@ const SearchComponent = (_props?: any) => {
         <Box sx={{ overflowY: "auto" as const, maxHeight: "300px" }}>
   <List sx={{ width: "100%", padding: 0 }}>
     {[
-      { name: "Ms. Shree", email: "shree.n.ihub@snsgroups.com", avatar: "M" },
+      { name: "Abielan", email: "noreply@abielan.in", avatar: "A" },
       { name: "Sample User", email: "", avatar: "A" },
     ].map((user, index) => (
       <ListItem
