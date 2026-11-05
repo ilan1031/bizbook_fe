@@ -316,7 +316,7 @@ const PaymentReceived = (_props?: any) => {
             width: "340px",
             backgroundColor: "white",
             flexShrink: 0,
-            display: "flex" as const,
+            display: { xs: "none", md: "flex" },
             flexDirection: "column" as const,
             height: "100%",
           }}

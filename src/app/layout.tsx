@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { Box, CssBaseline, CircularProgress } from "@mui/material";
+import { Box, CssBaseline, CircularProgress, Drawer } from "@mui/material";
 import Sidebar from "../components/Sidebar";
 import Navbar from "../components/Navbar";
 import Footer from "../components/Footer";
@@ -34,6 +34,13 @@ export default function RootLayout({ children }: any) {
   const toggleSidebar = () => {
     setCollapsed((prev) => !prev);
   };
+  // On a phone or small tablet the sidebar is a slide-out menu, opened from the
+  // top bar and closed again when a page is chosen.
+  const [mobileMenu, setMobileMenu] = useState<boolean>(false);
+  useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    setMobileMenu(false);
+  }, [pathname]);
 
   // Define paths where Sidebar, Navbar, and Footer should be hidden
   // The customer portal (/portal/...) has its own layout and sign-in.
@@ -57,12 +64,22 @@ export default function RootLayout({ children }: any) {
           content area below. (Before, the navbar plus a 90vh content box was
           taller than the window, so the page showed two scrollbars.) */}
       <Box sx={{ display: "flex" as const, flexDirection: "column" as const, height: "100vh", overflow: "hidden" as const }}>
-        {!hideLayout && showSidebar && <Navbar />}
+        {!hideLayout && showSidebar && <Navbar onMenuClick={() => setMobileMenu(true)} />}
 
         <Box sx={{ display: "flex" as const, flexGrow: 1, minHeight: 0 }}>
           {!hideLayout && showSidebar && (
+            <Drawer
+              open={mobileMenu}
+              onClose={() => setMobileMenu(false)}
+              sx={{ display: { xs: "block", md: "none" }, "& .MuiDrawer-paper": { width: 260, bgcolor: "primary.main" } }}
+            >
+              <Sidebar collapsed={false} toggleSidebar={() => setMobileMenu(false)} />
+            </Drawer>
+          )}
+          {!hideLayout && showSidebar && (
             <Box
               sx={{
+                display: { xs: "none", md: "block" },
                 width: collapsed ? 60 : 240,
                 transition: "width 0.3s ease",
                 bgcolor: "primary.main", // or use a custom value

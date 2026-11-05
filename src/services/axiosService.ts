@@ -43,6 +43,22 @@ export const endSession = (reason?: string) => {
   }
 };
 
+// A random id this browser keeps, sent on every request. The server approves a
+// device by this id rather than by IP address, which can change between
+// requests and used to sign people out right after signing in.
+export const deviceId = (): string => {
+  try {
+    let id = localStorage.getItem("device_id");
+    if (!id) {
+      id = (globalThis.crypto?.randomUUID?.() || `${Date.now().toString(16)}-${Math.random().toString(16).slice(2)}-${Math.random().toString(16).slice(2)}`).replace(/[^A-Za-z0-9-]/g, "");
+      localStorage.setItem("device_id", id);
+    }
+    return id;
+  } catch {
+    return "";
+  }
+};
+
 // Function to create Axios instances dynamically
 const createAxiosInstance = (baseURL: string, contentType = "application/json"): AxiosInstance => {
   const instance = axios.create({
@@ -51,6 +67,7 @@ const createAxiosInstance = (baseURL: string, contentType = "application/json"):
   });
 
   instance.interceptors.request.use((config) => {
+    config.headers["X-Device-Id"] = deviceId();
     const token = localStorage.getItem("token");
     if (token) {
       config.headers.Authorization = `Bearer ${token}`;

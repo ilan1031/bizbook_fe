@@ -51,7 +51,7 @@ import {
   RefreshButton,
   SettingsMenu,
 } from "./navbar/TopBarMenus";
-const Navbar = (_props?: any) => {
+const Navbar = ({ onMenuClick }: { onMenuClick?: () => void } = {}) => {
   const [orgDropdownOpen, setOrgDropdownOpen] = useState<boolean>(false);
   const [open, setOpen] = useState<boolean>(false); // This is for the organization drawer
   const [profileOpen, setProfileOpen] = useState<boolean>(false); // Add this new state for profile popover
@@ -154,6 +154,15 @@ const Navbar = (_props?: any) => {
       >
         {/* Logo */}
         <Box display="flex" alignItems="center">
+          {/* Phones and small tablets: the sidebar opens from here. */}
+          <IconButton
+            aria-label="Open menu"
+            onClick={onMenuClick}
+            size="small"
+            sx={{ display: { xs: "inline-flex", md: "none" }, mr: 0.5, color: "menu.text.normal" }}
+          >
+            <Menu />
+          </IconButton>
           <MenuBookIcon
             sx={{ fontSize: 22, mr: 1, color: "menu.text.normal" }}
           />

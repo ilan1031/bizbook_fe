@@ -575,6 +575,23 @@ function ManageUserDialog({ user, catalog, onClose, onSave, onRemoveIp }: any) {
           </Table>
         )}
 
+        {user.role !== "superadmin" && (
+          <Box sx={{ display: "flex" as const, alignItems: "center" as const, justifyContent: "space-between" as const, border: "1px solid #e0e0e0", borderRadius: 1, px: 2, py: 1, mb: 2 }}>
+            <Box>
+              <Typography sx={{ fontSize: "14px", fontWeight: 600 }}>Can add and manage staff</Typography>
+              <Typography sx={{ fontSize: "12px", color: "#6c718a" }}>
+                Lets this user invite staff, give them roles and turn them off (Staff in their sidebar). The staff limit is on the Teams page.
+              </Typography>
+            </Box>
+            <Switch
+              color="success"
+              checked={(perms.teamUsers || []).length > 0}
+              onChange={() => setPage("teamUsers", (perms.teamUsers || []).length ? [] : ["view"])}
+              inputProps={{ "aria-label": "Can add and manage staff" }}
+            />
+          </Box>
+        )}
+
         <Box sx={{ display: "flex" as const, alignItems: "center" as const, justifyContent: "space-between" as const, mb: 1 }}>
           <Typography sx={{ fontSize: "14px", fontWeight: 600 }}>Pages and actions</Typography>
           <Box>
@@ -614,7 +631,7 @@ function ManageUserDialog({ user, catalog, onClose, onSave, onRemoveIp }: any) {
                 {pages.map((page) => (
                   <TableRow key={page.key} hover>
                     <TableCell sx={{ fontSize: "13px", pl: 3 }}>
-                      {page.label}
+                      {page.key === "teamUsers" ? "Staff (add & manage team)" : page.label}
                       {page.group === "Features" && page.apiOnly && page.key !== "customerPortal" && page.key !== "teamUsers" && (
                         <Typography component="span" sx={{ display: "block" as const, fontSize: "11px", color: "#6c718a" }}>
                           Shown in other screens; off hides it everywhere
